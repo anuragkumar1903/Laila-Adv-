@@ -1,0 +1,873 @@
+{
+  "projectId": 5,
+  "projectName": "laila-dataset-builder",
+  "projectPath": "P:\\laila-dataset-builder",
+  "framework": "Python",
+  "languages": [
+    "JSON",
+    "Python",
+    "Markdown",
+    "YAML"
+  ],
+  "pkgManager": "pip",
+  "summary": "laila-dataset-builder (Python) • 120 files • JSON, Python, Markdown, YAML • no routes detected",
+  "filesMeta": [
+    {
+      "path": "test_config.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "ce3ee1598ae207a807461aea72f751bab3db9df7df5a2453989c9bb97458a0be"
+    },
+    {
+      "path": "test_collector.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "63505f34e8d99029de4beff2531cc3900c2cde482a39a845a94ba4998948b008"
+    },
+    {
+      "path": "test_client.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "4aa6fb42d21428d4916a9234593499b0598b23302eedb2928acef048ca31627d"
+    },
+    {
+      "path": "run.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "1f60410784ac45a5ddc0fcd79e179e35b52d26f4ca5898646211b2f5e787df7b"
+    },
+    {
+      "path": "requirements.txt",
+      "role": "other",
+      "language": null,
+      "hash": "8aede2e3d0fd429729ca2c2475bb60f8853ad599cf8481c06fef7298534ba663"
+    },
+    {
+      "path": "process_reasoning_huggingface.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "c88cdcd6df0619053236ecc248cc3901972542836ad0f7c68eb6668497873201"
+    },
+    {
+      "path": "process_official_docs.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "12e37f4ef284ff87bd436cafb26ad897672458a54179fe0d9c07ad14f9715fef"
+    },
+    {
+      "path": "process_github_pr_lists.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "ea9565ff8c48dad65b2af69bf7c0db7e1bfff80a862cfd7a3c360f56559c8ecf"
+    },
+    {
+      "path": "process_curated_kaggle.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "144684a7bd0033fc5cc49f6ccb77db33de625050892974476be36c1d2cd7440e"
+    },
+    {
+      "path": "process_curated_huggingface.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "4304c90053f0e606ad8e12c142d80472dea81e33bdff09c89b39b163ba314636"
+    },
+    {
+      "path": "merge_lora_to_ollama.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "3fbfe5ba5fb2813f5429d13f3bf2e2ec015d3acaca13237bf18c0f2b66ae2a9c"
+    },
+    {
+      "path": "kaggle_merge_lora.ipynb",
+      "role": "other",
+      "language": null,
+      "hash": "6fa4b8c02d09f1ae2fee841c8255547c8deaab7adba59ccd7745d5e8cf1b92a6"
+    },
+    {
+      "path": "kaggle_eval_lora.ipynb",
+      "role": "other",
+      "language": null,
+      "hash": "0fd3377ea5336f75595ae2ad5d10ea16e8702cef8447b525364eb510133e161e"
+    },
+    {
+      "path": "export_unsloth_train.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "f91751cafdc75792fdd31d1a5e9d142058001a55801255448435538529f48af2"
+    },
+    {
+      "path": "export_unsloth_reasoning_train.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "2bd3cbea75294925686c6f9ac8a40070dab093410de461d5d9660256b37b5c5d"
+    },
+    {
+      "path": "collect_official_docs.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "47636ec6040387c78e1198aaa782ced7e4ff602bd2624d900f6aa22e3ee788f9"
+    },
+    {
+      "path": "collect_curated_kaggle.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "e447c42a9fea73c4dd792973dcc685066884e483870a617a4c870b5438a959dd"
+    },
+    {
+      "path": "collect_curated_huggingface.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "36a3bf622d5f7e00872d67baaf943a40989279aa83b5999486385aa94b949487"
+    },
+    {
+      "path": "validators\\__init__.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "validators\\training_example_validator.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "2dbbec9a308f6c62f521dcd48bedeb204459a9b867e1d1040aa6bc6349208b9c"
+    },
+    {
+      "path": "processors\\__init__.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "processors\\reasoning_huggingface_processor.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "d94964b7697e75fdf6302e1857f17cf11f4089ae3fbd622e763fd54611493d4d"
+    },
+    {
+      "path": "processors\\official_docs_processor.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "f29ec563ab7e2a79d80b7572091de531bca5cd2f59bb46282a55573a430ec671"
+    },
+    {
+      "path": "processors\\github_pr_list_processor.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "651c15a96cb2652cb64340c44c81c28765a39b343c529d26a73b41e49beb3571"
+    },
+    {
+      "path": "processors\\curated_kaggle_processor.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "1f39966d9997e5b504d2f55fba52aca2c566c4fe5bfc10c7bc42b1a0cd8d58f5"
+    },
+    {
+      "path": "processors\\curated_huggingface_processor.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "b33d2ad10cf786a1af930cf01275912e273704117cda51912e56aa564e669283"
+    },
+    {
+      "path": "laila-project-docs\\ROADMAP.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "f2cb93bc8b503d949d58bfaf13c1ee2ea91e6db62bdc5ad78bb24b8a09b6471f"
+    },
+    {
+      "path": "laila-project-docs\\LORA_MERGE_V1.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "72d6055c7381bdde72bcee061826db3557ba8a5b901c26596ddec6d044f2a568"
+    },
+    {
+      "path": "laila-project-docs\\laila_identity_dataset_200.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "29a8e2811d6a1ec2ea7c882b48c4c88707a97e7fe865e2e96114ac728d36902b"
+    },
+    {
+      "path": "laila-project-docs\\CONTRIBUTING.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "1c1f28c1f1290eeb44e0b31bcf0bf2c8755925a61c0b7d0594c4c82582a2b976"
+    },
+    {
+      "path": "laila-project-docs\\CONTEXT.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "7d60968659d6cb80a885b80dc6f945bb364227f94872b59fafec944fa3d4dd68"
+    },
+    {
+      "path": "laila-project-docs\\ARCHITECTURE.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "aa5c2c3ac1c0329d745e3eccadac7c4ff589c3822d3aebc20d9b7d82395557f3"
+    },
+    {
+      "path": "exporters\\__init__.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "exporters\\unsloth_chat_exporter.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "32a2344917e4d65e2a907181aa5bbd5c4a7932faea7632c2cd18ddb568bc6b4b"
+    },
+    {
+      "path": "datasets\\multi_language_pipeline.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "ed9fd9b06cfd1c4f52126a1e7d2cab4458a7e481dd688b9ded8eb521af1295f5"
+    },
+    {
+      "path": "datasets\\combined_all_languages.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "0812caa80e4e84da9353ac7b93ea1f526e1aff5acc14cade540fe0a6e2fbb2ce"
+    },
+    {
+      "path": "configs\\github.yaml",
+      "role": "config",
+      "language": "YAML",
+      "hash": "df4401ad1b704fe3183ebd37748614406d71a9bd10811cc294f9c116c74b4fd7"
+    },
+    {
+      "path": "configs\\docs_sources.yaml",
+      "role": "config",
+      "language": "YAML",
+      "hash": "4da70786fa8ab3a012131a7b44e95d42934d704dc48a3882d493b70b4f12b590"
+    },
+    {
+      "path": "configs\\curated_datasets.yaml",
+      "role": "config",
+      "language": "YAML",
+      "hash": "799b380844d835c33411fe7190cc5151cc66a0e6aefe62345e6ff70247d9cc22"
+    },
+    {
+      "path": "configs\\config.py",
+      "role": "config",
+      "language": "Python",
+      "hash": "69e364e9a8b1fab599dfd271b8b653e3f19c2fc367f4cb31393d9b2b6b643c83"
+    },
+    {
+      "path": "datasets\\final\\validation_report_reasoning.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "2de15d3abe0babba9ee31e2759225221be951ce2e0586bea4716254af5b810d5"
+    },
+    {
+      "path": "datasets\\final\\validation_report.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "d569b4eb8875acce54d09b8856dac1d92053a3885951c48c8f4ff0d12afc9915"
+    },
+    {
+      "path": "datasets\\final\\train_reasoning.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "7a02082d556cd460134edf32fe99e204e84848fc56660e5c4700f7ddf35318ab"
+    },
+    {
+      "path": "datasets\\final\\train.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "8f7664cd73fbd894f30075e8c949480f6ed71af4afb6991914ad72f01015cf56"
+    },
+    {
+      "path": "collectors\\github\\writer.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "246cebd99b2073e258215c02e869564982b157dbfb06e1f7a048f80bf84444fa"
+    },
+    {
+      "path": "collectors\\github\\collector.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "15b30897c8dd37a7bcbb4584f1473e1330d77ec65c2b7286593f9aa16d8a6e50"
+    },
+    {
+      "path": "collectors\\github\\client.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "ee0cba2fbd3725afbe744adc6d3ad672a1dae5b6e6bd274a2f35f180567e6f0d"
+    },
+    {
+      "path": "collectors\\curated\\__init__.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "collectors\\curated\\kaggle_curl_collector.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "2b5e2089ff49de87f1f6527794647b9b74e29883a1198aad919c1ba7361a25fe"
+    },
+    {
+      "path": "collectors\\curated\\huggingface_collector.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "f4908335008452161f78de4a59e180b1765b55f1bfd038a1983b5afce2222f6f"
+    },
+    {
+      "path": "collectors\\docs\\__init__.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "collectors\\docs\\html_text.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "9a5bb9ede4573157eabecd3a13f98604c81426c6d75761c516b2d1a2af6ec510"
+    },
+    {
+      "path": "collectors\\docs\\collector.py",
+      "role": "other",
+      "language": "Python",
+      "hash": "bbaab80f90df03b324143ee726c19b1aba66d46cb3439d12f6c058a572981f39"
+    },
+    {
+      "path": "datasets\\processed\\curated\\reasoning_examples.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "6f93af7905be3109b588d1fe944f3d12c30cd09a528da2b7158c138cb7a4c9f3"
+    },
+    {
+      "path": "datasets\\processed\\curated\\kaggle_examples.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "2abe3aa96ed56df3fdbb1b392a4ad951f301f989ce80e5aee2af8aba4e09aa45"
+    },
+    {
+      "path": "datasets\\processed\\curated\\huggingface_examples.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "b2efbb3329106482f0958d1e742a5720132acec78d8ce7c6244415c23a81199d"
+    },
+    {
+      "path": "datasets\\processed\\docs\\documentation_examples.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "c4314a8376baa5b50f3a62b954362a007ed3a46ea59a25961e5443e1ca8ed486"
+    },
+    {
+      "path": "datasets\\processed\\github\\pr_summaries.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "f0d469d6ca26e7fe80d2f84f7864cedd03cf4213a81834074c74ce2fb6d44624"
+    },
+    {
+      "path": "datasets\\raw\\docs\\spring_boot_docs.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "40251a36e66b6a10d0f2d394844f4fc2581742ed8d390ffd7245e6e69589379d"
+    },
+    {
+      "path": "datasets\\raw\\docs\\react_docs.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "76587e9843210904c596dfa38800795907aa79e360bb192d857b8e507e5991d5"
+    },
+    {
+      "path": "datasets\\raw\\docs\\owasp_docs.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "a00b9475ac61ba265bdab5def1b5ba68c07ac4fe386a193ccdf4899ce039d3ce"
+    },
+    {
+      "path": "datasets\\raw\\docs\\nodejs_docs.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "0d3fc14d62ef769ba8d5a727812ae6de29cb204a6b5b3c591a19d733d3ed8e56"
+    },
+    {
+      "path": "datasets\\raw\\docs\\mongodb_docs.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "6998dec79f53f0f673c583758f8adc752c9265382034d6249d5fe0a71eb3e451"
+    },
+    {
+      "path": "datasets\\raw\\docs\\java_docs.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "cc1a400b32a0444f22c140c9686efc43beca7ec51f31b58bfce975c5c02071c0"
+    },
+    {
+      "path": "datasets\\raw\\docs\\github_rest_api.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "771ba79d82c1a93b9a12d34474f0649dad94707cf24bf9f622bf1570ecb315e6"
+    },
+    {
+      "path": "datasets\\raw\\docs\\github_graphql_api.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "cca54ffbcd93f35a3aa5ead8b170641ff6af525c962c5e91dd34022cad31e744"
+    },
+    {
+      "path": "datasets\\raw\\docs\\express_docs.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "c7d703eac02ef0f1848dfafda2a28c3f6970dab226d620bb62a3aa53cc167577"
+    },
+    {
+      "path": "datasets\\languages\\sql\\sql_training.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "2c110bf6d42ecfe4a5762b4936714a5afa0139505d9a93f87823f08933fdfde3"
+    },
+    {
+      "path": "datasets\\languages\\sql\\sql_training.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "9964b774fd823b6369d3a35544e900139e0c789f2ac63130c77a4afe35b2409f"
+    },
+    {
+      "path": "datasets\\languages\\python\\python_training.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "748b0686a6111132ccfa57178cf72024483c3c12a2a3a0fa4243d1ea40082d70"
+    },
+    {
+      "path": "datasets\\languages\\python\\python_training.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "082a63d3e4669d3dc1a87579e5391f0b203e64126df42cc85185b6ea1167e023"
+    },
+    {
+      "path": "datasets\\languages\\javascript\\javascript_training.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "758489890727745a678943c4e5a447e4ca40350e3595643464330300a2ad7c6d"
+    },
+    {
+      "path": "datasets\\languages\\javascript\\javascript_training.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "cfe48043ec5ae68488fbe2dfb74aabc11c06c355b36c4b17edbe964551414b58"
+    },
+    {
+      "path": "datasets\\final\\by_category_reasoning\\reasoning_math.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "b1346d82ad4b0d354b1c128698c7ace0fae67eac3ee754abae647009c02c39cf"
+    },
+    {
+      "path": "datasets\\final\\by_category_reasoning\\reasoning_general.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "f38566dd6f02ae09dc626e9826e2cd8c9841e148c5ece0830160498907f4707a"
+    },
+    {
+      "path": "datasets\\final\\by_category_reasoning\\reasoning_coding.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "0e902a238e775d4079d226b2aaa328fb126c50f2f74cf9d1ea9943abf449d05d"
+    },
+    {
+      "path": "datasets\\final\\by_category\\python.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "961faa334c7f29ca682f77ced24d9bb494afeebc229e1b72bec3cc4be158d32e"
+    },
+    {
+      "path": "datasets\\final\\by_category\\pull_request_summary.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "ca86f45b6108e1e448993324fc56605e7c7bb21d223ad127f82294502d00d704"
+    },
+    {
+      "path": "datasets\\final\\by_category\\programming_language_info.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "c8d8505d2934dd019c6735b429e23f4642b52d1998bd2aff9a7004aadd65685e"
+    },
+    {
+      "path": "datasets\\final\\by_category\\java.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "0a0b0c15b1b76311541bb4e4aac8856e82d21b438b4dd7d3b5b23406dc380405"
+    },
+    {
+      "path": "datasets\\final\\by_category\\identity.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "647e1110315ba7ec9aa8e011b0648caa466408622b8755277fe7d6fb2245aa6f"
+    },
+    {
+      "path": "datasets\\final\\by_category\\general_instruction.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "81f287c66be2a133967aee9a8550a578e780c570750f45e2e9ec88f1ef490a77"
+    },
+    {
+      "path": "datasets\\final\\by_category\\code_review.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "a3ae222eb8a1e61926578998f86b38a396dccfdb691d69b5d7f43d3568a59b1f"
+    },
+    {
+      "path": "datasets\\final\\by_category\\code_quality.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "017e7485fb3da87bf39ae77954ec6fe7e6ddb27dd73c67690c33d59ac9192b17"
+    },
+    {
+      "path": "datasets\\final\\by_category\\backend_optimization.jsonl",
+      "role": "other",
+      "language": null,
+      "hash": "1fd1f58a8f98d4b22d61a552b0b05bddda9551d539f32269d931c40ae4f9d75a"
+    },
+    {
+      "path": "datasets\\raw\\github\\review_comments\\spring-projects__spring-boot.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "59f14ceef85c4574cbfc4c5b77fae5a2f7b1e12d43d92eb5bd889d13e8679325"
+    },
+    {
+      "path": "datasets\\raw\\github\\review_comments\\nodejs__node.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "c9729eac5f2cc62f8a2a56424b42d23f63c2b4317ce6c7845b46ee5a2ad293ce"
+    },
+    {
+      "path": "datasets\\raw\\github\\review_comments\\mongodb__mongo.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "613d65121d6fda69b848f1da98c9dd64bdea0a90a43726de7031c3c7e1a1aeaa"
+    },
+    {
+      "path": "datasets\\raw\\github\\review_comments\\facebook__react.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "1ee6647fefd439e74239b3bf815da16b1db20fd694a249f18b9b1b7b3e07fbee"
+    },
+    {
+      "path": "datasets\\raw\\github\\review_comments\\expressjs__express.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "06558de569020906251e29086bfff6dd98e4e8038ac6b25a46d8e30b3071ed7b"
+    },
+    {
+      "path": "datasets\\raw\\github\\reviews\\spring-projects__spring-boot.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "20e69639aaa1a98da2de034ff013b023b31821b60899f81303d995cff0287c14"
+    },
+    {
+      "path": "datasets\\raw\\github\\reviews\\nodejs__node.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "c3f21081c5d7f9a31742e17bc0ff03178560b78cb0760f9f14f6783abaf471ea"
+    },
+    {
+      "path": "datasets\\raw\\github\\reviews\\mongodb__mongo.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "ac6bd05ccd6c7040ecee40c2eaad33255a5c63899b4fe2c1c6fb4176024eed07"
+    },
+    {
+      "path": "datasets\\raw\\github\\reviews\\facebook__react.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "99a1d25b13b6ee118689cb5b844f8243957f78fa213dc29965b44400a2ec2aa0"
+    },
+    {
+      "path": "datasets\\raw\\github\\reviews\\expressjs__express.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "de6a1561004a400d3971869c827473831b2394246717eb48c506b2ce3d753395"
+    },
+    {
+      "path": "datasets\\raw\\github\\pr_lists\\spring-projects__spring-boot.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "bbf1ef31c4ea50b252cbe9b52749baf1cff2dc2657d324f96b69896aa1e325b7"
+    },
+    {
+      "path": "datasets\\raw\\github\\pr_lists\\nodejs__node.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "bb0d1474d1740cd9b57c10d4f81db6efdd44d9b57c5b86785cb08faf64125f12"
+    },
+    {
+      "path": "datasets\\raw\\github\\pr_lists\\mongodb__mongo.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "60a2d271d61e4f489e2b932a248121f6e7f02f83f3bdf21151fb9f76b9ca88d9"
+    },
+    {
+      "path": "datasets\\raw\\github\\pr_lists\\facebook__react.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "0774f5e8626c424f91e450fdbfc9637f38f93a1419db8424791bffd9984e1c01"
+    },
+    {
+      "path": "datasets\\raw\\github\\pr_lists\\expressjs__express.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "e99a4bd347790b7e640784560b0561ea15680dfea1905f1f5e610c6e6ee4db61"
+    },
+    {
+      "path": "datasets\\raw\\github\\pr_details\\spring-projects__spring-boot.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "6b2daf99edf1068a8bf52fa8d78d08a9e593c1ee7eecc0e066dacc95354b0034"
+    },
+    {
+      "path": "datasets\\raw\\github\\pr_details\\nodejs__node.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "bf8f99c1e1a6b0ecf42b0380d13c1c968cadc1ee134297fd6a7ce05e5e17674b"
+    },
+    {
+      "path": "datasets\\raw\\github\\pr_details\\mongodb__mongo.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "c0a56a71045388191fde47a7fa28fe619e9460a09a9cd575358ca1874be0bf7c"
+    },
+    {
+      "path": "datasets\\raw\\github\\pr_details\\facebook__react.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "577996d7c61298fcae63f117b77456fe8b24415876f9319e12fe43e54c12dc68"
+    },
+    {
+      "path": "datasets\\raw\\github\\pr_details\\expressjs__express.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "9252361269573e29e4ed3dcab14c42b0c6dfa8243dc9c3525560dad2cceeab71"
+    },
+    {
+      "path": "datasets\\raw\\curated\\huggingface\\swe_bench.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "6a44473076e1389b48301b8e57f4f42ba7895f9621c278fa951042f55d3c88fb"
+    },
+    {
+      "path": "datasets\\raw\\curated\\huggingface\\nodejs_reasoning.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "d6965012448b00f689cedbcd6c9ee0b69b473635822808ddcd228055ecd2f52a"
+    },
+    {
+      "path": "datasets\\raw\\curated\\huggingface\\nodejs_5000.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "2013f5f3f5fe6a44962007046860d398586c946185057b0be5fb90f1996ca874"
+    },
+    {
+      "path": "datasets\\raw\\curated\\huggingface\\nodejs_18_20_6.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "e4ea427432eb52defe0fd5bef424a2a649b1da984467a8cf6565deea1dfa3342"
+    },
+    {
+      "path": "datasets\\raw\\curated\\huggingface\\nextjs_15_4_with_reasoning.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "0b029b1f5c982a8c357a3fdad08add3429921207d38bc1119ec2748d5bab7a66"
+    },
+    {
+      "path": "datasets\\raw\\curated\\huggingface\\magicoder_evol_instruct_110k.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "62b267f925f47e0c251187e2616c68cdf80d20ced20a9239c608700da7ecef73"
+    },
+    {
+      "path": "datasets\\raw\\curated\\huggingface\\lima.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "c3b133ec17a2b03337a11b988d1f5dce15763bb69647a2aa6943cf54f3d160a4"
+    },
+    {
+      "path": "datasets\\raw\\curated\\huggingface\\java_coding_dataset.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "135091cfd1bbe6cc6f9c128c833e6d480926a0d107b599ec34a0ff5371f2b2d2"
+    },
+    {
+      "path": "datasets\\raw\\curated\\huggingface\\javascript_code_large.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "a7014eff8670facb8b32d21b49cebf31d85b492c4102b000f375cddb381b6562"
+    },
+    {
+      "path": "datasets\\raw\\curated\\huggingface\\code_review_instruct_critique_revision_python.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "a6d94a7a7ad23deafb373d5710577c1387b25163f03c738b29b3dba74a4b499f"
+    },
+    {
+      "path": "datasets\\raw\\curated\\huggingface\\code_review_assistant.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "5f6ca0663e01af9382a5ac405c85d7d7cd3564e75511c1356b82c7ac5cdc3e43"
+    },
+    {
+      "path": "datasets\\raw\\curated\\huggingface\\claude_opus_reasoning.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "7bfa045216463e6dcabd4ac2d2f74b4dc0b1fff14dd489573b180a42473ff3c3"
+    },
+    {
+      "path": "datasets\\raw\\curated\\huggingface\\advanced_fullstack_ai_knowledge_base.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "a9933f14057faafc72d441c749eaf6e44a318088780037d067069152e1b84129"
+    },
+    {
+      "path": "datasets\\raw\\curated\\kaggle\\extracted\\software_engineering_code_quality_2024\\Software Engineering and Code Quality.csv",
+      "role": "other",
+      "language": null,
+      "hash": "f297b09db2330da6494563351afe1d054eadda5b5212c1d6bfdb3da7e15b8577"
+    },
+    {
+      "path": "datasets\\raw\\curated\\kaggle\\extracted\\programming_language_database\\pldb.csv",
+      "role": "other",
+      "language": null,
+      "hash": "db65ecf5d95670a7213d03f5867df56ba2823261989a2d0f3736cc07d07e5219"
+    }
+  ],
+  "routes": [],
+  "files": {
+    "controllers": [],
+    "services": [],
+    "routes": [],
+    "models": [],
+    "tests": [],
+    "configs": [
+      "configs\\github.yaml",
+      "configs\\docs_sources.yaml",
+      "configs\\curated_datasets.yaml",
+      "configs\\config.py"
+    ],
+    "schemas": [],
+    "middleware": [],
+    "utils": [],
+    "other": [
+      "test_config.py",
+      "test_collector.py",
+      "test_client.py",
+      "run.py",
+      "requirements.txt",
+      "process_reasoning_huggingface.py",
+      "process_official_docs.py",
+      "process_github_pr_lists.py",
+      "process_curated_kaggle.py",
+      "process_curated_huggingface.py",
+      "merge_lora_to_ollama.py",
+      "kaggle_merge_lora.ipynb",
+      "kaggle_eval_lora.ipynb",
+      "export_unsloth_train.py",
+      "export_unsloth_reasoning_train.py",
+      "collect_official_docs.py",
+      "collect_curated_kaggle.py",
+      "collect_curated_huggingface.py",
+      "validators\\__init__.py",
+      "validators\\training_example_validator.py",
+      "processors\\__init__.py",
+      "processors\\reasoning_huggingface_processor.py",
+      "processors\\official_docs_processor.py",
+      "processors\\github_pr_list_processor.py",
+      "processors\\curated_kaggle_processor.py",
+      "processors\\curated_huggingface_processor.py",
+      "laila-project-docs\\ROADMAP.md",
+      "laila-project-docs\\LORA_MERGE_V1.md",
+      "laila-project-docs\\laila_identity_dataset_200.jsonl",
+      "laila-project-docs\\CONTRIBUTING.md",
+      "laila-project-docs\\CONTEXT.md",
+      "laila-project-docs\\ARCHITECTURE.md",
+      "exporters\\__init__.py",
+      "exporters\\unsloth_chat_exporter.py",
+      "datasets\\multi_language_pipeline.py",
+      "datasets\\combined_all_languages.jsonl",
+      "datasets\\final\\validation_report_reasoning.json",
+      "datasets\\final\\validation_report.json",
+      "datasets\\final\\train_reasoning.jsonl",
+      "datasets\\final\\train.jsonl",
+      "collectors\\github\\writer.py",
+      "collectors\\github\\collector.py",
+      "collectors\\github\\client.py",
+      "collectors\\curated\\__init__.py",
+      "collectors\\curated\\kaggle_curl_collector.py",
+      "collectors\\curated\\huggingface_collector.py",
+      "collectors\\docs\\__init__.py",
+      "collectors\\docs\\html_text.py",
+      "collectors\\docs\\collector.py",
+      "datasets\\processed\\curated\\reasoning_examples.jsonl",
+      "datasets\\processed\\curated\\kaggle_examples.jsonl",
+      "datasets\\processed\\curated\\huggingface_examples.jsonl",
+      "datasets\\processed\\docs\\documentation_examples.jsonl",
+      "datasets\\processed\\github\\pr_summaries.jsonl",
+      "datasets\\raw\\docs\\spring_boot_docs.json",
+      "datasets\\raw\\docs\\react_docs.json",
+      "datasets\\raw\\docs\\owasp_docs.json",
+      "datasets\\raw\\docs\\nodejs_docs.json",
+      "datasets\\raw\\docs\\mongodb_docs.json",
+      "datasets\\raw\\docs\\java_docs.json",
+      "datasets\\raw\\docs\\github_rest_api.json",
+      "datasets\\raw\\docs\\github_graphql_api.json",
+      "datasets\\raw\\docs\\express_docs.json",
+      "datasets\\languages\\sql\\sql_training.jsonl",
+      "datasets\\languages\\sql\\sql_training.json",
+      "datasets\\languages\\python\\python_training.jsonl",
+      "datasets\\languages\\python\\python_training.json",
+      "datasets\\languages\\javascript\\javascript_training.jsonl",
+      "datasets\\languages\\javascript\\javascript_training.json",
+      "datasets\\final\\by_category_reasoning\\reasoning_math.jsonl",
+      "datasets\\final\\by_category_reasoning\\reasoning_general.jsonl",
+      "datasets\\final\\by_category_reasoning\\reasoning_coding.jsonl",
+      "datasets\\final\\by_category\\python.jsonl",
+      "datasets\\final\\by_category\\pull_request_summary.jsonl",
+      "datasets\\final\\by_category\\programming_language_info.jsonl",
+      "datasets\\final\\by_category\\java.jsonl",
+      "datasets\\final\\by_category\\identity.jsonl",
+      "datasets\\final\\by_category\\general_instruction.jsonl",
+      "datasets\\final\\by_category\\code_review.jsonl",
+      "datasets\\final\\by_category\\code_quality.jsonl",
+      "datasets\\final\\by_category\\backend_optimization.jsonl",
+      "datasets\\raw\\github\\review_comments\\spring-projects__spring-boot.json",
+      "datasets\\raw\\github\\review_comments\\nodejs__node.json",
+      "datasets\\raw\\github\\review_comments\\mongodb__mongo.json",
+      "datasets\\raw\\github\\review_comments\\facebook__react.json",
+      "datasets\\raw\\github\\review_comments\\expressjs__express.json",
+      "datasets\\raw\\github\\reviews\\spring-projects__spring-boot.json",
+      "datasets\\raw\\github\\reviews\\nodejs__node.json",
+      "datasets\\raw\\github\\reviews\\mongodb__mongo.json",
+      "datasets\\raw\\github\\reviews\\facebook__react.json",
+      "datasets\\raw\\github\\reviews\\expressjs__express.json",
+      "datasets\\raw\\github\\pr_lists\\spring-projects__spring-boot.json",
+      "datasets\\raw\\github\\pr_lists\\nodejs__node.json",
+      "datasets\\raw\\github\\pr_lists\\mongodb__mongo.json",
+      "datasets\\raw\\github\\pr_lists\\facebook__react.json",
+      "datasets\\raw\\github\\pr_lists\\expressjs__express.json",
+      "datasets\\raw\\github\\pr_details\\spring-projects__spring-boot.json",
+      "datasets\\raw\\github\\pr_details\\nodejs__node.json",
+      "datasets\\raw\\github\\pr_details\\mongodb__mongo.json",
+      "datasets\\raw\\github\\pr_details\\facebook__react.json",
+      "datasets\\raw\\github\\pr_details\\expressjs__express.json",
+      "datasets\\raw\\curated\\huggingface\\swe_bench.json",
+      "datasets\\raw\\curated\\huggingface\\nodejs_reasoning.json",
+      "datasets\\raw\\curated\\huggingface\\nodejs_5000.json",
+      "datasets\\raw\\curated\\huggingface\\nodejs_18_20_6.json",
+      "datasets\\raw\\curated\\huggingface\\nextjs_15_4_with_reasoning.json",
+      "datasets\\raw\\curated\\huggingface\\magicoder_evol_instruct_110k.json",
+      "datasets\\raw\\curated\\huggingface\\lima.json",
+      "datasets\\raw\\curated\\huggingface\\java_coding_dataset.json",
+      "datasets\\raw\\curated\\huggingface\\javascript_code_large.json",
+      "datasets\\raw\\curated\\huggingface\\code_review_instruct_critique_revision_python.json",
+      "datasets\\raw\\curated\\huggingface\\code_review_assistant.json",
+      "datasets\\raw\\curated\\huggingface\\claude_opus_reasoning.json",
+      "datasets\\raw\\curated\\huggingface\\advanced_fullstack_ai_knowledge_base.json",
+      "datasets\\raw\\curated\\kaggle\\extracted\\software_engineering_code_quality_2024\\Software Engineering and Code Quality.csv",
+      "datasets\\raw\\curated\\kaggle\\extracted\\programming_language_database\\pldb.csv"
+    ]
+  },
+  "tests": [],
+  "scannedAt": "2026-07-02T04:12:21.270Z"
+}

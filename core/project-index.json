@@ -1,0 +1,845 @@
+{
+  "projectId": 3,
+  "projectName": "laila",
+  "projectPath": "P:\\Laila(Adv)\\core",
+  "framework": null,
+  "languages": [
+    "TypeScript",
+    "JSON"
+  ],
+  "pkgManager": "npm",
+  "summary": "laila (unknown framework) • 54 files • TypeScript, JSON • no routes detected",
+  "filesMeta": [
+    {
+      "path": "tsconfig.json",
+      "role": "config",
+      "language": "JSON",
+      "hash": "7ae19a0e389d16228fcbc917d295f4be6dec124ed8056f2455a601b44741b7dd"
+    },
+    {
+      "path": "project-index.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "9dabf25cad0b4cc156a5e60f140d233e6624027dbd3ccb39732dcf3c7a403b8b"
+    },
+    {
+      "path": "package.json",
+      "role": "config",
+      "language": "JSON",
+      "hash": "81cc91949728d7bc2d9212f36a5a7a4cbac5e528816825927bcb4394b35ca44a"
+    },
+    {
+      "path": "src\\types.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "5dbd9d5c5295e70e4c78839747c13c3fc39fdde3d7dfd7783b5d23faf0ab19eb",
+      "symbols": {
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\config.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "e0be98a4f61a13e1b8f4734dd8a423821776760c10e022c2152cc448f6efef31",
+      "symbols": {
+        "imports": [
+          "path",
+          "url"
+        ],
+        "exports": [
+          "REPO_ROOT",
+          "SKILLS_DIR",
+          "DATA_DIR",
+          "PROJECTS_DIR",
+          "DB_PATH",
+          "OLLAMA_HOST",
+          "OLLAMA_MODEL",
+          "OLLAMA_TIMEOUT_MS",
+          "MAX_FILE_LINES",
+          "MAX_RELEVANT_FILES",
+          "MAX_CONTEXT_CHARS",
+          "SESSION_HISTORY_SIZE",
+          "N8N_WEBHOOK_URL",
+          "N8N_ENABLED",
+          "SCAN_EXCLUDES"
+        ],
+        "functions": [],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\validation\\validator.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "1ec52ab4f65183c5d9d1043e43397127b8e577f3959c7719e94a858a04fa6ebf"
+    },
+    {
+      "path": "src\\validation\\runner.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "56f92764760ccbb009a0ecdccb33e51d38262669aeb443152c193480bc0653d0"
+    },
+    {
+      "path": "src\\utils\\logger.ts",
+      "role": "util",
+      "language": "TypeScript",
+      "hash": "0345cc18fe5a3f45ea89e1e3da6a50f3135009f58c19e1493da6e50e6a2f51c8"
+    },
+    {
+      "path": "src\\utils\\git-utils.ts",
+      "role": "util",
+      "language": "TypeScript",
+      "hash": "11e3e8a8298fa9938dc4605ecb84c554f7d1f91a7b915905a159ad2298bd5dbe",
+      "symbols": {
+        "imports": [
+          "child_process",
+          "util",
+          "path",
+          "./fs-utils.js"
+        ],
+        "exports": [
+          "isGitRepo",
+          "getGitRemote",
+          "getGitBranch",
+          "getGitRoot",
+          "getGitStatus",
+          "getGitDiff",
+          "commitChanges"
+        ],
+        "functions": [
+          "git",
+          "isGitRepo",
+          "getGitRemote",
+          "getGitBranch",
+          "getGitRoot",
+          "getGitStatus",
+          "getGitDiff",
+          "commitChanges"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\utils\\fs-utils.ts",
+      "role": "util",
+      "language": "TypeScript",
+      "hash": "7d523ddae1283294b5723f0a4160da6b4f0e77eb49781dea590826b44ca8db08",
+      "symbols": {
+        "imports": [
+          "fs/promises",
+          "path"
+        ],
+        "exports": [
+          "pathExists",
+          "ensureDir",
+          "readFileLines",
+          "readFileSafe",
+          "readJSON",
+          "writeJSON",
+          "getFileSizeBytes",
+          "getFileStat",
+          "isTextFile"
+        ],
+        "functions": [
+          "pathExists",
+          "ensureDir",
+          "readFileLines",
+          "readFileSafe",
+          "readJSON",
+          "writeJSON",
+          "getFileSizeBytes",
+          "getFileStat",
+          "isTextFile"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\system\\tool-checks.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "3c3e4e1d123fd5e7d752f7384e06ea96f33c8547954efabcba55ce554e6da58e",
+      "symbols": {
+        "imports": [
+          "child_process",
+          "util",
+          "path",
+          "../utils/fs-utils.js",
+          "../config.js"
+        ],
+        "exports": [
+          "detectInstallers",
+          "runToolChecks",
+          "isWritablePath"
+        ],
+        "functions": [
+          "commandExists",
+          "detectInstallers",
+          "pickInstallCommand",
+          "checkDocker",
+          "checkNode",
+          "checkGit",
+          "checkN8n",
+          "runToolChecks",
+          "isWritablePath"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\system\\installer.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "105c25062f57b56065a154f809bda42924a843a9e57c168cbba5aa8caaee7bd0"
+    },
+    {
+      "path": "src\\scanner\\scanner.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "46c82eaff078c51461a296ab01c1007a9a92f1c6ec2264a864eba0a591f2aa0b",
+      "symbols": {
+        "imports": [
+          "path",
+          "crypto",
+          "glob",
+          "ignore",
+          "../utils/fs-utils.js",
+          "../utils/git-utils.js",
+          "./detectors/language.js",
+          "./detectors/framework.js",
+          "./detectors/package-manager.js",
+          "./detectors/structure.js",
+          "./detectors/symbols.js",
+          "../config.js"
+        ],
+        "exports": [
+          "scanProject"
+        ],
+        "functions": [
+          "hashContent",
+          "inferNextRoute",
+          "routePart",
+          "extractRoutes",
+          "method",
+          "scanProject",
+          "gitRemote"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\scanner\\project-index.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "ffb5b2ade74dbe40541c963ac4e9f1eedd8fe96de7584d655d99b674f93c3a79",
+      "symbols": {
+        "imports": [
+          "path",
+          "../utils/fs-utils.js",
+          "../config.js"
+        ],
+        "exports": [
+          "getProjectIndexPath",
+          "getLegacyProjectIndexPath",
+          "buildProjectIndex",
+          "writeProjectIndex"
+        ],
+        "functions": [
+          "getProjectIndexPath",
+          "getLegacyProjectIndexPath",
+          "buildProjectIndex",
+          "writeProjectIndex"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\skills\\skill-registry.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "572bf67dc4d6966bd2f762d283ac61f88f001f137760fb8cde15285da34a3a47"
+    },
+    {
+      "path": "src\\skills\\skill-loader.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "32af4d0c9755a2c45ef4e5d95a9273576a5471e485fcd038420bb628aca4510e"
+    },
+    {
+      "path": "src\\orchestrator\\orchestrator.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "6aefdafbddaacd9f57125d051582074a816710ee8534785d2872cd1ac7a54ee2",
+      "symbols": {
+        "imports": [
+          "./intent.js",
+          "./context.js",
+          "../memory/repositories/tasks.js",
+          "../agents/coder-agent.js",
+          "../agents/reviewer-agent.js",
+          "../agents/research-agent.js",
+          "../agents/writer-agent.js",
+          "../agents/general-agent.js",
+          "../validation/validator.js",
+          "../n8n/n8n-client.js",
+          "../memory/repositories/projects.js",
+          "../utils/logger.js"
+        ],
+        "exports": [
+          "run"
+        ],
+        "functions": [
+          "makeAgent",
+          "run"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\orchestrator\\intent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "4bec4bcacf5dea0eb7272d5f0bb1183b5ac3fef668030df9e451320fb2c36b94"
+    },
+    {
+      "path": "src\\orchestrator\\context.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "51fa268c2056aeb5ae04bb03d7c0e07e8b98e38af0caaad38eab72a5b9a35a89",
+      "symbols": {
+        "imports": [
+          "../memory/context-store.js",
+          "../memory/repositories/projects.js",
+          "../memory/repositories/tasks.js",
+          "../skills/skill-registry.js",
+          "../utils/fs-utils.js",
+          "../utils/git-utils.js",
+          "path",
+          "../config.js",
+          "../scanner/project-index.js"
+        ],
+        "exports": [
+          "buildContext"
+        ],
+        "functions": [
+          "buildContext"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\llm\\prompt-builder.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "06bda7ec9920f68326bae8726fcb5b60a4e92200187b6e833b62f7b080e5f444",
+      "symbols": {
+        "imports": [
+          "../config.js",
+          "./identity.js"
+        ],
+        "exports": [
+          "buildMessages"
+        ],
+        "functions": [
+          "formatProjectSummary",
+          "formatRelevantFiles",
+          "buildMessages"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\llm\\ollama-client.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "5d105c75001622c7f0e5c71033bbe43fb7ff9cb4d7645234de0c5b3027156247"
+    },
+    {
+      "path": "src\\llm\\identity.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "865dcdbc9de37bb1e5bbef3e93dd88f1e64093b060cff0ea83a11c288e5b679f",
+      "symbols": {
+        "imports": [],
+        "exports": [
+          "LAILA_IDENTITY"
+        ],
+        "functions": [],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\n8n\\n8n-client.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "f38a4a187f2f7235bfc743d55d576d3f4d3e7336d7e5b2c113eb494e505631bc"
+    },
+    {
+      "path": "src\\cli\\workspace.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "a51eaf2e88baf8cfe6b1c62d78217912171dad61336ec635977d958817214dc4"
+    },
+    {
+      "path": "src\\cli\\index.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "facb8a3fa21fff8c64801e23ef1cd585f257fc2eaf552cdb7674d699e0add8d7",
+      "symbols": {
+        "imports": [
+          "commander",
+          "./commands/start.js",
+          "./commands/ask.js",
+          "./commands/scan.js",
+          "./commands/status.js",
+          "./commands/history.js",
+          "./commands/skills.js",
+          "./commands/doctor.js",
+          "./commands/commit.js",
+          "../memory/schema.js"
+        ],
+        "exports": [],
+        "functions": [],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\memory\\schema.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "b9658664263a7c90207a5fa28185db5d1f2f20ba2aa56c9be476c4f6d59c0c5d"
+    },
+    {
+      "path": "src\\memory\\db.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "e7ea3e0b32f028a924125ae7d0c530c5a0054bb57591955666558b52b37288c8"
+    },
+    {
+      "path": "src\\memory\\context-store.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "c557b3f0501bd50ec1b614391cab8bd8c875bb0de546edf6e57f681090bbc536"
+    },
+    {
+      "path": "src\\editor\\diff-editor.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "7d76356db8c190147ced26d818a873b6a518404f460a6edd6a8254ff5bbb49f2",
+      "symbols": {
+        "imports": [
+          "path",
+          "fs/promises",
+          "diff",
+          "chalk",
+          "readline"
+        ],
+        "exports": [
+          "parseCodeBlocks",
+          "generateAndPromptDiff"
+        ],
+        "functions": [
+          "parseCodeBlocks",
+          "promptConfirm",
+          "generateAndPromptDiff"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\agents\\writer-agent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "2d8aea4528aa92230d1e3724556bd17e506b4706470752706b6f49b9c45d4c67"
+    },
+    {
+      "path": "src\\agents\\reviewer-agent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "7e9301660596955715285fc00da69a57e8482d7b652fb67f9eb41ada3d53dc21"
+    },
+    {
+      "path": "src\\agents\\research-agent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "c94735c25eecccaf997a159fe17849b1cf40718b25adf14aea507293722b6573"
+    },
+    {
+      "path": "src\\agents\\general-agent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "f877cf54da7c4688b485f0bc461382e3311a54873898226276eedf73ccaaf700"
+    },
+    {
+      "path": "src\\agents\\coder-agent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "defac1504ffdfe77519006bc0987788d93584b09cd7499b4a6370d4d9640fba6",
+      "symbols": {
+        "imports": [
+          "./base-agent.js",
+          "../llm/prompt-builder.js",
+          "../llm/ollama-client.js"
+        ],
+        "exports": [],
+        "functions": [],
+        "classes": [
+          "CoderAgent"
+        ]
+      }
+    },
+    {
+      "path": "src\\agents\\base-agent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "550b49d7669bec5b7502feaf653f878d1f663f66d6e92330ff618d17fd685dfa"
+    },
+    {
+      "path": "src\\scanner\\detectors\\symbols.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "d999b6e390fc8195b4042086e44b5cc97caa80350bce73ab175db3de3688e008",
+      "symbols": {
+        "imports": [
+          "../../utils/fs-utils.js",
+          "path"
+        ],
+        "exports": [
+          "extractSymbols",
+          "buildDependencyMap"
+        ],
+        "functions": [
+          "extractSymbols",
+          "buildDependencyMap"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\scanner\\detectors\\structure.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "234c3fb6ee432c3ed4afa9bbedc51cc02ba1e3207759b1b08d67c53949ded510"
+    },
+    {
+      "path": "src\\scanner\\detectors\\package-manager.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "6d8d1ff79e587d14a9bbb8ad2c0db88d9aac49b519c3ce6caadd2cc389f8427e"
+    },
+    {
+      "path": "src\\scanner\\detectors\\language.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "8e13cbd059067b9f96da53e2995f3d04904f3c44dd7aec127e664fc301610594"
+    },
+    {
+      "path": "src\\scanner\\detectors\\framework.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "8a246c73dc336398e696861199ec6bdd97cf1c46158fe44d5a6109c96186cbe3"
+    },
+    {
+      "path": "src\\cli\\commands\\status.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "f8002329bf23dcc7f039c482a958dad5004461977bdd0f04a1dec3df5f42f763"
+    },
+    {
+      "path": "src\\cli\\commands\\start.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "543b0879869ed41e56993c3cb3a3d4a4de066a7b251927557e4e2122d7cc3108",
+      "symbols": {
+        "imports": [
+          "readline",
+          "path",
+          "chalk",
+          "../../utils/fs-utils.js",
+          "../../utils/git-utils.js",
+          "../../scanner/scanner.js",
+          "../../scanner/project-index.js",
+          "../../memory/repositories/projects.js",
+          "../../memory/repositories/indexes.js",
+          "../../memory/repositories/projects.js",
+          "../../memory/repositories/sessions.js",
+          "../../llm/ollama-client.js",
+          "../../orchestrator/orchestrator.js",
+          "../ui/printer.js",
+          "../ui/spinner.js",
+          "../../system/tool-checks.js",
+          "../../system/installer.js",
+          "../../editor/diff-editor.js"
+        ],
+        "exports": [
+          "startCommand"
+        ],
+        "functions": [
+          "promptLine",
+          "promptYesNo",
+          "looksLikeCliCommand",
+          "isProjectRoot",
+          "resolveInitialProjectPath",
+          "startCommand"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\cli\\commands\\skills.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "646c399f90da9ddc7a48cbc43e5c2b56c411cab84837c6d9ee65669d264ef8eb",
+      "symbols": {
+        "imports": [
+          "../../skills/skill-loader.js",
+          "../ui/printer.js",
+          "../ui/spinner.js"
+        ],
+        "exports": [
+          "skillsCommand"
+        ],
+        "functions": [
+          "skillsCommand"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\cli\\commands\\scan.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "361824959bdfc6785a3c3553ea081a1ceac58f23ae9943fb2f3bb63d9e9d0fbf",
+      "symbols": {
+        "imports": [
+          "path",
+          "../../scanner/scanner.js",
+          "../../scanner/project-index.js",
+          "../../memory/repositories/projects.js",
+          "../../memory/repositories/indexes.js",
+          "../../utils/git-utils.js",
+          "../../utils/fs-utils.js",
+          "../ui/printer.js",
+          "../ui/spinner.js"
+        ],
+        "exports": [
+          "scanCommand"
+        ],
+        "functions": [
+          "scanCommand"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\cli\\commands\\history.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "12620ed8b1af7fb8ede19099b316a96aac673597624486d5ef6b93040e0639a4"
+    },
+    {
+      "path": "src\\cli\\commands\\doctor.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "1927148937ef728116cda7ae5b5fb584687a94adf4ebd5c4799942107d564e31",
+      "symbols": {
+        "imports": [
+          "path",
+          "../../utils/fs-utils.js",
+          "../../utils/git-utils.js",
+          "../../utils/fs-utils.js",
+          "../../config.js",
+          "../../memory/repositories/projects.js",
+          "../../llm/ollama-client.js",
+          "../../system/tool-checks.js",
+          "../ui/printer.js",
+          "../ui/spinner.js"
+        ],
+        "exports": [
+          "doctorCommand"
+        ],
+        "functions": [
+          "formatState",
+          "addSuggestion",
+          "parseDoctorOptions",
+          "safeCreateDir",
+          "doctorCommand"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\cli\\commands\\commit.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "63b8f7bf40d5235f4b49f224a5ed626bb05a04da65f0955f4de268aeb0e06eaa",
+      "symbols": {
+        "imports": [
+          "path",
+          "chalk",
+          "readline",
+          "../../utils/git-utils.js",
+          "../../llm/ollama-client.js",
+          "../ui/spinner.js",
+          "../ui/printer.js",
+          "../../llm/identity.js"
+        ],
+        "exports": [
+          "commitCommand"
+        ],
+        "functions": [
+          "commitCommand"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\cli\\commands\\ask.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "de61bf7354a26a9e64d0e2e5958f7ef3c2190d45feef4ea174931276f2786d78"
+    },
+    {
+      "path": "src\\cli\\ui\\spinner.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "e029c39f7176c7afce4ffffc2050a771f65661ae29710d9c078921eaa81e7cbd"
+    },
+    {
+      "path": "src\\cli\\ui\\printer.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "666adaacd8735ac666bb7aecb21351c003263b97937f771d4a6f937e8f53037f",
+      "symbols": {
+        "imports": [
+          "chalk"
+        ],
+        "exports": [
+          "printer"
+        ],
+        "functions": [],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\memory\\repositories\\tasks.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "ea2fcc802c503c23137175c0bd2e317a39eefce8fb7a0ea81a50c3e57b24517c"
+    },
+    {
+      "path": "src\\memory\\repositories\\sessions.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "a119bcdf4d0dc9af4b29ddaf96cde6b164e8fd4085175f563ce5d681208d8240"
+    },
+    {
+      "path": "src\\memory\\repositories\\projects.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "f5cc52a8dabbceb10af8f550e0428a452a4760946a2d2f515dd4c44bbdd041a0"
+    },
+    {
+      "path": "src\\memory\\repositories\\indexes.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "cef6d278524f9b0e36aa101254ca30fe607f5c2dfd4d14de7606f2bac5ef1ef6",
+      "symbols": {
+        "imports": [
+          "../db.js"
+        ],
+        "exports": [
+          "bulkUpsertFiles",
+          "clearProject",
+          "findByProject",
+          "findByCategory",
+          "searchFiles"
+        ],
+        "functions": [
+          "bulkUpsertFiles",
+          "clearProject",
+          "findByProject",
+          "findByCategory",
+          "searchFiles"
+        ],
+        "classes": []
+      }
+    }
+  ],
+  "routes": [],
+  "files": {
+    "controllers": [],
+    "services": [],
+    "routes": [],
+    "models": [],
+    "tests": [],
+    "configs": [
+      "tsconfig.json",
+      "package.json"
+    ],
+    "schemas": [],
+    "middleware": [],
+    "utils": [
+      "src\\utils\\logger.ts",
+      "src\\utils\\git-utils.ts",
+      "src\\utils\\fs-utils.ts"
+    ],
+    "other": [
+      "project-index.json",
+      "src\\types.ts",
+      "src\\config.ts",
+      "src\\validation\\validator.ts",
+      "src\\validation\\runner.ts",
+      "src\\system\\tool-checks.ts",
+      "src\\system\\installer.ts",
+      "src\\scanner\\scanner.ts",
+      "src\\scanner\\project-index.ts",
+      "src\\skills\\skill-registry.ts",
+      "src\\skills\\skill-loader.ts",
+      "src\\orchestrator\\orchestrator.ts",
+      "src\\orchestrator\\intent.ts",
+      "src\\orchestrator\\context.ts",
+      "src\\llm\\prompt-builder.ts",
+      "src\\llm\\ollama-client.ts",
+      "src\\llm\\identity.ts",
+      "src\\n8n\\n8n-client.ts",
+      "src\\cli\\workspace.ts",
+      "src\\cli\\index.ts",
+      "src\\memory\\schema.ts",
+      "src\\memory\\db.ts",
+      "src\\memory\\context-store.ts",
+      "src\\editor\\diff-editor.ts",
+      "src\\agents\\writer-agent.ts",
+      "src\\agents\\reviewer-agent.ts",
+      "src\\agents\\research-agent.ts",
+      "src\\agents\\general-agent.ts",
+      "src\\agents\\coder-agent.ts",
+      "src\\agents\\base-agent.ts",
+      "src\\scanner\\detectors\\symbols.ts",
+      "src\\scanner\\detectors\\structure.ts",
+      "src\\scanner\\detectors\\package-manager.ts",
+      "src\\scanner\\detectors\\language.ts",
+      "src\\scanner\\detectors\\framework.ts",
+      "src\\cli\\commands\\status.ts",
+      "src\\cli\\commands\\start.ts",
+      "src\\cli\\commands\\skills.ts",
+      "src\\cli\\commands\\scan.ts",
+      "src\\cli\\commands\\history.ts",
+      "src\\cli\\commands\\doctor.ts",
+      "src\\cli\\commands\\commit.ts",
+      "src\\cli\\commands\\ask.ts",
+      "src\\cli\\ui\\spinner.ts",
+      "src\\cli\\ui\\printer.ts",
+      "src\\memory\\repositories\\tasks.ts",
+      "src\\memory\\repositories\\sessions.ts",
+      "src\\memory\\repositories\\projects.ts",
+      "src\\memory\\repositories\\indexes.ts"
+    ]
+  },
+  "tests": [],
+  "scannedAt": "2026-06-28T05:18:50.362Z"
+}

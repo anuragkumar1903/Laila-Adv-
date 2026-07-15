@@ -1,0 +1,1504 @@
+{
+  "projectId": 4,
+  "projectName": "Laila(Adv)",
+  "projectPath": "p:\\Laila(Adv)",
+  "framework": null,
+  "languages": [
+    "Markdown",
+    "TypeScript",
+    "JSON",
+    "YAML"
+  ],
+  "pkgManager": "npm",
+  "summary": "Laila(Adv) (unknown framework) • 210 files • Markdown, TypeScript, JSON, YAML • no routes detected",
+  "filesMeta": [
+    {
+      "path": "README.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "321fae9a538e701a6c6ca5028693fc62744f77cf9ea62a0a11af38cd870f7ca0"
+    },
+    {
+      "path": "project-index.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "cbd9796046cc9f77dae8d36ea1fd204d4fa80b6393224a82e8f7061c13d377de"
+    },
+    {
+      "path": "Brain.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "4541b42874637fcb1793424423415e54cea9d8f0a09123d9b59aabd74ed367c4"
+    },
+    {
+      "path": "skills\\technical-writer.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "59235482424ee05c6fe080af1cd4acd90a164d1c0e57b7c822b09705e0adf7e5"
+    },
+    {
+      "path": "skills\\senior-code-reviewer.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "ef88e1dcb5f0f87d7cc22261353cc8e6a28587b62a010a7a65a3bf97fd4f836d"
+    },
+    {
+      "path": "skills\\researcher.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "96ebc8f16625c568d0d212039eeb22cec4e3ec354c679e3a0e726685aee3583d"
+    },
+    {
+      "path": "skills\\general-assistant.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "69247dbf865932e3731051045a491f92cc31dad5eba402f8e1919341f4e442aa"
+    },
+    {
+      "path": "skills\\backend-engineer.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "59a71c3a4b5952b4d44f0b40da6e0eee55f53d7ef940c46383c9d5e2c8bcb6d1"
+    },
+    {
+      "path": "infra\\docker-compose.yml",
+      "role": "config",
+      "language": "YAML",
+      "hash": "b99b944d7841a880755ba9b64aa45a1e5c09f66781e1d4dba497d2ffa14f4151"
+    },
+    {
+      "path": "docs\\Laila_V1_Improvement_Roadmap.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "17640bc1b9dd89d240cef6309eef238860077fdda579518b5c0be1d17d9c7f95"
+    },
+    {
+      "path": "docs\\DEVELOPER_GUIDE.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "4427d5618c5a74e2108b05c1f7f0d5941fed40d286bfee4e0bb9bdd47d6495cc"
+    },
+    {
+      "path": "docs\\CHANGELOG.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "a388e2704486c6c5f5e049fc7b9bdd545b389191a3741462396d0142af26e1b1"
+    },
+    {
+      "path": "docs\\ARCHITECTURE.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "a71d460e483144587f91206d0700c8a669876cd3c2f3cf9b0834749d4a576ff2"
+    },
+    {
+      "path": "docs\\AI_HANDOFF.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "80efd6496dc08ba284294943dfca32fdc3cc9ad7528f5aba4f0425b4b653b068"
+    },
+    {
+      "path": "docs\\AGENT_REFERENCE.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "20ecde6b0d3490dee4d6b65fbc9b5f40c9419c28d5981c31752985e6c6ce7717"
+    },
+    {
+      "path": "data\\laila.db-wal",
+      "role": "other",
+      "language": null,
+      "hash": ""
+    },
+    {
+      "path": "data\\laila.db-shm",
+      "role": "other",
+      "language": null,
+      "hash": "eefee28e3e88102c227c857dcec20b0b42049e0a8e2fbe3cd57dd4320dc24c66"
+    },
+    {
+      "path": "data\\laila.db",
+      "role": "other",
+      "language": null,
+      "hash": "8530a50ae295c72ade413f70cd06667a211cb0de7ac87e2b0a37895fde848c20"
+    },
+    {
+      "path": "core\\tsconfig.json",
+      "role": "config",
+      "language": "JSON",
+      "hash": "7ae19a0e389d16228fcbc917d295f4be6dec124ed8056f2455a601b44741b7dd"
+    },
+    {
+      "path": "core\\project-index.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "9dabf25cad0b4cc156a5e60f140d233e6624027dbd3ccb39732dcf3c7a403b8b"
+    },
+    {
+      "path": "core\\package.json",
+      "role": "config",
+      "language": "JSON",
+      "hash": "0a47ea6eac4b1106da657f330f0ada1c0e1f2b5a10f065c66f7a47780b47fe9c"
+    },
+    {
+      "path": "skills\\websocket-engineer\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "3557582d3169663c5561950fc390a6e1998b38d9722169ae09548624eb6c1f02"
+    },
+    {
+      "path": "skills\\test-master\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "f16f02c55fcc761bac2e9f31fff2fc47398601b125a3658399b35670271889e9"
+    },
+    {
+      "path": "skills\\sre-engineer\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "7d3ff7346b57ae80a345bb32bfde35712639ccff0fbb042ee98d89e905b7796d"
+    },
+    {
+      "path": "skills\\sql-pro\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "88ee296bc482dc47ad4bc9f2d0e21c0d37568690e43874fd55beed1099cfcf5d"
+    },
+    {
+      "path": "skills\\security-reviewer\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "e9a96f7be5c52e4c0ee7eec268a2f3bdb16e24ea31620e648bfb95c36e1437d8"
+    },
+    {
+      "path": "skills\\react-expert\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "542b344c6b4c3b801255c77fe93c7685ff37a4a1c2d04ecaaa81f3f5aa15dc0a"
+    },
+    {
+      "path": "skills\\postgres-pro\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "e2f32f2fb3b4e640bd58d3133f7bed38697c85e526860cacdc504c8ef456655f"
+    },
+    {
+      "path": "skills\\nextjs-developer\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "a8631cf7789732d8f9924ec763d5f9b99ddb35b793929a2d067a72088c96de70"
+    },
+    {
+      "path": "skills\\secure-code-guardian\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "19153a339a499baf6ea7fc684afc535d8b31292af468e5dd008b58b20d29a89c"
+    },
+    {
+      "path": "skills\\nestjs-expert\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "7d2809fbc80586af81129a39713aea5b49520768da28ce8b31f703dd9ddca27f"
+    },
+    {
+      "path": "skills\\javascript-pro\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "fb73d05454525647884f3aae73ec831fad4efc3c128a1a584bf6d97e73b35e15"
+    },
+    {
+      "path": "skills\\fullstack-guardian\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "22a1c39c86be63fafce6e2aaa5b667a588de346c359dbb67231e75d5c0fe990c"
+    },
+    {
+      "path": "skills\\database-optimizer\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "b581ed9eadeced125c26fee4ca204a48c5b183da00448fb2eeb1362e5741ccab"
+    },
+    {
+      "path": "skills\\code-reviewer\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "8f0ddb7d90178b6986f8d597ab0bc93ec01adb044bd27b75e1682b06902dae93"
+    },
+    {
+      "path": "skills\\debugging-wizard\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "82c442c0a4f87785adc0a5ad9f9968d7ceb83e03f937151f19f362c76267e2e7"
+    },
+    {
+      "path": "skills\\architecture-designer\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "5235b031e8fadacf01f39ad9db7b8d5ec9d6f83460ebcef78da95d31c9f36276"
+    },
+    {
+      "path": "skills\\code-documenter\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "9db40547fcaf27844d3b2ca80737bd7e5b94da99094d7f7ca2b27b540b2686f2"
+    },
+    {
+      "path": "skills\\api-designer\\SKILL.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "75a1d0df12641ef02803a1c8dba1e079f0b4cd7b238dd53ab4c257fad5b49e93"
+    },
+    {
+      "path": "data\\redis\\dump.rdb",
+      "role": "other",
+      "language": null,
+      "hash": "7da7fb2b1e9d6b20fcddd08537194b125dcfe3b6acbad19ac8bbc27d63ef49c1"
+    },
+    {
+      "path": "data\\n8n\\n8nEventLog.log",
+      "role": "other",
+      "language": null,
+      "hash": ""
+    },
+    {
+      "path": "data\\n8n\\n8nEventLog-3.log",
+      "role": "other",
+      "language": null,
+      "hash": ""
+    },
+    {
+      "path": "data\\n8n\\n8nEventLog-2.log",
+      "role": "other",
+      "language": null,
+      "hash": ""
+    },
+    {
+      "path": "data\\n8n\\n8nEventLog-1.log",
+      "role": "other",
+      "language": null,
+      "hash": ""
+    },
+    {
+      "path": "data\\n8n\\database.sqlite-wal",
+      "role": "other",
+      "language": null,
+      "hash": "592482506c26cc13f198ea1b8345fbb3d31df2c5c06548b648c9c2a5b305a28e"
+    },
+    {
+      "path": "data\\n8n\\database.sqlite-shm",
+      "role": "other",
+      "language": null,
+      "hash": "21bb34fce4331b64b2f517d68607f495719dae9aeddf9114273dd8ea44193f68"
+    },
+    {
+      "path": "data\\n8n\\database.sqlite",
+      "role": "other",
+      "language": null,
+      "hash": "47d890ff21fd98f79b6ec297bbd90a31b867548667b4d91483a26d41354077bf"
+    },
+    {
+      "path": "data\\n8n\\config",
+      "role": "other",
+      "language": null,
+      "hash": "3dfba250adb9a5466318274409864608b5f569091284f4d92403baafe796be18"
+    },
+    {
+      "path": "core\\src\\types.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "b73ff4da4982e580cb211b33f0a553a61d60f22b4789bf2acdbcef740e784adb"
+    },
+    {
+      "path": "core\\src\\config.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "e0be98a4f61a13e1b8f4734dd8a423821776760c10e022c2152cc448f6efef31"
+    },
+    {
+      "path": "skills\\websocket-engineer\\references\\security.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "0d477bb4ffc5143fa68076774d2a4e7abc44d077682c0fc252af1a7ca1b785da"
+    },
+    {
+      "path": "skills\\websocket-engineer\\references\\scaling.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "9e6e1ff026caceacfc5ae9fd743a490b6d10d1a633e927dcc3e0dffd423cd258"
+    },
+    {
+      "path": "skills\\websocket-engineer\\references\\protocol.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "877c9cf4af1ca39efcac27528f7ee036162bfa683d99165592e562ada575f77f"
+    },
+    {
+      "path": "skills\\websocket-engineer\\references\\patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "5ecab19a1a88bf3abffa9e7a94a544fb82866f81c972266fd5a4daad0cd7a18d"
+    },
+    {
+      "path": "skills\\websocket-engineer\\references\\alternatives.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "a8f9f15bec130ebb9746fc7dbcecaea5e146cc5ab37d1ab3bcef89d250dabfab"
+    },
+    {
+      "path": "skills\\test-master\\references\\unit-testing.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "6165c82a10c79295ce45329fa16895128888ffd874269ee509af56061291c43a"
+    },
+    {
+      "path": "skills\\test-master\\references\\testing-anti-patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "ae653194178f04a7fe7662d256e2d11da763d6d2e04fcd091f7b374d70b28945"
+    },
+    {
+      "path": "skills\\test-master\\references\\test-reports.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "9202c94244a2da9981fec66042634244478bf8d762061856f71d202e0e4744cf"
+    },
+    {
+      "path": "skills\\test-master\\references\\tdd-iron-laws.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "1f719ea75af92dac32762b9e27d7f1bd6dfd7be9d71c8b8db7b1c8842b34bed1"
+    },
+    {
+      "path": "skills\\test-master\\references\\security-testing.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "aa4fe58e2e1341fc8e9ce2c50abe940b378571fa0b9233904aa567a31d8bb6fc"
+    },
+    {
+      "path": "skills\\test-master\\references\\qa-methodology.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "9277588309c80929241df3302150cae1c966cb83dd1dc2be3125a943fa4d4477"
+    },
+    {
+      "path": "skills\\test-master\\references\\performance-testing.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "8ba93c666af382e91c8ee1bd4ccc02e213c3c3b986b1b88f53321214bd2d6955"
+    },
+    {
+      "path": "skills\\test-master\\references\\integration-testing.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "2330ec33787f4afcde1486c0c041b33f015396d995b0799372f081601631dfa8"
+    },
+    {
+      "path": "skills\\test-master\\references\\e2e-testing.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "b9b731c88e0bce4a2dc35f2f97b7c37e83104c075cd8f5f81b267a0632c855ae"
+    },
+    {
+      "path": "skills\\test-master\\references\\automation-frameworks.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "407d5778b282cdf1bc72ccb18e81e9f8479198218da4dd8f35cbeda40e8a4c00"
+    },
+    {
+      "path": "skills\\sre-engineer\\references\\slo-sli-management.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "9f56a471eaf30474906deea6009b800eae972097828560ab950d104525b900d2"
+    },
+    {
+      "path": "skills\\sre-engineer\\references\\monitoring-alerting.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "22479c9718b70d889baf43fa7c6cbbe7015f3ba7d710f627c7da68286ca0adf1"
+    },
+    {
+      "path": "skills\\sre-engineer\\references\\incident-chaos.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "063058f0f36d2c420f33dd158f6e96b24328b47043a59ea8523f0391717dfdac"
+    },
+    {
+      "path": "skills\\sre-engineer\\references\\error-budget-policy.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "ab1eb5849bcb1345b57ed5a34d8836dc853e30968b998601195bfc65f803c0cd"
+    },
+    {
+      "path": "skills\\sre-engineer\\references\\automation-toil.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "6e93b916b246a739e28583f70565abcfee18285141900734ef1587329858272f"
+    },
+    {
+      "path": "skills\\sql-pro\\references\\window-functions.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "23f1987aa8223d256502f9ef1504b5aff35999ad6917d85a62c6df4ede7b1769"
+    },
+    {
+      "path": "skills\\sql-pro\\references\\query-patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "19c3b2e803336b5de9edb9fb663d2942f010459bf50f0d2961d5b0c1da6e3a8f"
+    },
+    {
+      "path": "skills\\sql-pro\\references\\optimization.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "dd197a02491cda9e1d26e2f0fdff4a5a90f4a54ccf4f6d57e5041a62c06be9a6"
+    },
+    {
+      "path": "skills\\sql-pro\\references\\dialect-differences.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "5eac1a75d44e65dab3877353bf9e5963fa95dd990b5b1d853b17f744761f9586"
+    },
+    {
+      "path": "skills\\sql-pro\\references\\database-design.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "b8d0676ac91213999c28e03dae2a7685d78dda05b6abe3f6b34690d2ae19d0f6"
+    },
+    {
+      "path": "skills\\security-reviewer\\references\\vulnerability-patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "cfa6dc7e7d3d181a5936e0d4a3672138ba764b85b208dd9e6fec83f29cef21ec"
+    },
+    {
+      "path": "skills\\security-reviewer\\references\\secret-scanning.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "57c12434ba61db6ee5ce649599c7e407f19281f3f41680fb37e6ebc00ad1f84d"
+    },
+    {
+      "path": "skills\\security-reviewer\\references\\sast-tools.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "37b32c0dd34ee34dba396382d8a5a9c6eb170ceee333736a97e3750a34272055"
+    },
+    {
+      "path": "skills\\security-reviewer\\references\\report-template.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "047be06a70bf44f47ae2c124318702f185200f43c122ebf26bcbc47d8f53f18a"
+    },
+    {
+      "path": "skills\\security-reviewer\\references\\penetration-testing.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "cacad435101a3079e62ea9a539c632b808941abcd8f5e82178ed9a67c7fdc4ce"
+    },
+    {
+      "path": "skills\\security-reviewer\\references\\infrastructure-security.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "a4f277216de3e0fa4c0314d536b8251c757bb7c9e98cba906be656fd2a031866"
+    },
+    {
+      "path": "skills\\react-expert\\references\\testing-react.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "5c648e0ca79f2326be24d95f0dbb4c47968251dad1f295152326b5ba4b606a08"
+    },
+    {
+      "path": "skills\\react-expert\\references\\state-management.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "df7bb47ff8efa87970fe32c1726f723ffa53e74c25aff3b13764a2ab63f8bcee"
+    },
+    {
+      "path": "skills\\react-expert\\references\\server-components.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "f5a1c727e772e341bee46706fe94878207b1f5e92c2b2893b62e8a1bfef2ff90"
+    },
+    {
+      "path": "skills\\react-expert\\references\\react-19-features.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "15b179809f620c2a703765aa23eedfa93a0aabc3d7a8b030e4b8552c0517bbbb"
+    },
+    {
+      "path": "skills\\react-expert\\references\\performance.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "49cc1262ff7163cfdab606f8842def3109bba5a3c3472181515e7098514a587f"
+    },
+    {
+      "path": "skills\\react-expert\\references\\migration-class-to-modern.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "dc3c57770eb66cadae9ea0f9d138dc42666c57667d930e4261fb3f5ee0241066"
+    },
+    {
+      "path": "skills\\react-expert\\references\\hooks-patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "1b812584ea3f94a51e30b014f986781ea57e4f3812927d23f2a65847b0bb01cd"
+    },
+    {
+      "path": "skills\\postgres-pro\\references\\replication.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "c4993a7c459f10f4dba0ce5a2c4a703e534e588439a5e94168087f3460f15412"
+    },
+    {
+      "path": "skills\\postgres-pro\\references\\performance.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "b137e04782ab4c5387184862cb689d7657d5cbb13c3c41d61980a2edf7c2c8d4"
+    },
+    {
+      "path": "skills\\postgres-pro\\references\\maintenance.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "a9915cf08759fb92ccfbcfd2b811f36ac7c02ad0bffff2dc7f59aca9e670203c"
+    },
+    {
+      "path": "skills\\postgres-pro\\references\\jsonb.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "8ad7086e676f86f23305a5127714566898e4c500593e1a4679194a32c7f530f2"
+    },
+    {
+      "path": "skills\\postgres-pro\\references\\extensions.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "24151c2645e07c139afa9b6ff4ef1f2972950b7e7f08195772256a6f7f216b10"
+    },
+    {
+      "path": "skills\\nextjs-developer\\references\\server-components.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "c03e919c56f4588840cd4141e015f900fa6993567d3720d4736e3a3063663cc9"
+    },
+    {
+      "path": "skills\\nextjs-developer\\references\\server-actions.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "c708b825296d525744e517d630402d7d73fb64df7db02882f0107a1abc4cb549"
+    },
+    {
+      "path": "skills\\nextjs-developer\\references\\deployment.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "ff554f01556c5c07125e9931dee8645461fae9b42f172d84107f2f492035b06c"
+    },
+    {
+      "path": "skills\\nextjs-developer\\references\\data-fetching.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "abbea7c3351c7ad77ca820e48e6f27cd68f29638b82e39dc65560a75f5151255"
+    },
+    {
+      "path": "skills\\nextjs-developer\\references\\app-router.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "6ad5dcb2db0c98b13e87846936670c861da27346edebe75bf096cb08b78f6330"
+    },
+    {
+      "path": "skills\\secure-code-guardian\\references\\xss-csrf.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "4d9976faed6ff05ce2677cdccee1df0be2980375fcdc6151ea59553fce5ca470"
+    },
+    {
+      "path": "skills\\secure-code-guardian\\references\\security-headers.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "59333cf6d3a13b8675d98afd0888e224a1e6b644f755b08a46ebcef3fb6be281"
+    },
+    {
+      "path": "skills\\secure-code-guardian\\references\\owasp-prevention.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "4baed17eeefd365c1b46cf54e0915e99ce85666b345faf40dd9c6bf9e33372b1"
+    },
+    {
+      "path": "skills\\secure-code-guardian\\references\\input-validation.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "2f227b437b0d1184ad557c3ba48bf6e0db4df43c8949c9c0fc923c69847a040a"
+    },
+    {
+      "path": "skills\\secure-code-guardian\\references\\authentication.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "4d680ac47602955de09a4bb248346a91b96158d0b7e23de4fe20ecfda2ff8ac2"
+    },
+    {
+      "path": "skills\\nestjs-expert\\references\\testing-patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "a6815219bd5f4651beeb459cbac45513be247e87e2f8905bc1ae75948aaf75ab"
+    },
+    {
+      "path": "skills\\nestjs-expert\\references\\services-di.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "9e55a6b147bb3e29bc1ee45fbbccb3200ee2514082952c16e91c356432176f6a"
+    },
+    {
+      "path": "skills\\nestjs-expert\\references\\migration-from-express.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "8ef8ec40d56dcaebf5ec2784321a312b7cd183157b03d9f6dfaa21d859bb6f53"
+    },
+    {
+      "path": "skills\\nestjs-expert\\references\\dtos-validation.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "e42823044324f5927de8c7e0e65eb05f10b6659ee4296dc48ad44197b4ea832f"
+    },
+    {
+      "path": "skills\\nestjs-expert\\references\\controllers-routing.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "6a26d34c4348c7ad849774003f22d1959d95305ac39dae92e778dfc4b0911825"
+    },
+    {
+      "path": "skills\\nestjs-expert\\references\\authentication.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "7bdd11ae675c17f25e2e59726459cd565ff403b475ba97c9f1ff9470eecbe2cc"
+    },
+    {
+      "path": "skills\\javascript-pro\\references\\node-essentials.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "d8863b3776d74816ba4855da31932198571484a295126a24bdaebeb3edf61729"
+    },
+    {
+      "path": "skills\\javascript-pro\\references\\modules.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "d6fc9198f0ea7e2342d0927a524f98664ada8084a039fe70b1cc7abda0cf9af3"
+    },
+    {
+      "path": "skills\\javascript-pro\\references\\modern-syntax.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "88c6cb7b863067c364a5d4242c0a187098bdec50c4c05efb0ab9f90aedf3314f"
+    },
+    {
+      "path": "skills\\javascript-pro\\references\\browser-apis.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "169bd23e862339654016ae52259597aca3cfb505bbf7e359f7648ef6e61845d7"
+    },
+    {
+      "path": "skills\\javascript-pro\\references\\async-patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "0a4e9a195d3f7f2d4e8b6c8a8c8a80c886733968e5d6aa3043900ae7975d8f52"
+    },
+    {
+      "path": "skills\\fullstack-guardian\\references\\security-checklist.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "5d943e6a3a8f3c34dccae234be4a61b92eeac9164ca568ea013516465f7f67bf"
+    },
+    {
+      "path": "skills\\fullstack-guardian\\references\\integration-patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "68e8ed7111f95ade940b983353210bd8f062196a0fb640fc3a81191558afd201"
+    },
+    {
+      "path": "skills\\fullstack-guardian\\references\\frontend-patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "fc4b8676f066f92c50ce0294903ad53f0259a418f9e587a202e5090558e04c11"
+    },
+    {
+      "path": "skills\\fullstack-guardian\\references\\error-handling.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "41b940665960b9e55dbba72768acfa72d8a45cbe4d19b53662ca3dc7ea39c766"
+    },
+    {
+      "path": "skills\\fullstack-guardian\\references\\design-template.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "9a5a7cc58b0485c5641e49b5bc1bb01ae5a635e028521949b2a4917a8b371691"
+    },
+    {
+      "path": "skills\\fullstack-guardian\\references\\deliverables-checklist.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "c5ccd2800d6d55c8a00fc9e8f1ef5b3e999d98611381866c5e5f9bb4dd74693c"
+    },
+    {
+      "path": "skills\\fullstack-guardian\\references\\common-patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "941030050a8ab34fab523b2f1ddc83dc3da24613c8b063f2342c87c9e21b80d0"
+    },
+    {
+      "path": "skills\\fullstack-guardian\\references\\backend-patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "82264065150f04d36c2cfa5e7003698b78759cafd6213ad0beb12b5ebcd0e3ca"
+    },
+    {
+      "path": "skills\\fullstack-guardian\\references\\architecture-decisions.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "9cc7722d6dc0cd3e5e8897dcd5206db3a71ae656b51990b76d998ad884fa0a5a"
+    },
+    {
+      "path": "skills\\fullstack-guardian\\references\\api-design-standards.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "7c2cb846a14c312d9042b560aea38dcb47e405a6dfb17e8eef63a24caf1b3af4"
+    },
+    {
+      "path": "skills\\database-optimizer\\references\\query-optimization.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "dce3acf3b12dee597dcdbc73d2ba26b20d53f72f3718fad9ddb4b62f56a25e6e"
+    },
+    {
+      "path": "skills\\database-optimizer\\references\\postgresql-tuning.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "197da2b922e1f5d22cf824de8645f645e064d52b9745b125a36abee89e34da3a"
+    },
+    {
+      "path": "skills\\database-optimizer\\references\\mysql-tuning.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "62dc54ae06a2936cb9d3497a0a9f51eace78b83bf3673364e33c81fae237dedc"
+    },
+    {
+      "path": "skills\\database-optimizer\\references\\monitoring-analysis.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "95fb6e97985cb6fd5cd01739117cb4df6e286d64b94c39b2033d4b5f390b4c93"
+    },
+    {
+      "path": "skills\\database-optimizer\\references\\index-strategies.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "05f5e3f4e603ca6994016260996b3cfb6c28cf6d87ebd0b7f33621ca266840f4"
+    },
+    {
+      "path": "skills\\code-reviewer\\references\\spec-compliance-review.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "a5fcb93e7058b4c089b871ae954d8ab5cf45702e91c54242b06cf7af455f57df"
+    },
+    {
+      "path": "skills\\code-reviewer\\references\\review-checklist.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "c0e348f3896a274c407da7bf52570377dd9b7d0d3284d8f582559d890c3dfbcc"
+    },
+    {
+      "path": "skills\\code-reviewer\\references\\report-template.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "2f2b63c8543b510d4dceffb9336627d02aa5f6f722a805d6fa93572d7673a885"
+    },
+    {
+      "path": "skills\\code-reviewer\\references\\receiving-feedback.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "62f3958b0be7f3d03cde7bbf00d3f6051a6d98081be3e97d2e7cca5501749c04"
+    },
+    {
+      "path": "skills\\code-reviewer\\references\\feedback-examples.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "e87d7a255efaa04a8ee6acfa53f642974c4b2919658671418e670d0db7d038f6"
+    },
+    {
+      "path": "skills\\code-reviewer\\references\\common-issues.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "19de3ccd5611e82d1c94636aaf4b0a11a68a09799459285a3ab250a24c04265c"
+    },
+    {
+      "path": "skills\\debugging-wizard\\references\\systematic-debugging.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "1e4a89c67ddfb8e500d95ee21d9a665c7b1a0204c97f752d03d04e96740a07f9"
+    },
+    {
+      "path": "skills\\debugging-wizard\\references\\strategies.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "2a28d131e430beb667db1efc5dbc2beaeb38572a76ea998ef0330ab27b2b399e"
+    },
+    {
+      "path": "skills\\debugging-wizard\\references\\quick-fixes.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "5cb8d18dbf1d445e82af556368098b52c8fa1dc70c63ab2d0897bbc5c5744ab1"
+    },
+    {
+      "path": "skills\\debugging-wizard\\references\\debugging-tools.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "406df18ffd885ed96e8ccb541d22b0d8bcd0342cd7a89cc10b82e2675e118333"
+    },
+    {
+      "path": "skills\\debugging-wizard\\references\\common-patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "34e8957fc8dd44033ce6e968c3fca55259b40ba91dc7eb81a819fd2442b08d0a"
+    },
+    {
+      "path": "skills\\architecture-designer\\references\\system-design.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "b33ff621c6461eb321d18fc9923c4bba689776e1cd0f0c00945584c2698319a1"
+    },
+    {
+      "path": "skills\\architecture-designer\\references\\nfr-checklist.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "37b9b0f083bd224acccb04eec86edc09a494c693a4ad0ec32ea24f472c122d70"
+    },
+    {
+      "path": "skills\\architecture-designer\\references\\database-selection.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "6439a36138654947acb808eeff1fff5862894ef94a7210e8fd540bb2641c5a80"
+    },
+    {
+      "path": "skills\\architecture-designer\\references\\architecture-patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "954bde741cffe6dec00acb63840bbb79654d2647ca8f7c9a8f99f5888b94c5f9"
+    },
+    {
+      "path": "skills\\architecture-designer\\references\\adr-template.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "cada2aa2f8fa039ba63ab95499cbe653a28110f9f406040a06966552026fea4b"
+    },
+    {
+      "path": "skills\\code-documenter\\references\\user-guides-tutorials.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "18c05418351ec3b362b8ee7a577c40e4417f3f624c53dd72a43fd7833ab52f3b"
+    },
+    {
+      "path": "skills\\code-documenter\\references\\typescript-jsdoc.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "a100430b78e885b3c2070740491590578dcb3d35918755c1495e8c8b621a6b2d"
+    },
+    {
+      "path": "skills\\code-documenter\\references\\python-docstrings.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "f852d307f2dfaa44b7ec27137933ae4ace086991454e832f59fdeaa6d0a40a25"
+    },
+    {
+      "path": "skills\\code-documenter\\references\\interactive-api-docs.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "c1b57eac676576644152d6293ad17c9ece51e39fdbc2966ef7b981061210dfaf"
+    },
+    {
+      "path": "skills\\code-documenter\\references\\documentation-systems.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "b12392c057147925974faa380e3a249013f9b608a14344ed268df20b15ccd3b8"
+    },
+    {
+      "path": "skills\\code-documenter\\references\\coverage-reports.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "8688b82cbc2963f2909194a229901e2aa75231ebfc86801542380ea85e9900a6"
+    },
+    {
+      "path": "skills\\code-documenter\\references\\api-docs-nestjs-express.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "fb1b07526b74edc5b3ba7e704a50a0f3aa5f542f97d80dffc90c95f585c4c9b5"
+    },
+    {
+      "path": "skills\\code-documenter\\references\\api-docs-fastapi-django.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "5506708ca897d28169ea43be038f1e4346a518bf8194d4b5b13a3779b4946413"
+    },
+    {
+      "path": "skills\\api-designer\\references\\versioning.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "7abc655037778fbf09a575f7b245a18710d49a11e340ca0eee62e97fcd76a034"
+    },
+    {
+      "path": "skills\\api-designer\\references\\rest-patterns.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "d1d493065f10387a5c9198ea5c0c1d45c7757daf188aff763e582f342c8ce21b"
+    },
+    {
+      "path": "skills\\api-designer\\references\\pagination.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "6f12180b54539525048610ab2cbc22a3c09792623f4b64be85b4cb335213ea6b"
+    },
+    {
+      "path": "skills\\api-designer\\references\\openapi.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "cef05ac175cb3f69e3ff247fba5b05838229d3644ad7f9f4e53b1eff1750988f"
+    },
+    {
+      "path": "skills\\api-designer\\references\\error-handling.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "f4f53b35360da99e4abd5edc86e53d1a34adc77f5172fa7ba8c50acff8df9c87"
+    },
+    {
+      "path": "data\\redis\\appendonlydir\\appendonly.aof.manifest",
+      "role": "other",
+      "language": null,
+      "hash": "ca465c5845ad4d4c0a2b4cda8853efeb9423cb4242a4eaaa5ecbaa00a4e75492"
+    },
+    {
+      "path": "data\\redis\\appendonlydir\\appendonly.aof.1.incr.aof",
+      "role": "other",
+      "language": null,
+      "hash": ""
+    },
+    {
+      "path": "data\\redis\\appendonlydir\\appendonly.aof.1.base.rdb",
+      "role": "other",
+      "language": null,
+      "hash": "0102163aaee1b92aa703ed487ba7dd0ca52f169fe9149f46106bbf954ccd9c90"
+    },
+    {
+      "path": "data\\n8n\\nodes\\package.json",
+      "role": "config",
+      "language": "JSON",
+      "hash": "67df4a5e97253a7dbb9018b811892c3c2182738af0323f0d3ac6aac961b666d8"
+    },
+    {
+      "path": "data\\projects\\4\\project-index.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "cbd9796046cc9f77dae8d36ea1fd204d4fa80b6393224a82e8f7061c13d377de"
+    },
+    {
+      "path": "data\\projects\\3\\project-index.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "9dabf25cad0b4cc156a5e60f140d233e6624027dbd3ccb39732dcf3c7a403b8b"
+    },
+    {
+      "path": "core\\src\\validation\\validator.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "1ec52ab4f65183c5d9d1043e43397127b8e577f3959c7719e94a858a04fa6ebf"
+    },
+    {
+      "path": "core\\src\\validation\\runner.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "56f92764760ccbb009a0ecdccb33e51d38262669aeb443152c193480bc0653d0"
+    },
+    {
+      "path": "core\\src\\utils\\logger.ts",
+      "role": "util",
+      "language": "TypeScript",
+      "hash": "0345cc18fe5a3f45ea89e1e3da6a50f3135009f58c19e1493da6e50e6a2f51c8"
+    },
+    {
+      "path": "core\\src\\utils\\git-utils.ts",
+      "role": "util",
+      "language": "TypeScript",
+      "hash": "7b9f493309da0d041be934c55eb7d0662405e08636bcb8bc94bf769362652a8c"
+    },
+    {
+      "path": "core\\src\\utils\\fs-utils.ts",
+      "role": "util",
+      "language": "TypeScript",
+      "hash": "7d523ddae1283294b5723f0a4160da6b4f0e77eb49781dea590826b44ca8db08"
+    },
+    {
+      "path": "core\\src\\system\\tool-checks.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "3c3e4e1d123fd5e7d752f7384e06ea96f33c8547954efabcba55ce554e6da58e"
+    },
+    {
+      "path": "core\\src\\system\\installer.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "105c25062f57b56065a154f809bda42924a843a9e57c168cbba5aa8caaee7bd0"
+    },
+    {
+      "path": "core\\src\\skills\\skill-registry.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "572bf67dc4d6966bd2f762d283ac61f88f001f137760fb8cde15285da34a3a47"
+    },
+    {
+      "path": "core\\src\\skills\\skill-loader.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "32af4d0c9755a2c45ef4e5d95a9273576a5471e485fcd038420bb628aca4510e"
+    },
+    {
+      "path": "core\\src\\scanner\\scanner.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "a4a556886aacbbcf0f070e11252f0f2a3304056cbc5cc669b01de8bc0d1c4823"
+    },
+    {
+      "path": "core\\src\\scanner\\project-index.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "2fad1474084a41d538e31538420627c877afe11f2e221b6588f163ed7574495e"
+    },
+    {
+      "path": "core\\src\\orchestrator\\orchestrator.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "4711c19a33a970b7b81fcfb4b6f7f04c1753d49b06e10a8d354c948bca6383b8"
+    },
+    {
+      "path": "core\\src\\orchestrator\\intent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "4bec4bcacf5dea0eb7272d5f0bb1183b5ac3fef668030df9e451320fb2c36b94"
+    },
+    {
+      "path": "core\\src\\orchestrator\\context.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "692b2d9d6068abc2a6d5ff2b26a6c6f2f1268239375f2c221a89c2593b8b5391"
+    },
+    {
+      "path": "core\\src\\n8n\\n8n-client.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "f38a4a187f2f7235bfc743d55d576d3f4d3e7336d7e5b2c113eb494e505631bc"
+    },
+    {
+      "path": "core\\src\\memory\\schema.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "b9658664263a7c90207a5fa28185db5d1f2f20ba2aa56c9be476c4f6d59c0c5d"
+    },
+    {
+      "path": "core\\src\\memory\\db.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "e7ea3e0b32f028a924125ae7d0c530c5a0054bb57591955666558b52b37288c8"
+    },
+    {
+      "path": "core\\src\\memory\\context-store.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "c557b3f0501bd50ec1b614391cab8bd8c875bb0de546edf6e57f681090bbc536"
+    },
+    {
+      "path": "core\\src\\cli\\workspace.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "a51eaf2e88baf8cfe6b1c62d78217912171dad61336ec635977d958817214dc4"
+    },
+    {
+      "path": "core\\src\\cli\\index.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "78199adbe705009e30125fcc22ef03aae8d9c83dfd36ea6e05f4046a12c0891d"
+    },
+    {
+      "path": "core\\src\\llm\\prompt-builder.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "e622fdee1f4945c88997b31421235a16ec5e19d041a13a5b4aac9cd7f404cd88"
+    },
+    {
+      "path": "core\\src\\llm\\ollama-client.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "5d105c75001622c7f0e5c71033bbe43fb7ff9cb4d7645234de0c5b3027156247"
+    },
+    {
+      "path": "core\\src\\llm\\identity.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "865dcdbc9de37bb1e5bbef3e93dd88f1e64093b060cff0ea83a11c288e5b679f"
+    },
+    {
+      "path": "core\\src\\agents\\writer-agent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "2d8aea4528aa92230d1e3724556bd17e506b4706470752706b6f49b9c45d4c67"
+    },
+    {
+      "path": "core\\src\\agents\\reviewer-agent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "7e9301660596955715285fc00da69a57e8482d7b652fb67f9eb41ada3d53dc21"
+    },
+    {
+      "path": "core\\src\\agents\\research-agent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "c94735c25eecccaf997a159fe17849b1cf40718b25adf14aea507293722b6573"
+    },
+    {
+      "path": "core\\src\\agents\\general-agent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "f877cf54da7c4688b485f0bc461382e3311a54873898226276eedf73ccaaf700"
+    },
+    {
+      "path": "core\\src\\agents\\coder-agent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "30df382c9279ca5397af844ed3297faef5ecabc98d750a52cc3994727b638c19"
+    },
+    {
+      "path": "core\\src\\agents\\base-agent.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "550b49d7669bec5b7502feaf653f878d1f663f66d6e92330ff618d17fd685dfa"
+    },
+    {
+      "path": "core\\src\\scanner\\detectors\\structure.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "234c3fb6ee432c3ed4afa9bbedc51cc02ba1e3207759b1b08d67c53949ded510"
+    },
+    {
+      "path": "core\\src\\scanner\\detectors\\package-manager.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "6d8d1ff79e587d14a9bbb8ad2c0db88d9aac49b519c3ce6caadd2cc389f8427e"
+    },
+    {
+      "path": "core\\src\\scanner\\detectors\\language.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "8e13cbd059067b9f96da53e2995f3d04904f3c44dd7aec127e664fc301610594"
+    },
+    {
+      "path": "core\\src\\scanner\\detectors\\framework.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "8a246c73dc336398e696861199ec6bdd97cf1c46158fe44d5a6109c96186cbe3"
+    },
+    {
+      "path": "core\\src\\memory\\repositories\\tasks.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "ea2fcc802c503c23137175c0bd2e317a39eefce8fb7a0ea81a50c3e57b24517c"
+    },
+    {
+      "path": "core\\src\\memory\\repositories\\sessions.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "a119bcdf4d0dc9af4b29ddaf96cde6b164e8fd4085175f563ce5d681208d8240"
+    },
+    {
+      "path": "core\\src\\memory\\repositories\\projects.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "f5cc52a8dabbceb10af8f550e0428a452a4760946a2d2f515dd4c44bbdd041a0"
+    },
+    {
+      "path": "core\\src\\memory\\repositories\\indexes.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "bde7adde5e9059aa62e39703d7557aee576fd6bc57c30c9392b419d9f6640ac3"
+    },
+    {
+      "path": "core\\src\\cli\\commands\\status.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "f8002329bf23dcc7f039c482a958dad5004461977bdd0f04a1dec3df5f42f763"
+    },
+    {
+      "path": "core\\src\\cli\\commands\\start.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "75acab0fa69fb369cf644bff455f380e0f4ad7458392ab83df66397e5784d15c"
+    },
+    {
+      "path": "core\\src\\cli\\commands\\skills.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "646c399f90da9ddc7a48cbc43e5c2b56c411cab84837c6d9ee65669d264ef8eb"
+    },
+    {
+      "path": "core\\src\\cli\\commands\\scan.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "361824959bdfc6785a3c3553ea081a1ceac58f23ae9943fb2f3bb63d9e9d0fbf"
+    },
+    {
+      "path": "core\\src\\cli\\commands\\history.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "12620ed8b1af7fb8ede19099b316a96aac673597624486d5ef6b93040e0639a4"
+    },
+    {
+      "path": "core\\src\\cli\\commands\\doctor.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "bf48561930514c5eb751eec1db5fdf03479ee2b4093de4f278608f31c796016f"
+    },
+    {
+      "path": "core\\src\\cli\\commands\\ask.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "de61bf7354a26a9e64d0e2e5958f7ef3c2190d45feef4ea174931276f2786d78"
+    },
+    {
+      "path": "core\\src\\cli\\ui\\spinner.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "e029c39f7176c7afce4ffffc2050a771f65661ae29710d9c078921eaa81e7cbd"
+    },
+    {
+      "path": "core\\src\\cli\\ui\\printer.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "c17c5b689edb28e63d73f459e7cf26aa6538f62711d1dc747500309a7c375720"
+    }
+  ],
+  "routes": [],
+  "files": {
+    "controllers": [],
+    "services": [],
+    "routes": [],
+    "models": [],
+    "tests": [],
+    "configs": [
+      "infra\\docker-compose.yml",
+      "core\\tsconfig.json",
+      "core\\package.json",
+      "data\\n8n\\nodes\\package.json"
+    ],
+    "schemas": [],
+    "middleware": [],
+    "utils": [
+      "core\\src\\utils\\logger.ts",
+      "core\\src\\utils\\git-utils.ts",
+      "core\\src\\utils\\fs-utils.ts"
+    ],
+    "other": [
+      "README.md",
+      "project-index.json",
+      "Brain.md",
+      "skills\\technical-writer.md",
+      "skills\\senior-code-reviewer.md",
+      "skills\\researcher.md",
+      "skills\\general-assistant.md",
+      "skills\\backend-engineer.md",
+      "docs\\Laila_V1_Improvement_Roadmap.md",
+      "docs\\DEVELOPER_GUIDE.md",
+      "docs\\CHANGELOG.md",
+      "docs\\ARCHITECTURE.md",
+      "docs\\AI_HANDOFF.md",
+      "docs\\AGENT_REFERENCE.md",
+      "data\\laila.db-wal",
+      "data\\laila.db-shm",
+      "data\\laila.db",
+      "core\\project-index.json",
+      "skills\\websocket-engineer\\SKILL.md",
+      "skills\\test-master\\SKILL.md",
+      "skills\\sre-engineer\\SKILL.md",
+      "skills\\sql-pro\\SKILL.md",
+      "skills\\security-reviewer\\SKILL.md",
+      "skills\\react-expert\\SKILL.md",
+      "skills\\postgres-pro\\SKILL.md",
+      "skills\\nextjs-developer\\SKILL.md",
+      "skills\\secure-code-guardian\\SKILL.md",
+      "skills\\nestjs-expert\\SKILL.md",
+      "skills\\javascript-pro\\SKILL.md",
+      "skills\\fullstack-guardian\\SKILL.md",
+      "skills\\database-optimizer\\SKILL.md",
+      "skills\\code-reviewer\\SKILL.md",
+      "skills\\debugging-wizard\\SKILL.md",
+      "skills\\architecture-designer\\SKILL.md",
+      "skills\\code-documenter\\SKILL.md",
+      "skills\\api-designer\\SKILL.md",
+      "data\\redis\\dump.rdb",
+      "data\\n8n\\n8nEventLog.log",
+      "data\\n8n\\n8nEventLog-3.log",
+      "data\\n8n\\n8nEventLog-2.log",
+      "data\\n8n\\n8nEventLog-1.log",
+      "data\\n8n\\database.sqlite-wal",
+      "data\\n8n\\database.sqlite-shm",
+      "data\\n8n\\database.sqlite",
+      "data\\n8n\\config",
+      "core\\src\\types.ts",
+      "core\\src\\config.ts",
+      "skills\\websocket-engineer\\references\\security.md",
+      "skills\\websocket-engineer\\references\\scaling.md",
+      "skills\\websocket-engineer\\references\\protocol.md",
+      "skills\\websocket-engineer\\references\\patterns.md",
+      "skills\\websocket-engineer\\references\\alternatives.md",
+      "skills\\test-master\\references\\unit-testing.md",
+      "skills\\test-master\\references\\testing-anti-patterns.md",
+      "skills\\test-master\\references\\test-reports.md",
+      "skills\\test-master\\references\\tdd-iron-laws.md",
+      "skills\\test-master\\references\\security-testing.md",
+      "skills\\test-master\\references\\qa-methodology.md",
+      "skills\\test-master\\references\\performance-testing.md",
+      "skills\\test-master\\references\\integration-testing.md",
+      "skills\\test-master\\references\\e2e-testing.md",
+      "skills\\test-master\\references\\automation-frameworks.md",
+      "skills\\sre-engineer\\references\\slo-sli-management.md",
+      "skills\\sre-engineer\\references\\monitoring-alerting.md",
+      "skills\\sre-engineer\\references\\incident-chaos.md",
+      "skills\\sre-engineer\\references\\error-budget-policy.md",
+      "skills\\sre-engineer\\references\\automation-toil.md",
+      "skills\\sql-pro\\references\\window-functions.md",
+      "skills\\sql-pro\\references\\query-patterns.md",
+      "skills\\sql-pro\\references\\optimization.md",
+      "skills\\sql-pro\\references\\dialect-differences.md",
+      "skills\\sql-pro\\references\\database-design.md",
+      "skills\\security-reviewer\\references\\vulnerability-patterns.md",
+      "skills\\security-reviewer\\references\\secret-scanning.md",
+      "skills\\security-reviewer\\references\\sast-tools.md",
+      "skills\\security-reviewer\\references\\report-template.md",
+      "skills\\security-reviewer\\references\\penetration-testing.md",
+      "skills\\security-reviewer\\references\\infrastructure-security.md",
+      "skills\\react-expert\\references\\testing-react.md",
+      "skills\\react-expert\\references\\state-management.md",
+      "skills\\react-expert\\references\\server-components.md",
+      "skills\\react-expert\\references\\react-19-features.md",
+      "skills\\react-expert\\references\\performance.md",
+      "skills\\react-expert\\references\\migration-class-to-modern.md",
+      "skills\\react-expert\\references\\hooks-patterns.md",
+      "skills\\postgres-pro\\references\\replication.md",
+      "skills\\postgres-pro\\references\\performance.md",
+      "skills\\postgres-pro\\references\\maintenance.md",
+      "skills\\postgres-pro\\references\\jsonb.md",
+      "skills\\postgres-pro\\references\\extensions.md",
+      "skills\\nextjs-developer\\references\\server-components.md",
+      "skills\\nextjs-developer\\references\\server-actions.md",
+      "skills\\nextjs-developer\\references\\deployment.md",
+      "skills\\nextjs-developer\\references\\data-fetching.md",
+      "skills\\nextjs-developer\\references\\app-router.md",
+      "skills\\secure-code-guardian\\references\\xss-csrf.md",
+      "skills\\secure-code-guardian\\references\\security-headers.md",
+      "skills\\secure-code-guardian\\references\\owasp-prevention.md",
+      "skills\\secure-code-guardian\\references\\input-validation.md",
+      "skills\\secure-code-guardian\\references\\authentication.md",
+      "skills\\nestjs-expert\\references\\testing-patterns.md",
+      "skills\\nestjs-expert\\references\\services-di.md",
+      "skills\\nestjs-expert\\references\\migration-from-express.md",
+      "skills\\nestjs-expert\\references\\dtos-validation.md",
+      "skills\\nestjs-expert\\references\\controllers-routing.md",
+      "skills\\nestjs-expert\\references\\authentication.md",
+      "skills\\javascript-pro\\references\\node-essentials.md",
+      "skills\\javascript-pro\\references\\modules.md",
+      "skills\\javascript-pro\\references\\modern-syntax.md",
+      "skills\\javascript-pro\\references\\browser-apis.md",
+      "skills\\javascript-pro\\references\\async-patterns.md",
+      "skills\\fullstack-guardian\\references\\security-checklist.md",
+      "skills\\fullstack-guardian\\references\\integration-patterns.md",
+      "skills\\fullstack-guardian\\references\\frontend-patterns.md",
+      "skills\\fullstack-guardian\\references\\error-handling.md",
+      "skills\\fullstack-guardian\\references\\design-template.md",
+      "skills\\fullstack-guardian\\references\\deliverables-checklist.md",
+      "skills\\fullstack-guardian\\references\\common-patterns.md",
+      "skills\\fullstack-guardian\\references\\backend-patterns.md",
+      "skills\\fullstack-guardian\\references\\architecture-decisions.md",
+      "skills\\fullstack-guardian\\references\\api-design-standards.md",
+      "skills\\database-optimizer\\references\\query-optimization.md",
+      "skills\\database-optimizer\\references\\postgresql-tuning.md",
+      "skills\\database-optimizer\\references\\mysql-tuning.md",
+      "skills\\database-optimizer\\references\\monitoring-analysis.md",
+      "skills\\database-optimizer\\references\\index-strategies.md",
+      "skills\\code-reviewer\\references\\spec-compliance-review.md",
+      "skills\\code-reviewer\\references\\review-checklist.md",
+      "skills\\code-reviewer\\references\\report-template.md",
+      "skills\\code-reviewer\\references\\receiving-feedback.md",
+      "skills\\code-reviewer\\references\\feedback-examples.md",
+      "skills\\code-reviewer\\references\\common-issues.md",
+      "skills\\debugging-wizard\\references\\systematic-debugging.md",
+      "skills\\debugging-wizard\\references\\strategies.md",
+      "skills\\debugging-wizard\\references\\quick-fixes.md",
+      "skills\\debugging-wizard\\references\\debugging-tools.md",
+      "skills\\debugging-wizard\\references\\common-patterns.md",
+      "skills\\architecture-designer\\references\\system-design.md",
+      "skills\\architecture-designer\\references\\nfr-checklist.md",
+      "skills\\architecture-designer\\references\\database-selection.md",
+      "skills\\architecture-designer\\references\\architecture-patterns.md",
+      "skills\\architecture-designer\\references\\adr-template.md",
+      "skills\\code-documenter\\references\\user-guides-tutorials.md",
+      "skills\\code-documenter\\references\\typescript-jsdoc.md",
+      "skills\\code-documenter\\references\\python-docstrings.md",
+      "skills\\code-documenter\\references\\interactive-api-docs.md",
+      "skills\\code-documenter\\references\\documentation-systems.md",
+      "skills\\code-documenter\\references\\coverage-reports.md",
+      "skills\\code-documenter\\references\\api-docs-nestjs-express.md",
+      "skills\\code-documenter\\references\\api-docs-fastapi-django.md",
+      "skills\\api-designer\\references\\versioning.md",
+      "skills\\api-designer\\references\\rest-patterns.md",
+      "skills\\api-designer\\references\\pagination.md",
+      "skills\\api-designer\\references\\openapi.md",
+      "skills\\api-designer\\references\\error-handling.md",
+      "data\\redis\\appendonlydir\\appendonly.aof.manifest",
+      "data\\redis\\appendonlydir\\appendonly.aof.1.incr.aof",
+      "data\\redis\\appendonlydir\\appendonly.aof.1.base.rdb",
+      "data\\projects\\4\\project-index.json",
+      "data\\projects\\3\\project-index.json",
+      "core\\src\\validation\\validator.ts",
+      "core\\src\\validation\\runner.ts",
+      "core\\src\\system\\tool-checks.ts",
+      "core\\src\\system\\installer.ts",
+      "core\\src\\skills\\skill-registry.ts",
+      "core\\src\\skills\\skill-loader.ts",
+      "core\\src\\scanner\\scanner.ts",
+      "core\\src\\scanner\\project-index.ts",
+      "core\\src\\orchestrator\\orchestrator.ts",
+      "core\\src\\orchestrator\\intent.ts",
+      "core\\src\\orchestrator\\context.ts",
+      "core\\src\\n8n\\n8n-client.ts",
+      "core\\src\\memory\\schema.ts",
+      "core\\src\\memory\\db.ts",
+      "core\\src\\memory\\context-store.ts",
+      "core\\src\\cli\\workspace.ts",
+      "core\\src\\cli\\index.ts",
+      "core\\src\\llm\\prompt-builder.ts",
+      "core\\src\\llm\\ollama-client.ts",
+      "core\\src\\llm\\identity.ts",
+      "core\\src\\agents\\writer-agent.ts",
+      "core\\src\\agents\\reviewer-agent.ts",
+      "core\\src\\agents\\research-agent.ts",
+      "core\\src\\agents\\general-agent.ts",
+      "core\\src\\agents\\coder-agent.ts",
+      "core\\src\\agents\\base-agent.ts",
+      "core\\src\\scanner\\detectors\\structure.ts",
+      "core\\src\\scanner\\detectors\\package-manager.ts",
+      "core\\src\\scanner\\detectors\\language.ts",
+      "core\\src\\scanner\\detectors\\framework.ts",
+      "core\\src\\memory\\repositories\\tasks.ts",
+      "core\\src\\memory\\repositories\\sessions.ts",
+      "core\\src\\memory\\repositories\\projects.ts",
+      "core\\src\\memory\\repositories\\indexes.ts",
+      "core\\src\\cli\\commands\\status.ts",
+      "core\\src\\cli\\commands\\start.ts",
+      "core\\src\\cli\\commands\\skills.ts",
+      "core\\src\\cli\\commands\\scan.ts",
+      "core\\src\\cli\\commands\\history.ts",
+      "core\\src\\cli\\commands\\doctor.ts",
+      "core\\src\\cli\\commands\\ask.ts",
+      "core\\src\\cli\\ui\\spinner.ts",
+      "core\\src\\cli\\ui\\printer.ts"
+    ]
+  },
+  "tests": [],
+  "scannedAt": "2026-06-28T04:45:44.510Z"
+}

@@ -1,0 +1,35 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: Laila-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - ../data/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: Laila-n8n
+    ports:
+      - "5678:5678"
+    volumes:
+      - ../data/n8n:/home/node/.n8n
+    environment:
+      - N8N_SECURE_COOKIE=false
+      - TZ=Asia/Kolkata
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
