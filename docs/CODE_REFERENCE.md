@@ -1,4 +1,4 @@
-# Laila Code Reference
+# Laila(Adv) Code Reference
 
 This document is the inline API reference for all core modules. It covers function signatures, parameters, return types, and behaviour notes for every public export.
 
@@ -6,6 +6,12 @@ This document is the inline API reference for all core modules. It covers functi
 
 ## Table of Contents
 
+- [CLI](#cli)
+  - [commands/start.ts](#commandsstartts)
+  - [commands/ask.ts](#commandsaskts)
+  - [commands/scan.ts](#commandsscantS)
+  - [commands/status.ts](#commandsstatusts)
+  - [commands/history.ts](#commandshistoryts)
 - [Orchestrator](#orchestrator)
   - [context.ts — buildContext](#contexttsbuildcontext)
   - [intent.ts — detectIntent](#intenttsdetectintent)
@@ -44,6 +50,30 @@ This document is the inline API reference for all core modules. It covers functi
 
 ---
 
+## CLI
+
+### commands/start.ts
+
+Interactive REPL loop for chat-based interactions with the agent. Uses `readline` to continually prompt the user for input. Handles graceful exits and initializes the database.
+
+### commands/ask.ts
+
+One-shot interaction command. Executes the orchestrator for a single query and prints the response, then exits.
+
+### commands/scan.ts
+
+Manual trigger for project indexing. Calls `scanProject` on the target directory and saves the output to SQLite and disk.
+
+### commands/status.ts
+
+Displays a rich terminal UI summary showing the active project, current database path, models, and recent history using `cli-table3`.
+
+### commands/history.ts
+
+Queries the local SQLite database for the recent tasks executed by Laila(Adv) and displays them in a formatted table, useful for auditing interactions.
+
+---
+
 ## Orchestrator
 
 ### context.ts — buildContext
@@ -62,15 +92,15 @@ buildContext(params: {
 
 **Layers assembled (in priority order):**
 
-| Layer | Source | Notes |
-|---|---|---|
-| Project index | `data/projects/<id>/project-index.json` | Falls back to legacy root `project-index.json` |
-| Project memory | `LAILA.md` / `.laila/LAILA.md` / `BRAIN.md` | First file found wins |
-| Relevant files | SQLite keyword search → file reads | Capped at `MAX_RELEVANT_FILES`, truncated to `MAX_FILE_LINES` |
-| Skill | `skills/` discovery → `skill-registry` | Best match for agent + query |
-| Available skills | `discoverSkills()` | Injected as a system message list |
-| History | `getMessages(previousTaskId)` | Last `SESSION_HISTORY_SIZE` messages only |
-| Git context | `git status --short` + `git diff` | Silently omitted if not a git repo |
+| Layer            | Source                                      | Notes                                                         |
+| ---------------- | ------------------------------------------- | ------------------------------------------------------------- |
+| Project index    | `data/projects/<id>/project-index.json`     | Falls back to legacy root `project-index.json`                |
+| Project memory   | `LAILA.md` / `.laila/LAILA.md` / `BRAIN.md` | First file found wins                                         |
+| Relevant files   | SQLite keyword search → file reads          | Capped at `MAX_RELEVANT_FILES`, truncated to `MAX_FILE_LINES` |
+| Skill            | `skills/` discovery → `skill-registry`      | Best match for agent + query                                  |
+| Available skills | `discoverSkills()`                          | Injected as a system message list                             |
+| History          | `getMessages(previousTaskId)`               | Last `SESSION_HISTORY_SIZE` messages only                     |
+| Git context      | `git status --short` + `git diff`           | Silently omitted if not a git repo                            |
 
 **Returns:** `AgentContext` — passed directly to the agent's `run()` method.
 
@@ -88,13 +118,13 @@ detectIntent(input: string): { intent: TaskIntent; agent: AgentName }
 
 **Intent → Agent mapping:**
 
-| Intent | Agent |
-|---|---|
-| `code` | `coder` |
-| `review` | `reviewer` |
+| Intent     | Agent        |
+| ---------- | ------------ |
+| `code`     | `coder`      |
+| `review`   | `reviewer`   |
 | `research` | `researcher` |
-| `write` | `writer` |
-| `general` | `general` |
+| `write`    | `writer`     |
+| `general`  | `general`    |
 
 **Keyword lists:**
 
@@ -129,6 +159,7 @@ interface OrchestratorResult {
 ```
 
 **Steps:**
+
 1. `detectIntent` — classify and select agent
 2. `createTask` — persist task record in SQLite with status `running`
 3. `addMessage` — store user message
@@ -165,6 +196,7 @@ Name: `coder`
 Temperature: `0.1` (highly deterministic)
 
 Enriches the user message with:
+
 - Full file output instruction: `// FILE: <path>` as the first line inside every code block
 - Shell command block format: ` ```cmd ` fences with a reason comment
 - Allowlist of safe CLI tools the model may propose
@@ -178,6 +210,7 @@ Name: `reviewer`
 Temperature: `0.3`
 
 Appends a 6-point review checklist:
+
 1. Bugs and logic errors
 2. Security vulnerabilities
 3. Performance issues
@@ -195,6 +228,7 @@ Name: `researcher`
 Temperature: `0.4`
 
 Instructs the model to:
+
 - Provide a clear, accurate explanation
 - Use examples where helpful
 - Stay concise — no padding
@@ -208,6 +242,7 @@ Name: `writer`
 Temperature: `0.5`
 
 Instructs the model to:
+
 - Write in professional Markdown with headings, bullets, and code blocks
 - Target developers familiar with the stack
 - Never include placeholder text — every section must be real content
@@ -235,6 +270,7 @@ scanProject(
 ```
 
 **Steps:**
+
 1. Build ignore rules from `SCAN_EXCLUDES` config + `.gitignore`
 2. `glob('**/*')` — collect all non-directory paths
 3. Filter binary extensions via `isTextFile()`
@@ -277,6 +313,7 @@ getRelevantFiles(
 ```
 
 **Algorithm:**
+
 1. `extractKeywords(query)` — tokenise query, strip stop words and short tokens
 2. `searchFiles(projectId, keywords)` — SQLite LIKE match on `rel_path`
 3. Fall back to `findByProject(projectId)` when no keywords are found
@@ -343,7 +380,8 @@ buildMessages(ctx: AgentContext): OllamaMessage[]
 Assembles the ordered message array sent to the LLM. Budget-aware — trims the files block if adding it would exceed `MAX_CONTEXT_CHARS`.
 
 **Message order:**
-1. `system` — Laila identity (`LAILA_IDENTITY`)
+
+1. `system` — Laila(Adv) identity (`LAILA_IDENTITY`)
 2. `system` — skill content
 3. `system` — available skills list (if any)
 4. `system` — project memory (`LAILA.md` / `BRAIN.md`)
@@ -388,13 +426,20 @@ interface LLMProvider {
 Concrete implementations: `OllamaProvider`, `AnthropicProvider`, `GeminiProvider`, `OpenAICompatProvider` (covers OpenAI, DeepSeek, Groq, Mistral, LM Studio, custom).
 
 `ChatOptions`:
+
 ```typescript
 { temperature?: number; top_p?: number; maxTokens?: number; stream?: boolean }
 ```
 
 `ChatResponse`:
+
 ```typescript
-{ content: string; tokensUsed: number; model: string; provider: string }
+{
+  content: string;
+  tokensUsed: number;
+  model: string;
+  provider: string;
+}
 ```
 
 ---
@@ -415,6 +460,7 @@ generateAndPromptDiff(
 `parseCodeBlocks` extracts fenced code blocks whose first line matches `// FILE: <path>`.
 
 `generateAndPromptDiff` for each block:
+
 1. Reads existing file content (empty string if new file)
 2. Computes a unified diff via `createTwoFilesPatch`
 3. Prints the coloured diff to stdout
@@ -441,11 +487,12 @@ interface RunCommandOptions {
   cwd: string;
   sessionId: number | null;
   taskId: number | null;
-  rl?: readline.Interface;   // pass REPL rl to avoid double-echo
+  rl?: readline.Interface; // pass REPL rl to avoid double-echo
 }
 ```
 
 **Safety pipeline (per command):**
+
 1. `validateCommand` — check blocklist (rm -rf, sudo, invoke-expression, …) then allowlist (npm, git, tsc, …)
 2. `askPermission` — show boxed command preview, prompt user (default: yes)
 3. `executeCommand` — spawn with `shell: true`, stream stdout/stderr, 2-minute timeout
@@ -468,6 +515,7 @@ findBestSkillForQuery(query: string, currentAgent: AgentName): Promise<Skill | n
 ```
 
 **Discovery:** recursively scans `SKILLS_DIR` for `.md` files. Supported layouts:
+
 - `skills/name.md`
 - `skills/name/skill.md`
 - `skills/name/index.md`
@@ -487,6 +535,7 @@ getSkillForAgent(agent: AgentName, query?: string): Promise<Skill>
 ```
 
 Resolution order:
+
 1. `findBestSkillForQuery(query, agent)` — dynamic match when query is provided
 2. `loadSkillSafe(AGENT_SKILL_MAP[agent])` — hardcoded default per agent role
 3. `loadDiscoveredSkill(agent)` — any skill matching agent name/alias
@@ -494,13 +543,13 @@ Resolution order:
 
 **Default skill map:**
 
-| Agent | Default skill file |
-|---|---|
-| `coder` | `backend-engineer` |
-| `reviewer` | `senior-code-reviewer` |
-| `researcher` | `researcher` |
-| `writer` | `technical-writer` |
-| `general` | `general-assistant` |
+| Agent        | Default skill file     |
+| ------------ | ---------------------- |
+| `coder`      | `backend-engineer`     |
+| `reviewer`   | `senior-code-reviewer` |
+| `researcher` | `researcher`           |
+| `writer`     | `technical-writer`     |
+| `general`    | `general-assistant`    |
 
 ---
 
@@ -560,18 +609,18 @@ Writes to stdout. Debug output is suppressed unless `DEBUG=laila` is set in the 
 
 Constants from `core/src/config.ts`:
 
-| Constant | Default | Purpose |
-|---|---|---|
-| `REPO_ROOT` | resolved at runtime | Absolute path to the monorepo root |
-| `SKILLS_DIR` | `<root>/skills` | Where skill bundles are discovered |
-| `DATA_DIR` | `<root>/data` | SQLite DB and project storage |
-| `DB_PATH` | `<root>/data/laila.db` | SQLite database file |
-| `OLLAMA_HOST` | `http://localhost:11434` | Ollama API base URL (legacy) |
-| `OLLAMA_MODEL` | `qwen2.5-coder:7b` | Default model (legacy) |
-| `MAX_FILE_LINES` | `300` | Lines per file before truncation |
-| `MAX_RELEVANT_FILES` | `5` | Files sent to LLM per request |
-| `MAX_CONTEXT_CHARS` | `14000` | Total character budget for the prompt |
-| `SESSION_HISTORY_SIZE` | `8` | Previous messages kept in context |
-| `SCAN_EXCLUDES` | `node_modules, .git, dist, …` | Directories/patterns excluded from scanning |
+| Constant               | Default                       | Purpose                                     |
+| ---------------------- | ----------------------------- | ------------------------------------------- |
+| `REPO_ROOT`            | resolved at runtime           | Absolute path to the monorepo root          |
+| `SKILLS_DIR`           | `<root>/skills`               | Where skill bundles are discovered          |
+| `DATA_DIR`             | `<root>/data`                 | SQLite DB and project storage               |
+| `DB_PATH`              | `<root>/data/laila.db`        | SQLite database file                        |
+| `OLLAMA_HOST`          | `http://localhost:11434`      | Ollama API base URL (legacy)                |
+| `OLLAMA_MODEL`         | `qwen2.5-coder:3b`            | Default model (legacy)                      |
+| `MAX_FILE_LINES`       | `300`                         | Lines per file before truncation            |
+| `MAX_RELEVANT_FILES`   | `5`                           | Files sent to LLM per request               |
+| `MAX_CONTEXT_CHARS`    | `14000`                       | Total character budget for the prompt       |
+| `SESSION_HISTORY_SIZE` | `8`                           | Previous messages kept in context           |
+| `SCAN_EXCLUDES`        | `node_modules, .git, dist, …` | Directories/patterns excluded from scanning |
 
 Environment variable overrides: `LAILA_PROVIDER`, `LAILA_MODEL`, `LAILA_API_KEY`, `LAILA_BASE_URL`, `OLLAMA_HOST`, `OLLAMA_MODEL`, `N8N_WEBHOOK_URL`, `N8N_ENABLED`.
