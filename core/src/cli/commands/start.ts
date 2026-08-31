@@ -270,6 +270,7 @@ export async function startCommand(): Promise<void> {
   // ── Prompt queue ──────────────────────────────────────────────────────
   const promptQueue: string[] = [];
   let queueRunning = false;
+  let autoFixCount = 0;
 
   function updatePrompt(): void {
     const depth = promptQueue.length;
@@ -367,14 +368,26 @@ export async function startCommand(): Promise<void> {
           spinner.stop();
           printer.validationReport(validation.results);
           if (!validation.success) {
-            printer.warn('Validation failed — see details above.');
-            void triggerN8nWebhook({
-              event: 'validation_failed',
-              projectId,
-              taskId: previousTaskId,
-              message: 'Code validation failed after file edits',
-              details: validation.results,
-            });
+            if (autoFixCount < 3) {
+              autoFixCount++;
+              printer.warn(`Auto-healing... (Attempt ${autoFixCount} of 3). Queueing fix prompt.`);
+              const errorLogs = validation.results.filter(r => !r.success).map(r => `[${r.step}] Failed:\n${r.stdout}\n${r.stderr}`).join('\n\n');
+              promptQueue.unshift(`[Auto-Fix]: The code you just wrote failed validation. Here are the compiler/linter errors:\n\n${errorLogs}\n\nPlease fix the files you edited to resolve these errors.`);
+              updatePrompt();
+              // Kick off drainQueue if it's not running
+              if (!queueRunning) {
+                setTimeout(drainQueue, 100);
+              }
+            } else {
+              printer.warn('Validation failed 3 times. Giving up on auto-heal.');
+              void triggerN8nWebhook({
+                event: 'validation_failed',
+                projectId,
+                taskId: previousTaskId,
+                message: 'Code validation failed after file edits (auto-heal exhausted)',
+                details: validation.results,
+              });
+            }
           } else {
             void triggerN8nWebhook({
               event: 'task_completed',
@@ -463,6 +476,9 @@ export async function startCommand(): Promise<void> {
     }
 
     if (!line) { rl.resume(); rl.prompt(); return; }
+    
+    // Reset auto-fix loop counter when the user types a new command directly
+    autoFixCount = 0;
 
     // If queue is already running, just enqueue and return
     if (queueRunning && !normalized.startsWith('/') && !normalized.startsWith('.')) {
