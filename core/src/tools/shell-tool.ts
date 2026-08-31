@@ -431,10 +431,12 @@ async function executeCommand(
     let stderrBuf = '';
     let timedOut  = false;
 
-    // Use shell: true so the full command string works as-is (matches runner.ts pattern)
+    // Use shell: true on Unix, but explicitly powershell.exe on Windows 
+    // so that PowerShell cmdlets actually execute instead of failing in cmd.exe.
+    const isWin = process.platform === 'win32';
     const child = spawn(command, [], {
       cwd,
-      shell: true,
+      shell: isWin ? 'powershell.exe' : true,
       stdio: 'pipe',
       // Use a minimal env — never inherit secrets (AWS keys, DB passwords, tokens etc.)
       // from process.env into the child process. Only pass essentials for commands to work.

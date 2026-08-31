@@ -267,10 +267,11 @@ export async function startCommand(): Promise<void> {
   printer.info('Type your request. Type /help for available commands.');
   printer.blank();
 
-  // ── Prompt queue ──────────────────────────────────────────────────────
+  // ── Prompt queue & MCP ────────────────────────────────────────────────
   const promptQueue: string[] = [];
   let queueRunning = false;
   let autoFixCount = 0;
+  let mcpManager: import('../../mcp/mcp-client.js').MCPClientManager | null = null;
 
   function updatePrompt(): void {
     const depth = promptQueue.length;
@@ -280,13 +281,18 @@ export async function startCommand(): Promise<void> {
     rl.setPrompt(label);
   }
 
-  /** Run a single user message through the full orchestrator pipeline. */
   async function runPrompt(userMessage: string): Promise<void> {
     try {
       const startMs = Date.now();
       spinner.start('Thinking…');
+      
+      let finalMessage = userMessage;
+      if (mcpManager && mcpManager.tools.length > 0) {
+        finalMessage += `\n\n[SYSTEM: You are connected to an MCP server. You may call its tools by returning a markdown block like this:\n\`\`\`mcp\n{\n  "tool": "tool_name",\n  "args": { "param": "value" }\n}\n\`\`\`\n\nAvailable tools:\n${JSON.stringify(mcpManager.tools, null, 2)}]`;
+      }
+
       const result = await orchestrate({
-        userMessage,
+        userMessage: finalMessage,
         sessionId: session!.id,
         projectId,
         previousTaskId,
@@ -332,6 +338,18 @@ export async function startCommand(): Promise<void> {
         else if (block.language === 'search' || block.language === 'url') {
           const webRes = await runWebBlocks(block.raw);
           if (webRes.webContext) contextSuffixes.push(webRes.webContext);
+        }
+        else if (block.language === 'mcp' && mcpManager) {
+          try {
+            const parsed = JSON.parse(block.content);
+            spinner.start(`Calling MCP tool ${parsed.tool}…`);
+            const mcpRes = await mcpManager.callTool(parsed.tool, parsed.args);
+            spinner.stop();
+            contextSuffixes.push(`=== MCP Tool Result (${parsed.tool}) ===\n${JSON.stringify(mcpRes, null, 2)}`);
+          } catch (e: any) {
+            spinner.fail();
+            contextSuffixes.push(`=== MCP Tool Error ===\n${e.message}`);
+          }
         }
       }
 
@@ -576,7 +594,8 @@ export async function startCommand(): Promise<void> {
         printer.warn('Usage: /look <path/to/image.png> [optional prompt]');
         rl.resume(); rl.prompt(); return;
       }
-      const [_, imgPath, prompt = 'Describe this image in detail.'] = match;
+      const imgPath = match[1]!;
+      const prompt = match[2] ?? 'Describe this image in detail.';
       spinner.start(`Analyzing image: ${imgPath}…`);
       try {
         const { askVision } = await import('../../tools/vision-tool.js');
@@ -592,6 +611,28 @@ export async function startCommand(): Promise<void> {
       } catch (e: any) {
         spinner.fail();
         printer.error(e.message);
+      }
+      rl.resume(); rl.prompt(); return;
+    }
+
+    // ── /mcp ──────────────────────────────────────────────────────────────
+    if (normalized.startsWith('/mcp ')) {
+      const parts = line.split(' ').slice(1);
+      if (parts.length === 0) {
+        printer.warn('Usage: /mcp <command> [args...] (e.g. /mcp node server.js)');
+        rl.resume(); rl.prompt(); return;
+      }
+      spinner.start(`Connecting to MCP server: ${parts.join(' ')}…`);
+      try {
+        const { MCPClientManager } = await import('../../mcp/mcp-client.js');
+        mcpManager = new MCPClientManager();
+        await mcpManager.connect(parts[0]!, parts.slice(1));
+        spinner.succeed(`Connected! Loaded ${mcpManager.tools.length} tools.`);
+        mcpManager.tools.forEach(t => printer.dim(`  - ${t.name}: ${t.description}`));
+      } catch (e: any) {
+        spinner.fail();
+        printer.error(e.message);
+        mcpManager = null;
       }
       rl.resume(); rl.prompt(); return;
     }
