@@ -272,6 +272,16 @@ export async function startCommand(): Promise<void> {
   let queueRunning = false;
   let autoFixCount = 0;
   let mcpManager: import('../../mcp/mcp-client.js').MCPClientManager | null = null;
+  try {
+    const { MCPClientManager } = await import('../../mcp/mcp-client.js');
+    mcpManager = new MCPClientManager();
+    if (projectPath) {
+      await mcpManager.loadConfig(path.join(projectPath, '.laila', 'mcp.json'));
+      await mcpManager.connectAllFromConfig();
+    }
+  } catch (e) {
+    // Ignore initialization errors for MCP
+  }
 
   function updatePrompt(): void {
     const depth = promptQueue.length;
@@ -287,8 +297,11 @@ export async function startCommand(): Promise<void> {
       spinner.start('Thinking…');
       
       let finalMessage = userMessage;
-      if (mcpManager && mcpManager.tools.length > 0) {
-        finalMessage += `\n\n[SYSTEM: You are connected to an MCP server. You may call its tools by returning a markdown block like this:\n\`\`\`mcp\n{\n  "tool": "tool_name",\n  "args": { "param": "value" }\n}\n\`\`\`\n\nAvailable tools:\n${JSON.stringify(mcpManager.tools, null, 2)}]`;
+      if (mcpManager) {
+        await mcpManager.checkAutoTriggers(userMessage);
+        if (mcpManager.tools.length > 0) {
+          finalMessage += `\n\n[SYSTEM: You are connected to an MCP server. You may call its tools by returning a markdown block like this:\n\`\`\`mcp\n{\n  "serverName": "name_here",\n  "name": "tool_name",\n  "args": { "param": "value" }\n}\n\`\`\`\n\nAvailable tools:\n${JSON.stringify(mcpManager.tools, null, 2)}]`;
+        }
       }
 
       const result = await orchestrate({
@@ -342,10 +355,12 @@ export async function startCommand(): Promise<void> {
         else if (block.language === 'mcp' && mcpManager) {
           try {
             const parsed = JSON.parse(block.content);
-            spinner.start(`Calling MCP tool ${parsed.tool}…`);
-            const mcpRes = await mcpManager.callTool(parsed.tool, parsed.args);
+            const srv = parsed.serverName || 'default';
+            const toolName = parsed.name || parsed.tool;
+            spinner.start(`Calling MCP tool ${toolName} on ${srv}…`);
+            const mcpRes = await mcpManager.callTool(srv, toolName, parsed.args);
             spinner.stop();
-            contextSuffixes.push(`=== MCP Tool Result (${parsed.tool}) ===\n${JSON.stringify(mcpRes, null, 2)}`);
+            contextSuffixes.push(`=== MCP Tool Result (${srv}:${toolName}) ===\n${JSON.stringify(mcpRes, null, 2)}`);
           } catch (e: any) {
             spinner.fail();
             contextSuffixes.push(`=== MCP Tool Error ===\n${e.message}`);
@@ -624,9 +639,11 @@ export async function startCommand(): Promise<void> {
       }
       spinner.start(`Connecting to MCP server: ${parts.join(' ')}…`);
       try {
-        const { MCPClientManager } = await import('../../mcp/mcp-client.js');
-        mcpManager = new MCPClientManager();
-        await mcpManager.connect(parts[0]!, parts.slice(1));
+        if (!mcpManager) {
+          const { MCPClientManager } = await import('../../mcp/mcp-client.js');
+          mcpManager = new MCPClientManager();
+        }
+        await mcpManager.connect('default', parts[0]!, parts.slice(1));
         spinner.succeed(`Connected! Loaded ${mcpManager.tools.length} tools.`);
         mcpManager.tools.forEach(t => printer.dim(`  - ${t.name}: ${t.description}`));
       } catch (e: any) {
