@@ -302,47 +302,58 @@ export async function startCommand(): Promise<void> {
         printer.dim(`⏱ ${printer.elapsed(startMs)}`);
       }
 
-      // ── File edits ───────────────────────────────────────────────────
-      const blocks = parseCodeBlocks(result.response);
+      // ── Sequential Tool Router ───────────────────────────────────────
+      const { parseAllBlocks } = await import('../../utils/markdown-parser.js');
+      const allBlocks = parseAllBlocks(result.response);
+      
       let filesWritten = 0;
-      if (blocks.length > 0) {
-        filesWritten = await generateAndPromptDiff(projectPath!, blocks, rl);
-      }
+      let contextSuffixes: string[] = [];
 
-      // ── Shell commands ───────────────────────────────────────────────
-      const cmdBlocks = parseCommandBlocks(result.response);
-      if (cmdBlocks.length > 0) {
-        const cmdResults = await runCommandBlocks(cmdBlocks, {
-          cwd:       projectPath!,
-          sessionId: session!.id,
-          taskId:    result.taskId,
-          rl,
-        });
-
-        const contextSuffix = formatCommandResultsForContext(cmdResults);
-        if (contextSuffix) {
-          const hasFailures = cmdResults.some(r => r.approved && r.exitCode !== 0);
-          if (hasFailures) {
-            printer.warn('One or more commands failed — asking Laila to review the output…');
-            spinner.start('Thinking…');
-            const followUp = await orchestrate({
-              userMessage: `The following commands ran after your previous response. Please review the output and continue or fix any issues:\n\n${contextSuffix}`,
-              sessionId:   session!.id,
-              projectId,
-              previousTaskId: result.taskId,
-            });
-            spinner.stop();
-            previousTaskId = followUp.taskId;
-            printer.response(followUp.response);
-
-            const followUpBlocks = parseCodeBlocks(followUp.response);
-            if (followUpBlocks.length > 0) {
-              await generateAndPromptDiff(projectPath!, followUpBlocks, rl);
-            }
-          } else {
-            previousTaskId = result.taskId;
+      for (const block of allBlocks) {
+        if (block.language.match(/^(typescript|javascript|python|css|html|json|yaml|md|ts|js|jsx|tsx)$/)) {
+          const fileBlocks = parseCodeBlocks(block.raw);
+          if (fileBlocks.length > 0) {
+            filesWritten += await generateAndPromptDiff(projectPath!, fileBlocks, rl);
+          }
+        } 
+        else if (['cmd', 'bash', 'sh'].includes(block.language)) {
+          const cmdBlocks = parseCommandBlocks(block.raw);
+          if (cmdBlocks.length > 0) {
+            const cmdRes = await runCommandBlocks(cmdBlocks, { cwd: projectPath!, sessionId: session!.id, taskId: result.taskId, rl });
+            const sfx = formatCommandResultsForContext(cmdRes);
+            if (sfx) contextSuffixes.push(sfx);
           }
         }
+        else if (block.language === 'git') {
+          const gitRes = await runGitBlocks(block.raw, projectPath!);
+          if (gitRes.gitContext) contextSuffixes.push(gitRes.gitContext);
+        }
+        else if (block.language === 'search' || block.language === 'url') {
+          const webRes = await runWebBlocks(block.raw);
+          if (webRes.webContext) contextSuffixes.push(webRes.webContext);
+        }
+      }
+
+      if (contextSuffixes.length > 0) {
+        printer.warn('Tools executed. Asking Laila to process the output…');
+        spinner.start('Thinking…');
+        const followUp = await orchestrate({
+          userMessage: `The following tools ran after your previous response. Review the output and continue:\n\n${contextSuffixes.join('\n\n')}`,
+          sessionId: session!.id,
+          projectId,
+          previousTaskId: result.taskId,
+        });
+        spinner.stop();
+        previousTaskId = followUp.taskId;
+        printer.response(followUp.response);
+        
+        // Very basic recursion for just files if the follow-up generated files directly
+        const followUpBlocks = parseCodeBlocks(followUp.response);
+        if (followUpBlocks.length > 0) {
+          filesWritten += await generateAndPromptDiff(projectPath!, followUpBlocks, rl);
+        }
+      } else {
+        previousTaskId = result.taskId;
       }
 
       // ── Validation ───────────────────────────────────────────────────

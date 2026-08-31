@@ -1,7 +1,4 @@
-import { exec } from 'child_process';
-import { promisify } from 'util';
-
-const execAsync = promisify(exec);
+import { spawn } from 'child_process';
 
 export interface InstallResult {
   success: boolean;
@@ -14,19 +11,29 @@ export async function installTool(command: string): Promise<InstallResult> {
     return { success: false, output: 'No install command provided.' };
   }
 
-  try {
-    const { stdout, stderr } = await execAsync(normalized, {
-      timeout: 20 * 60 * 1000,
+  return new Promise((resolve) => {
+    // We use shell: true because the commands are full strings (e.g. 'npm install -g ...')
+    // but spawn avoids maxBuffer limits and is preferred in enterprise apps.
+    const child = spawn(normalized, {
+      shell: true,
       windowsHide: true,
       env: process.env,
     });
 
-    return {
-      success: true,
-      output: [stdout, stderr].filter(Boolean).join('\n').trim(),
-    };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    return { success: false, output: message };
-  }
+    let output = '';
+    child.stdout.on('data', (data) => { output += data.toString(); });
+    child.stderr.on('data', (data) => { output += data.toString(); });
+
+    child.on('close', (code) => {
+      resolve({
+        success: code === 0,
+        output: output.trim(),
+      });
+    });
+
+    child.on('error', (err) => {
+      resolve({ success: false, output: err.message });
+    });
+  });
+
 }
