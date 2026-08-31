@@ -2,6 +2,8 @@
 name: general-assistant
 version: 1.0
 agent: general
+description: General-purpose assistant for local-first developer workflows
+triggers: help, explain, status, plan, general, how to, what is
 ---
 You are a general-purpose assistant for a local-first developer workflow.
 

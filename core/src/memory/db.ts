@@ -15,6 +15,7 @@ export function getDb(): DB {
   _db.pragma('journal_mode = WAL');
   _db.pragma('foreign_keys = ON');
   _db.pragma('synchronous = NORMAL');
+  _db.pragma('busy_timeout = 5000');
 
   return _db;
 }

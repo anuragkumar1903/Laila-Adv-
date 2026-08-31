@@ -1,6 +1,10 @@
-import type { AgentContext, OllamaMessage, ProjectIndex, RelevantFile } from '../types.js';
-import { MAX_CONTEXT_CHARS } from '../config.js';
+import type { AgentContext, ProjectIndex, RelevantFile } from '../types.js';
+import type { LLMMessage } from '../llm/providers/base.js';
+import { getContextLimit } from './provider-factory.js';
 import { LAILA_IDENTITY } from './identity.js';
+
+// Approximate chars-per-message overhead for role labels in the API payload
+const MESSAGE_OVERHEAD = 20;
 
 /**
  * Render a compact, human-readable summary of a {@link ProjectIndex}.
@@ -68,15 +72,24 @@ function formatRelevantFiles(files: RelevantFile[]): string {
 }
 
 /**
- * Build the full message array for Ollama from an agent context.
- * Enforces MAX_CONTEXT_CHARS budget before appending files.
+ * Build the full message array for the LLM from an agent context.
+ *
+ * - Uses the active provider's context window limit (via getContextLimit())
+ *   instead of a hardcoded constant, so cloud models with large windows are
+ *   not artificially capped to the local-model budget.
+ * - Applies a per-message history budget: history messages are included
+ *   newest-first until they would consume more than 30% of the total budget.
+ * - Files block is trimmed last — it fills whatever remains after all other
+ *   sections have been accounted for.
  */
-export function buildMessages(ctx: AgentContext): OllamaMessage[] {
-  const messages: OllamaMessage[] = [];
+export async function buildMessages(ctx: AgentContext): Promise<LLMMessage[]> {
+  const MAX_CONTEXT_CHARS = await getContextLimit();
+  // History may consume at most 30% of the total budget
+  const MAX_HISTORY_CHARS = Math.floor(MAX_CONTEXT_CHARS * 0.30);
+
+  const messages: LLMMessage[] = [];
 
   // Identity + skill merged into one system message.
-  // Small local models (qwen, llama) only reliably honour the LAST system message
-  // when multiple are sent — merging ensures identity is never overridden by skill content.
   messages.push({
     role: 'system',
     content: `${LAILA_IDENTITY}\n\n---\n\n${ctx.skill}`,
@@ -121,23 +134,35 @@ export function buildMessages(ctx: AgentContext): OllamaMessage[] {
     });
   }
 
-  // History (skip system messages from history — already injected above)
+  // ── History budget check ────────────────────────────────────────────────
+  // Include history messages (oldest first) only up to MAX_HISTORY_CHARS.
+  // This prevents 8 long conversation turns from crowding out project context.
+  let historyCharsUsed = 0;
+  const historyToInject: LLMMessage[] = [];
   for (const msg of ctx.history) {
-    if (msg.role !== 'system') {
-      messages.push({ role: msg.role, content: msg.content });
-    }
+    if (msg.role === 'system') continue; // system messages already injected above
+    const msgLen = msg.content.length + MESSAGE_OVERHEAD;
+    if (historyCharsUsed + msgLen > MAX_HISTORY_CHARS) break;
+    historyToInject.push({ role: msg.role, content: msg.content });
+    historyCharsUsed += msgLen;
   }
+  messages.push(...historyToInject);
 
-  // User message + relevant files (budget-aware)
+  // ── User message + relevant files (budget-aware) ────────────────────────
   let userContent = ctx.userMessage;
   const filesBlock = formatRelevantFiles(ctx.relevantFiles);
 
-  const total = messages.reduce((n, m) => n + m.content.length, 0);
-  const budget = MAX_CONTEXT_CHARS - total - ctx.userMessage.length;
+  const systemChars = messages.reduce((n, m) => n + m.content.length + MESSAGE_OVERHEAD, 0);
+  const budget = MAX_CONTEXT_CHARS - systemChars - ctx.userMessage.length - MESSAGE_OVERHEAD;
 
   if (filesBlock && budget > 500) {
-    const trimmed = filesBlock.length > budget ? filesBlock.slice(0, budget) + '\n...(truncated)' : filesBlock;
-    userContent = `${ctx.userMessage}\n${trimmed}`;
+    let trimmedBlock = filesBlock;
+    if (filesBlock.length > budget) {
+      const raw = filesBlock.slice(0, budget);
+      const lastNl = raw.lastIndexOf('\n');
+      trimmedBlock = (lastNl > 0 ? raw.slice(0, lastNl) : raw) + '\n[... context truncated ...]';
+    }
+    userContent = `${ctx.userMessage}\n${trimmedBlock}`;
   }
 
   messages.push({ role: 'user', content: userContent });

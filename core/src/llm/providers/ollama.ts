@@ -38,7 +38,9 @@ export class OllamaProvider implements LLMProvider {
 
   constructor(opts: { host?: string; model?: string; timeoutMs?: number } = {}) {
     this.host      = opts.host      ?? 'http://localhost:11434';
-    this.model     = opts.model     ?? 'qwen2.5-coder:7b';
+    // No hardcoded default model — callers must pass a model or use getDefaultModel()
+    // to dynamically fetch the first available model from the Ollama instance.
+    this.model     = opts.model     ?? '';
     this.timeoutMs = opts.timeoutMs ?? 120_000;
   }
 
@@ -68,6 +70,16 @@ export class OllamaProvider implements LLMProvider {
     } catch { return []; }
   }
 
+  /**
+   * Return the first locally available model name.
+   * Used by provider-factory when no model is configured so the user
+   * doesn't have to hardcode a model name in config.
+   */
+  async getDefaultModel(): Promise<string | null> {
+    const models = await this.listModels();
+    return models[0]?.id ?? null;
+  }
+
   async modelExists(model: string): Promise<boolean> {
     const models = await this.listModels();
     const target = model.toLowerCase();
@@ -78,8 +90,13 @@ export class OllamaProvider implements LLMProvider {
   }
 
   async chat(messages: LLMMessage[], options: ChatOptions = {}): Promise<ChatResponse> {
+    const modelToUse = this.model || await this.getDefaultModel();
+    if (!modelToUse) {
+      throw new LLMError('No models available in Ollama. Pull a model first: ollama pull <model>', this.id);
+    }
+
     const body = {
-      model:   this.model,
+      model:   modelToUse,
       messages,
       stream:  false,
       options: {

@@ -10,9 +10,21 @@ export function bulkUpsertFiles(
     category: FileCategory;
     language: string | null;
     sizeBytes: number;
+    content?: string;
   }>,
 ): void {
   const db = getDb();
+  
+  // 1. Find and delete files that no longer exist on disk
+  const existingPaths = db.prepare('SELECT rel_path FROM project_files WHERE project_id = ?').all(projectId) as { rel_path: string }[];
+  const newPaths = new Set(files.map(f => f.relPath));
+  
+  const toDelete = existingPaths.map(r => r.rel_path).filter(p => !newPaths.has(p));
+  
+  const delStmt = db.prepare('DELETE FROM project_files WHERE project_id = ? AND rel_path = ?');
+  const ftsDelStmt = db.prepare('DELETE FROM project_files_fts WHERE project_id = ? AND rel_path = ?');
+
+  // 2. Prepare upsert statements
   const stmt = db.prepare(`
     INSERT INTO project_files (project_id, rel_path, category, language, size_bytes)
     VALUES (@project_id, @rel_path, @category, @language, @size_bytes)
@@ -22,7 +34,20 @@ export function bulkUpsertFiles(
       size_bytes=excluded.size_bytes,
       last_indexed=unixepoch()
   `);
+
+  const ftsStmt = db.prepare(`
+    INSERT INTO project_files_fts (project_id, rel_path, category, content)
+    VALUES (@project_id, @rel_path, @category, @content)
+  `);
+
   const run = db.transaction(() => {
+    // Clean up deleted files
+    for (const relPath of toDelete) {
+      delStmt.run(projectId, relPath);
+      ftsDelStmt.run(projectId, relPath);
+    }
+
+    // Upsert existing files
     for (const f of files) {
       stmt.run({
         project_id: projectId,
@@ -31,6 +56,17 @@ export function bulkUpsertFiles(
         language: f.language,
         size_bytes: f.sizeBytes,
       });
+
+      // Only update FTS5 if we actually read the content (file changed or is new)
+      if (f.content) {
+        ftsDelStmt.run(projectId, f.relPath); // FTS5 doesn't support ON CONFLICT DO UPDATE cleanly with UNINDEXED columns
+        ftsStmt.run({
+          project_id: projectId,
+          rel_path: f.relPath,
+          category: f.category,
+          content: f.content,
+        });
+      }
     }
   });
   run();

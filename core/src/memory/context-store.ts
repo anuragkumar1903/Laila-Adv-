@@ -2,7 +2,7 @@ import path from 'path';
 import { searchFiles, findByProject } from './repositories/indexes.js';
 import { readFileLines } from '../utils/fs-utils.js';
 import { MAX_FILE_LINES, MAX_RELEVANT_FILES } from '../config.js';
-import type { RelevantFile } from '../types.js';
+import type { RelevantFile, FileCategory } from '../types.js';
 
 const STOP_WORDS = new Set([
   'the','a','an','is','are','was','be','been','do','does','did',
@@ -55,9 +55,31 @@ export async function getRelevantFiles(
 ): Promise<RelevantFile[]> {
   const keywords = extractKeywords(query);
 
-  const candidates = keywords.length > 0
-    ? searchFiles(projectId, keywords).slice(0, maxFiles)
-    : findByProject(projectId).slice(0, maxFiles);
+  const db = (await import('./db.js')).getDb();
+  let candidates: Array<{ rel_path: string; category: FileCategory }> = [];
+
+  if (keywords.length > 0) {
+    // Generate an FTS MATCH query: e.g. "user" OR "login"
+    // Using OR means any match will rank the file, but BM25 will score files with multiple matches higher.
+    const ftsQuery = keywords.map(kw => `"${kw}"`).join(' OR ');
+    
+    candidates = db.prepare(`
+      SELECT rel_path, category 
+      FROM project_files_fts 
+      WHERE project_id = ? AND project_files_fts MATCH ? 
+      ORDER BY bm25(project_files_fts) 
+      LIMIT ?
+    `).all(projectId, ftsQuery, maxFiles) as any;
+  } else {
+    // Fallback if no keywords: grab the most recently modified files
+    candidates = db.prepare(`
+      SELECT rel_path, category 
+      FROM project_files 
+      WHERE project_id = ? 
+      ORDER BY last_indexed DESC 
+      LIMIT ?
+    `).all(projectId, maxFiles) as any;
+  }
 
   const results: RelevantFile[] = [];
 

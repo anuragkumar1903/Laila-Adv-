@@ -55,14 +55,25 @@ export function findRecent(limit = 15): Task[] {
 
 // ── Messages ──────────────────────────────────────────────────────────────
 
+/** Maximum number of characters stored in a single message row.
+ *  Prevents a runaway LLM response or enormous shell stdout from filling
+ *  the database. Content exceeding this limit is truncated with a notice. */
+const MAX_MESSAGE_CHARS = 100_000; // ~25k tokens — generous but bounded
+
 export function addMessage(taskId: number, role: Message['role'], content: string): Message {
+  const safe = content.length > MAX_MESSAGE_CHARS
+    ? content.slice(0, MAX_MESSAGE_CHARS) + '\n\n[... message truncated — exceeded 100 000 char storage limit ...]'
+    : content;
+
   return getDb().prepare(
     'INSERT INTO messages (task_id, role, content) VALUES (?, ?, ?) RETURNING *'
-  ).get(taskId, role, content) as Message;
+  ).get(taskId, role, safe) as Message;
 }
 
-export function getMessages(taskId: number): Message[] {
-  return getDb().prepare(
-    'SELECT * FROM messages WHERE task_id=? ORDER BY created_at ASC'
-  ).all(taskId) as Message[];
+export function getMessages(taskId: number, limit?: number): Message[] {
+  const sql = limit
+    ? 'SELECT * FROM messages WHERE task_id=? ORDER BY created_at ASC LIMIT ?'
+    : 'SELECT * FROM messages WHERE task_id=? ORDER BY created_at ASC';
+  const args = limit ? [taskId, limit] : [taskId];
+  return getDb().prepare(sql).all(...args) as Message[];
 }

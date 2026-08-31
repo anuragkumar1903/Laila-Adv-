@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir, access, stat } from 'fs/promises';
+import { readFile, writeFile, mkdir, access, stat, rename } from 'fs/promises';
 import path from 'path';
 
 /**
@@ -69,7 +69,10 @@ export async function readJSON<T = unknown>(filePath: string): Promise<T | null>
  */
 export async function writeJSON(filePath: string, data: unknown): Promise<void> {
   await ensureDir(path.dirname(filePath));
-  await writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8');
+  // Atomic write: write to .tmp then rename — prevents corrupt files on crash
+  const tmpPath = filePath + '.tmp';
+  await writeFile(tmpPath, JSON.stringify(data, null, 2), 'utf-8');
+  await rename(tmpPath, filePath);
 }
 
 /**

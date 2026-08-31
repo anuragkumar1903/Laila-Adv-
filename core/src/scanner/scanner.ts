@@ -28,6 +28,20 @@ function hashContent(content: string): string {
   return createHash('sha256').update(content, 'utf8').digest('hex');
 }
 
+// Concurrency limiter — avoids EMFILE errors on large repos
+async function mapConcurrent<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const results: R[] = [];
+  let idx = 0;
+  async function worker() {
+    while (idx < items.length) {
+      const i = idx++;
+      results[i] = await fn(items[i]!);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return results;
+}
+
 function inferNextRoute(relPath: string): RouteHit | null {
   const normalized = relPath.replace(/\\/g, '/');
   const match = normalized.match(/(^|\/)(pages|app)\/(.+)\.(ts|tsx|js|jsx)$/i);
@@ -91,7 +105,6 @@ async function extractRoutes(projectRoot: string, files: Array<{ relPath: string
  */
 export async function scanProject(projectPath: string, previousIndex?: ProjectIndex | null): Promise<ScanResult> {
   const absPath = path.resolve(projectPath);
-  const fileRecords = [] as Array<{ path: string; role: string; language: string | null; hash: string }>;
 
   // ── Build ignore rules ──────────────────────────────────────────────────
   const ig = ignoreLib();
@@ -104,7 +117,7 @@ export async function scanProject(projectPath: string, previousIndex?: ProjectIn
   const rawPaths = await glob('**/*', {
     cwd: absPath,
     nodir: true,
-    dot: false,
+    dot: true,
     follow: false,
   });
 
@@ -118,16 +131,20 @@ export async function scanProject(projectPath: string, previousIndex?: ProjectIn
   const scannedAtMs = previousIndex ? new Date(previousIndex.scannedAt).getTime() : 0;
   let reusedCount = 0;
 
-  const files: ScannedFile[] = await Promise.all(
-    filteredPaths.map(async (relPath): Promise<ScannedFile> => {
+  const files: ScannedFile[] = await mapConcurrent(
+    filteredPaths,
+    64,
+    async (relPath): Promise<ScannedFile> => {
       const absFilePath = path.join(absPath, relPath);
       const stat = await getFileStat(absFilePath);
       
       const prev = prevFiles.get(relPath);
       const mtimeMs = stat ? stat.mtimeMs : Date.now();
-      
-      // If file hasn't changed since last scan and we have its previous metadata, reuse it!
-      if (prev && mtimeMs <= scannedAtMs && stat) {
+
+      // Reuse previous metadata if the file was last modified at least 1 second
+      // before the previous scan completed. The 1s buffer guards against files
+      // that were written during the scan itself having their old metadata reused.
+      if (prev && stat && mtimeMs < scannedAtMs - 1_000) {
         reusedCount++;
         return {
           relPath,
@@ -154,8 +171,9 @@ export async function scanProject(projectPath: string, previousIndex?: ProjectIn
         sizeBytes: stat ? stat.size : 0,
         hash: content ? hashContent(content) : '',
         symbols,
+        content: content ?? undefined,
       };
-    })
+    }
   );
 
   // ── Detect metadata ─────────────────────────────────────────────────────

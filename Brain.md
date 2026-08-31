@@ -522,12 +522,45 @@ Never claim success without running real validation commands in the project envi
 
 ## Next Steps and Roadmap
 
-- Phase 2: Expand scanner to recursive indexing and role detection.
-- Phase 3: Implement full SQLite layer and migrations.
-- Phase 4: Implement orchestrator intent detection and Ollama wrapper.
-- Phase 5: Implement agents with patch generation and review loops.
-- Phase 6: Harden validation pipeline and add test coverage.
-- Phase 7: Optional N8N integration for notifications and scheduled scans.
+> **Current Goal**: Evolve Laila into a fully agentic, Kiro-class local AI assistant — retaining local-first, offline principles while matching the tool-use depth and context intelligence of cloud-based assistants.
+
+### Phase 1 — File Tools (Highest Impact) ✅ In Progress
+- Implement dedicated `file-tool.ts` with read, write, create, and insert operations.
+- Expose file tools to all agents so they can read/modify files directly without relying on shell commands.
+- Safety: never overwrite files without showing a diff and requiring user confirmation.
+
+### Phase 2 — Shell Tool: `laila` Binary Allowed ✅ Done
+- Added `laila` to the `ALLOWED_PREFIXES` list in `shell-tool.ts` so Laila can invoke its own CLI sub-commands.
+
+### Phase 3 — Auto Skill Selection (Context-Aware)
+- Improve `skill-loader.ts` to score and rank skills based on task keywords, detected frameworks, and agent role.
+- Auto-inject the top N most relevant skills rather than loading all or a fixed set.
+- Add Redis, RAG, and remaining Kiro-parity skill files to `skills/` directory.
+
+### Phase 4 — Multi-Step Task Planning
+- Add a `planner` module in `orchestrator/` that breaks complex tasks into ordered sub-steps.
+- Each sub-step runs as an independent agent call with its own context and skill injection.
+- Present the plan to the user before execution; allow approval or edit.
+
+### Phase 5 — RAG / Semantic Context Retrieval
+- Replace keyword-based file retrieval with embedding-based semantic search.
+- Use a lightweight local embedding model (e.g., `nomic-embed-text` via Ollama).
+- Store embeddings in SQLite (via `sqlite-vec` extension) to keep local-first guarantee.
+- Retrieve top-K semantically relevant file snippets per task.
+
+### Phase 6 — Sub-Agent / Pipeline System
+- Allow the orchestrator to spawn and coordinate multiple agents in a DAG pipeline.
+- Example: Researcher → Coder → Reviewer → Writer in a single task run.
+- Persist inter-agent messages and results in SQLite for full auditability.
+
+### Phase 7 — Validation & Test Hardening
+- Add unit tests for scanner heuristics, intent detection, and skill loader.
+- Add integration tests that run the full validation pipeline on small sample projects.
+- Enforce validation before any file write is accepted.
+
+### Phase 8 — Optional N8N Integration
+- N8N integration for notifications and scheduled scans (task completed, validation failed).
+- N8N is not the brain; it only receives events and triggers external notifications.
 
 ---
 

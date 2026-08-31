@@ -1,5 +1,5 @@
 import path from 'path';
-import { readFile, writeFile, mkdir } from 'fs/promises';
+import { readFile, writeFile, mkdir, rename as fsRename } from 'fs/promises';
 import { createTwoFilesPatch } from 'diff';
 import chalk from 'chalk';
 import readline from 'readline';
@@ -17,8 +17,12 @@ export function parseCodeBlocks(response: string): ParsedBlock[] {
 
   while ((match = regex.exec(response)) !== null) {
     if (match[1] && match[2]) {
+      const fileName = match[1].trim();
+      if (!/^[\w./\-]+$/.test(fileName)) {
+        continue; // skip blocks with suspicious filenames
+      }
       blocks.push({
-        file: match[1].trim(),
+        file: fileName,
         content: match[2],
       });
     }
@@ -33,19 +37,22 @@ export function parseCodeBlocks(response: string): ParsedBlock[] {
  * Otherwise open a temporary interface (standalone use).
  */
 function promptConfirm(message: string, rl?: RLInterface): Promise<boolean> {
+  // Require explicit 'y' or 'yes'; blank/enter defaults to NO
+  const isYes = (answer: string) => ['y', 'yes'].includes(answer.trim().toLowerCase());
+
   if (rl) {
     return new Promise(resolve => {
-      rl.question(chalk.magenta(`\n  ${message} [Y/n] `), answer => {
-        resolve(answer.trim().toLowerCase() !== 'n');
+      rl.question(chalk.magenta(`\n  ${message} [y/N] `), answer => {
+        resolve(isYes(answer));
       });
     });
   }
 
   const tempRl = readline.createInterface({ input: process.stdin, output: process.stdout });
   return new Promise(resolve => {
-    tempRl.question(chalk.magenta(`\n  ${message} [Y/n] `), answer => {
+    tempRl.question(chalk.magenta(`\n  ${message} [y/N] `), answer => {
       tempRl.close();
-      resolve(answer.trim().toLowerCase() !== 'n');
+      resolve(isYes(answer));
     });
   });
 }
@@ -55,6 +62,14 @@ export async function generateAndPromptDiff(projectPath: string, blocks: ParsedB
 
   for (const block of blocks) {
     const absPath = path.resolve(projectPath, block.file);
+
+    // ── Path traversal guard ─────────────────────────────────────────────
+    const relCheck = path.relative(projectPath, absPath);
+    if (relCheck.startsWith('..') || path.isAbsolute(relCheck)) {
+      console.log(chalk.red(`  ✖ Skipping ${block.file} — path escapes project root`));
+      continue;
+    }
+
     let oldContent = '';
     
     try {
@@ -96,7 +111,10 @@ export async function generateAndPromptDiff(projectPath: string, blocks: ParsedB
       try {
         // Ensure parent directory exists (handles new files in new subdirectories)
         await mkdir(path.dirname(absPath), { recursive: true });
-        await writeFile(absPath, block.content, 'utf8');
+        // Atomic write: write to temp file then rename — prevents partial writes on crash
+        const tmpPath = absPath + '.laila.tmp';
+        await writeFile(tmpPath, block.content, 'utf8');
+        await fsRename(tmpPath, absPath);
         console.log(chalk.green(`  ✔ Saved ${block.file}`));
         filesWritten++;
       } catch (err) {

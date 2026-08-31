@@ -130,7 +130,7 @@ async function setupLMStudio(models: ModelInfo[], baseUrl: string): Promise<Prov
 async function setupCloudProvider(
   id: ProviderConfig['provider'],
   displayName: string,
-  models: ModelInfo[],
+  presetModels: ModelInfo[],
   apiKeyHint: string,
   defaultModelIdx = 0,
 ): Promise<ProviderConfig> {
@@ -139,11 +139,14 @@ async function setupCloudProvider(
   const apiKey = await askSecret(`Enter your ${displayName} API key (${apiKeyHint})`);
   if (!apiKey) throw new Error('API key cannot be empty.');
 
-  // Validate key by doing a quick health check
+  // Build a temporary provider to validate the key and fetch live models
+  const testModel     = presetModels[defaultModelIdx]?.id ?? '';
+  const testProvider  = buildProvider({ provider: id, model: testModel, apiKey });
+
+  // Validate key
   process.stdout.write(chalk.dim('  Validating key…'));
   let valid = false;
   try {
-    const testProvider = buildProvider({ provider: id, model: models[defaultModelIdx]?.id ?? '', apiKey });
     valid = await testProvider.healthCheck();
   } catch { /* treat as invalid */ }
 
@@ -153,7 +156,22 @@ async function setupCloudProvider(
     console.log(chalk.yellow(' ⚠  Could not validate key (offline or wrong key). Continuing anyway.'));
   }
 
-  const model = await pickModel(models, defaultModelIdx);
+  // Fetch live model list — always up to date, presets are only the fallback
+  let models = presetModels;
+  process.stdout.write(chalk.dim('  Fetching available models…'));
+  try {
+    const live = await testProvider.listModels();
+    if (live.length > 0) {
+      models = live;
+      console.log(chalk.green(` ✔  ${live.length} model(s) found`));
+    } else {
+      console.log(chalk.dim(' using presets'));
+    }
+  } catch {
+    console.log(chalk.dim(' using presets'));
+  }
+
+  const model = await pickModel(models, Math.min(defaultModelIdx, models.length - 1));
   return { provider: id, model: model.id, apiKey };
 }
 
@@ -544,7 +562,7 @@ async function _switchProviderImpl(
 async function _switchCloud(
   id: ProviderConfig['provider'],
   displayName: string,
-  models: ModelInfo[],
+  presetModels: ModelInfo[],
   keyHint: string,
   defaultModelIdx: number,
 ): Promise<ProviderConfig | null> {
@@ -561,21 +579,34 @@ async function _switchCloud(
     console.log(chalk.dim(`  No API key found for ${displayName}.`));
     console.log(chalk.dim(`  Get one at: ${keyHint}`));
     console.log('');
-    apiKey = await _promptApiKeyWithRetry(displayName, id, models[defaultModelIdx]?.id ?? '', 3);
+    apiKey = await _promptApiKeyWithRetry(displayName, id, presetModels[defaultModelIdx]?.id ?? '', 3);
     if (!apiKey) return null; // user cancelled
   } else {
     console.log(chalk.dim(`  Using saved API key for ${displayName}.`));
   }
 
-  // Fetch live models (may include new ones since last update)
-  let liveModels = models;
+  // Always fetch live models after key is confirmed — picks up new releases automatically
+  let liveModels = presetModels;
+  process.stdout.write(chalk.dim('  Fetching available models…'));
   try {
-    const tempProvider = buildProvider({ provider: id, model: models[defaultModelIdx]?.id ?? '', apiKey });
+    const tempProvider = buildProvider({
+      provider: id,
+      model:    presetModels[defaultModelIdx]?.id ?? '',
+      apiKey,
+    });
     const fetched = await tempProvider.listModels();
-    if (fetched.length > 0) liveModels = fetched;
-  } catch { /* use preset */ }
+    if (fetched.length > 0) {
+      liveModels = fetched;
+      console.log(chalk.green(` ✔  ${fetched.length} model(s)`));
+    } else {
+      console.log(chalk.dim(' using presets'));
+    }
+  } catch {
+    console.log(chalk.dim(' using presets'));
+  }
 
-  const model = await pickModel(liveModels, defaultModelIdx);
+  const safeDefaultIdx = Math.min(defaultModelIdx, liveModels.length - 1);
+  const model = await pickModel(liveModels, safeDefaultIdx);
   return { provider: id, model: model.id, apiKey };
 }
 

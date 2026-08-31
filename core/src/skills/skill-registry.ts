@@ -34,10 +34,15 @@ async function loadDiscoveredSkill(agent: AgentName): Promise<Skill | null> {
   return loadSkill(match.path);
 }
 
-export async function getSkillForAgent(agent: AgentName, query?: string): Promise<Skill> {
+export async function getSkillForAgent(
+  agent: AgentName,
+  query?: string,
+  framework?: string | null,
+  languages?: string[],
+): Promise<Skill> {
   if (query) {
     const { findBestSkillForQuery } = await import('./skill-loader.js');
-    const dynamicSkill = await findBestSkillForQuery(query, agent);
+    const dynamicSkill = await findBestSkillForQuery(query, agent, framework, languages);
     if (dynamicSkill) {
       return dynamicSkill;
     }

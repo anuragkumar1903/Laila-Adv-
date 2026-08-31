@@ -22,13 +22,25 @@ export function findLatestSession(): Session | null {
 }
 
 /**
- * Return the most recent session that has not yet been ended.
+ * Return the most recent session that has not yet been ended and was started
+ * within the last 24 hours. Sessions older than 24 h are considered stale
+ * (e.g. from a crashed or killed process) and are excluded.
  * Used at startup to offer session resume.
  */
 export function findLatestActiveSession(): Session | null {
   return (getDb().prepare(
-    'SELECT * FROM sessions WHERE ended_at IS NULL ORDER BY started_at DESC LIMIT 1'
+    'SELECT * FROM sessions WHERE ended_at IS NULL AND started_at > unixepoch() - 86400 ORDER BY started_at DESC LIMIT 1'
   ).get() as Session | undefined) ?? null;
+}
+
+/**
+ * Mark all sessions older than 24 hours that were never explicitly ended as
+ * ended. Call this once at startup before attempting to resume a session.
+ */
+export function cleanupStaleSessions(): void {
+  getDb().prepare(
+    'UPDATE sessions SET ended_at = unixepoch() WHERE ended_at IS NULL AND started_at <= unixepoch() - 86400'
+  ).run();
 }
 
 /**

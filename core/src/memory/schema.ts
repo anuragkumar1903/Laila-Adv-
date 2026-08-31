@@ -30,6 +30,16 @@ export function initSchema(): void {
       UNIQUE(project_id, rel_path)
     );
 
+    -- ── FTS5 Semantic Search Index (Phase 5) ──────────────────────────────
+    CREATE VIRTUAL TABLE IF NOT EXISTS project_files_fts USING fts5(
+      project_id UNINDEXED, 
+      rel_path, 
+      category, 
+      content,
+      tokenize='unicode61 remove_diacritics 2'
+    );
+
+
     -- ── Sessions ──────────────────────────────────────────────────────────
     CREATE TABLE IF NOT EXISTS sessions (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,

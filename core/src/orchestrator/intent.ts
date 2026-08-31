@@ -1,4 +1,5 @@
 import type { TaskIntent, AgentName } from '../types.js';
+import { logger } from '../utils/logger.js';
 
 // ── Keyword maps ───────────────────────────────────────────────────────────
 
@@ -48,8 +49,15 @@ function countMatches(text: string, keywords: string[]): number {
 /**
  * Detect the user's intent from their raw input using keyword scoring.
  * Fast — no LLM call required.
+ *
+ * Tie-breaking: when multiple intents score equally, the priority order
+ * code > review > research > write > general is used so that actionable
+ * intents are preferred over explanatory ones.
  */
 export function detectIntent(input: string): { intent: TaskIntent; agent: AgentName } {
+  // Priority used when scores tie (lower index = higher priority)
+  const PRIORITY: TaskIntent[] = ['code', 'review', 'research', 'write', 'general'];
+
   const scores: Record<TaskIntent, number> = {
     code:     countMatches(input, CODE_KEYWORDS),
     review:   countMatches(input, REVIEW_KEYWORDS),
@@ -58,11 +66,25 @@ export function detectIntent(input: string): { intent: TaskIntent; agent: AgentN
     general:  0,
   };
 
-  const best = (Object.entries(scores) as Array<[TaskIntent, number]>)
+  const candidates = (Object.entries(scores) as Array<[TaskIntent, number]>)
     .filter(([, s]) => s > 0)
-    .sort((a, b) => b[1] - a[1])[0];
+    .sort((a, b) => {
+      // Primary sort: descending score
+      if (b[1] !== a[1]) return b[1] - a[1];
+      // Secondary sort: priority index ascending (lower = higher priority)
+      return PRIORITY.indexOf(a[0]) - PRIORITY.indexOf(b[0]);
+    });
 
-  const intent: TaskIntent = best?.[0] ?? 'general';
+  if (candidates.length > 1 && candidates[0]![1] === candidates[1]![1]) {
+    // Log tie even after priority resolution for visibility
+    logger.debug?.(
+      `Intent tie at score ${candidates[0]![1]}: ` +
+      candidates.filter(([, s]) => s === candidates[0]![1]).map(([i]) => i).join(', ') +
+      ` — resolved to "${candidates[0]![0]}" by priority`,
+    );
+  }
+
+  const intent: TaskIntent = candidates[0]?.[0] ?? 'general';
 
   const agentMap: Record<TaskIntent, AgentName> = {
     code:     'coder',
@@ -71,6 +93,8 @@ export function detectIntent(input: string): { intent: TaskIntent; agent: AgentN
     write:    'writer',
     general:  'general',
   };
+
+  logger.debug?.(`Intent detected: ${intent} (scores: ${JSON.stringify(scores)})`);
 
   return { intent, agent: agentMap[intent] };
 }

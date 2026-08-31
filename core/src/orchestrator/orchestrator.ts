@@ -1,27 +1,19 @@
 import { detectIntent } from './intent.js';
 import { buildContext } from './context.js';
 import { createTask, completeTask, addMessage } from '../memory/repositories/tasks.js';
-import { CoderAgent } from '../agents/coder-agent.js';
-import { ReviewerAgent } from '../agents/reviewer-agent.js';
-import { ResearchAgent } from '../agents/research-agent.js';
-import { WriterAgent } from '../agents/writer-agent.js';
-import { GeneralAgent } from '../agents/general-agent.js';
+import { cleanupStaleSessions } from '../memory/repositories/sessions.js';
+import { buildMessages } from '../llm/prompt-builder.js';
+import { chat } from '../llm/provider-factory.js';
 import { notify } from '../n8n/n8n-client.js';
 import { logger } from '../utils/logger.js';
 import type { AgentName, AgentContext, AgentResponse } from '../types.js';
 
-type BaseAgent = {
-  run(ctx: AgentContext): Promise<AgentResponse>;
-};
-
-function makeAgent(name: AgentName): BaseAgent {
-  switch (name) {
-    case 'coder':      return new CoderAgent();
-    case 'reviewer':   return new ReviewerAgent();
-    case 'researcher': return new ResearchAgent();
-    case 'writer':     return new WriterAgent();
-    default:           return new GeneralAgent();
-  }
+async function runAgent(name: AgentName, ctx: AgentContext): Promise<AgentResponse> {
+  const messages = await buildMessages(ctx);
+  // Only coder and reviewer need strict determinism
+  const temperature = (name === 'coder' || name === 'reviewer') ? 0.1 : 0.7;
+  const result = await chat(messages, { temperature });
+  return { content: result.content, tokensUsed: result.tokensUsed };
 }
 
 export interface OrchestratorInput {
@@ -41,6 +33,11 @@ export interface OrchestratorResult {
 
 export async function run(input: OrchestratorInput): Promise<OrchestratorResult> {
   const { userMessage, sessionId, projectId, previousTaskId } = input;
+
+  // Clean up stale sessions from previous crashed/killed processes
+  try { cleanupStaleSessions(); } catch (err) {
+    logger.debug?.('cleanupStaleSessions failed (non-fatal): ' + String(err));
+  }
 
   // 1. Detect intent
   const { intent, agent } = detectIntent(userMessage);
@@ -63,8 +60,7 @@ export async function run(input: OrchestratorInput): Promise<OrchestratorResult>
 
   try {
     // 5. Run agent
-    const agentInstance = makeAgent(agent);
-    const agentResponse = await agentInstance.run(ctx);
+    const agentResponse = await runAgent(agent, ctx);
 
     // 6. Persist assistant response
     addMessage(task.id, 'assistant', agentResponse.content);
@@ -77,7 +73,7 @@ export async function run(input: OrchestratorInput): Promise<OrchestratorResult>
       event: 'task.completed',
       payload: { taskId: task.id, intent, agent, success: true },
       timestamp: new Date().toISOString(),
-    }).catch(() => { /* N8N is optional */ });
+    }).catch(err => logger.debug?.('N8N notify failed: ' + String(err)));
 
     return {
       taskId: task.id,

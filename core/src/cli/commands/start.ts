@@ -21,6 +21,9 @@ import { runToolChecks } from '../../system/tool-checks.js';
 import { installTool } from '../../system/installer.js';
 import { parseCodeBlocks, generateAndPromptDiff } from '../../editor/diff-editor.js';
 import { parseCommandBlocks, runCommandBlocks, formatCommandResultsForContext } from '../../tools/shell-tool.js';
+import { runGitBlocks } from '../../tools/git-tool.js';
+import { runWebBlocks } from '../../tools/web-tool.js';
+import { triggerN8nWebhook } from '../../utils/n8n-webhook.js';
 import { SKILLS_DIR } from '../../config.js';
 
 async function promptLine(prompt: string): Promise<string> {
@@ -354,12 +357,41 @@ export async function startCommand(): Promise<void> {
           printer.validationReport(validation.results);
           if (!validation.success) {
             printer.warn('Validation failed — see details above.');
+            void triggerN8nWebhook({
+              event: 'validation_failed',
+              projectId,
+              taskId: previousTaskId,
+              message: 'Code validation failed after file edits',
+              details: validation.results,
+            });
+          } else {
+            void triggerN8nWebhook({
+              event: 'task_completed',
+              projectId,
+              taskId: previousTaskId,
+              message: 'Task completed and validated successfully',
+            });
           }
         }
+      } else {
+        // If no files were written, task is still done
+        void triggerN8nWebhook({
+          event: 'task_completed',
+          projectId,
+          taskId: previousTaskId,
+          message: 'Task completed (no file edits)',
+        });
       }
     } catch (err: unknown) {
       spinner.fail();
-      printer.error(err instanceof Error ? err.message : String(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      printer.error(msg);
+      void triggerN8nWebhook({
+        event: 'task_failed',
+        projectId,
+        taskId: previousTaskId,
+        message: msg,
+      });
     }
   }
 
@@ -649,6 +681,67 @@ export async function startCommand(): Promise<void> {
         printer.error(`Failed to switch model: ${err instanceof Error ? err.message : String(err)}`);
       }
 
+      rl.resume(); rl.prompt(); return;
+    }
+    // ── /plan <goal> ───────────────────────────────────────────────────────
+    if (normalized.startsWith('/plan ') || normalized.startsWith('.plan ')) {
+      const goal = line.substring(6).trim();
+      if (!goal) { printer.warn('Usage: /plan <goal>'); rl.resume(); rl.prompt(); return; }
+      printer.section(`Planning: ${goal}`);
+      
+      const planRes = await orchestrate({
+        userMessage: `Break this goal into 3-5 independent, sequential tasks: "${goal}". Return ONLY a JSON array of strings representing the tasks. Do not include markdown blocks or any other text.`,
+        sessionId: session.id,
+        projectId,
+      });
+
+      try {
+        let jsonStr = planRes.response;
+        const jsonMatch = planRes.response.match(/```json\n([\s\S]*?)```/) || planRes.response.match(/\[\s*[\s\S]*?\s*\]/);
+        if (jsonMatch) jsonStr = jsonMatch[1] || jsonMatch[0];
+        
+        const tasks = JSON.parse(jsonStr);
+        if (!Array.isArray(tasks)) throw new Error('Not an array');
+        printer.success('Plan generated:');
+        tasks.forEach((t, i) => printer.dim(`  ${i + 1}. ${t}`));
+        printer.blank();
+        const ok = await rlAsk('Queue these steps for execution? [Y/n]: ');
+        if (ok.toLowerCase() !== 'n') {
+          tasks.forEach((t, i) => promptQueue.push(`[Plan Step ${i + 1}/${tasks.length}]: ${t}`));
+          updatePrompt();
+          drainQueue();
+          return; // Don't prompt, queue is running
+        } else {
+          printer.dim('Plan discarded.');
+        }
+      } catch (err: any) {
+        printer.error('Failed to parse plan. Try again or refine the goal.');
+      }
+      rl.resume(); rl.prompt(); return;
+    }
+
+    // ── /pipeline <task> ───────────────────────────────────────────────────
+    if (normalized.startsWith('/pipeline ') || normalized.startsWith('.pipeline ')) {
+      const goal = line.substring(10).trim();
+      if (!goal) { printer.warn('Usage: /pipeline <task>'); rl.resume(); rl.prompt(); return; }
+      
+      printer.section(`Pipeline created for: ${goal}`);
+      printer.dim('  1. Researcher: Investigate and gather context');
+      printer.dim('  2. Coder: Implement the feature');
+      printer.dim('  3. Reviewer: Audit the code');
+      printer.blank();
+
+      const ok = await rlAsk('Start pipeline? [Y/n]: ');
+      if (ok.toLowerCase() !== 'n') {
+        promptQueue.push(`As a researcher, investigate how to implement this task: "${goal}". Summarize the current state of the codebase regarding this feature and outline an implementation plan.`);
+        promptQueue.push(`As a coder, implement the feature based on the previous research: "${goal}". Write the actual code and apply patches.`);
+        promptQueue.push(`As a reviewer, review the code that was just implemented for: "${goal}". Check for security, style, and correctness. If there are issues, fix them.`);
+        updatePrompt();
+        drainQueue();
+        return;
+      } else {
+        printer.dim('Pipeline discarded.');
+      }
       rl.resume(); rl.prompt(); return;
     }
 

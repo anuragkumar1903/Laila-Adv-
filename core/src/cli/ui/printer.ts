@@ -136,7 +136,9 @@ export const printer = {
         ['/clear',     'Clear the screen'],
         ['/exit',      'End the session'],
       ]],
-      ['Queue', [
+      ['Queue & Planning', [
+        ['/plan <goal>', 'Ask Laila to break a task into steps and queue them'],
+        ['/pipeline <task>', 'Run a fixed Researcher -> Coder -> Reviewer pipeline'],
         ['/queue',     'List all pending queued prompts'],
         ['/skip [n]',  'Remove prompt #n from the queue (default: next)'],
         ['/interrupt <text>', 'Push a prompt to the front — runs before anything else'],

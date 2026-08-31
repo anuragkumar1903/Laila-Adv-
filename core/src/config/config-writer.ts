@@ -8,8 +8,7 @@
  * the project's .laila/config.yaml for per-project model switching.
  */
 
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync }       from 'fs';
+import { writeFile, mkdir, chmod } from 'fs/promises';
 import path from 'path';
 import os   from 'os';
 import type { ProviderConfig } from '../llm/providers/base.js';
@@ -18,6 +17,12 @@ import { getGlobalConfigPath, getProjectConfigPath } from './config-loader.js';
 // ─── YAML serializer ──────────────────────────────────────────────────────
 
 function toYaml(config: Partial<ProviderConfig>): string {
+  // Wrap string values in double quotes and escape backslashes and internal
+  // double quotes so that values containing '#' or special chars don't
+  // create invalid YAML (e.g. inline comments).
+  const escape = (v: string) =>
+    '"' + v.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+
   const lines: string[] = [
     '# Laila provider configuration',
     '# Generated automatically — you can edit this file.',
@@ -26,29 +31,41 @@ function toYaml(config: Partial<ProviderConfig>): string {
     '',
   ];
 
-  if (config.provider) lines.push(`provider: ${config.provider}`);
-  if (config.model)    lines.push(`model: ${config.model}`);
-  if (config.baseUrl)  lines.push(`base_url: ${config.baseUrl}`);
-  if (config.apiKey)   lines.push(`api_key: ${config.apiKey}`);
+  if (config.provider) lines.push(`provider: ${escape(config.provider)}`);
+  if (config.model)    lines.push(`model: ${escape(config.model)}`);
+  if (config.baseUrl)  lines.push(`base_url: ${escape(config.baseUrl)}`);
+  if (config.apiKey)   lines.push(`api_key: ${escape(config.apiKey)}`);
 
   return lines.join('\n') + '\n';
 }
 
+// ─── Directory helper ─────────────────────────────────────────────────────
+
+// No existsSync guard needed — mkdir with recursive:true is a no-op when the
+// directory already exists, and the guard introduced a TOCTOU race condition.
 async function ensureDir(dirPath: string): Promise<void> {
-  if (!existsSync(dirPath)) {
-    await mkdir(dirPath, { recursive: true });
-  }
+  await mkdir(dirPath, { recursive: true });
 }
 
 // ─── Save global config ───────────────────────────────────────────────────
 
 /**
- * Save the full config (including API key) to ~/.laila/config.yaml
+ * Save the full config (including API key) to ~/.laila/config.yaml.
+ * After writing, the file is chmod'd to 0o600 (owner read/write only) so
+ * that the API key is not world-readable on POSIX systems.
  */
 export async function saveGlobalConfig(config: Partial<ProviderConfig>): Promise<void> {
   const filePath = getGlobalConfigPath();
   await ensureDir(path.dirname(filePath));
   await writeFile(filePath, toYaml(config), 'utf8');
+
+  // Restrict to owner-only (rw-------).  chmod is best-effort — it may not
+  // work on Windows (FAT32/NTFS ACLs differ), so we swallow the error.
+  try {
+    await chmod(filePath, 0o600);
+  } catch {
+    // chmod may not work on Windows — best effort
+  }
 }
 
 // ─── Save project config ──────────────────────────────────────────────────

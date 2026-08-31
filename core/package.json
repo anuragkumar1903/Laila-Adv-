@@ -12,7 +12,7 @@
     "build": "tsc",
     "start": "node dist/cli/index.js",
     "lint": "tsc --noEmit",
-    "test": "echo \"No tests configured\" && exit 0"
+    "test": "node --import tsx --test tests/**/*.test.ts"
   },
   "keywords": [
     "ai",

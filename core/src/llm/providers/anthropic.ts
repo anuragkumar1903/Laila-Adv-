@@ -72,8 +72,7 @@ export class AnthropicProvider implements LLMProvider {
         headers: this._headers(),
         signal:  AbortSignal.timeout(5_000),
       });
-      // 200 or 404 both mean the server is reachable and the key is valid-ish
-      return res.status !== 401 && res.status !== 403;
+      return res.status >= 200 && res.status < 300;
     } catch { return false; }
   }
 
@@ -134,35 +133,47 @@ export class AnthropicProvider implements LLMProvider {
 
     const body: AnthropicRequest = {
       model:      this.model,
-      max_tokens: options.maxTokens ?? 4096,
+      max_tokens: options.maxTokens ?? 8192,
       messages:   merged,
       temperature: options.temperature ?? 0.2,
       top_p:       options.top_p       ?? 0.9,
     };
     if (system) body.system = system;
 
-    let res: Response;
-    try {
-      res = await fetch(`${this.baseUrl}/messages`, {
-        method:  'POST',
-        headers: this._headers(),
-        body:    JSON.stringify(body),
-        signal:  AbortSignal.timeout(this.timeoutMs),
-      });
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'TimeoutError') {
-        throw new LLMError(`Anthropic request timed out after ${this.timeoutMs / 1000}s`, this.id);
+    let res: Response | undefined;
+    for (let attempt = 0; attempt <= 1; attempt++) {
+      try {
+        res = await fetch(`${this.baseUrl}/messages`, {
+          method:  'POST',
+          headers: this._headers(),
+          body:    JSON.stringify(body),
+          signal:  AbortSignal.timeout(this.timeoutMs),
+        });
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'TimeoutError') {
+          throw new LLMError(`Anthropic request timed out after ${this.timeoutMs / 1000}s`, this.id);
+        }
+        throw new LLMError(`Cannot reach Anthropic API: ${String(err)}`, this.id);
       }
-      throw new LLMError(`Cannot reach Anthropic API: ${String(err)}`, this.id);
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        if (res.status === 401) throw new LLMError('Invalid Anthropic API key. Check your key at console.anthropic.com.', this.id, 401);
+        if (res.status === 429) {
+          const retryAfter = res.headers.get('retry-after');
+          const waitMs = retryAfter ? parseFloat(retryAfter) * 1000 : 10_000;
+          if (attempt === 0) {
+            await new Promise(r => setTimeout(r, Math.min(waitMs, 60_000)));
+            continue;
+          }
+          throw new LLMError('Anthropic rate limit reached. Try again shortly.', this.id, 429);
+        }
+        throw new LLMError(`Anthropic HTTP ${res.status}: ${text}`, this.id, res.status);
+      }
+      break;
     }
 
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      if (res.status === 401) throw new LLMError('Invalid Anthropic API key. Check your key at console.anthropic.com.', this.id, 401);
-      if (res.status === 429) throw new LLMError('Anthropic rate limit reached. Try again shortly.', this.id, 429);
-      throw new LLMError(`Anthropic HTTP ${res.status}: ${text}`, this.id, res.status);
-    }
-
+    if (!res) throw new LLMError('Anthropic request failed: no response received', this.id);
     const data = await res.json() as AnthropicResponse;
     const textBlock = data.content.find(c => c.type === 'text');
     if (!textBlock) throw new LLMError('Anthropic returned no text content', this.id);

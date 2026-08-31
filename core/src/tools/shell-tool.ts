@@ -41,7 +41,11 @@ const COMMAND_TIMEOUT_MS = 120_000; // 2 minutes
  *   - Windows CMD built-ins (dir, type, echo, copy, move, mkdir, ren, cls, set, ver)
  *   - PowerShell cmdlets (Get-*, Set-*, New-*, Remove-*, Copy-*, Move-*, Test-*, Write-*, etc.)
  *   - Unix utilities (ls, cat, pwd, which, grep, find, curl, wget — without pipe-to-shell)
- *   - Shells themselves when used to run a script (bash, sh, zsh, powershell, pwsh, cmd)
+ *
+ * NOTE: Shell launchers (bash, sh, zsh, powershell, pwsh, cmd) are intentionally
+ * NOT listed here. Allowing them as prefixes defeats the entire allowlist because
+ * any command can be run via e.g. `bash -c "rm -rf /"`. They are explicitly blocked
+ * by BLOCKED_PATTERNS instead.
  */
 const ALLOWED_PREFIXES: readonly string[] = [
   // ── Package managers ────────────────────────────────────────────────
@@ -73,6 +77,9 @@ const ALLOWED_PREFIXES: readonly string[] = [
 
   // ── Version control ──────────────────────────────────────────────────
   'git',
+
+  // ── Laila CLI ────────────────────────────────────────────────────────
+  'laila',
 
   // ── Windows CMD built-ins ────────────────────────────────────────────
   'dir',
@@ -139,11 +146,11 @@ const ALLOWED_PREFIXES: readonly string[] = [
   'measure-object', 'measure',
   'format-list', 'fl',
   'format-table', 'ft',
-  // PowerShell itself (to run .ps1 scripts)
-  'powershell', 'pwsh',
 
   // ── Unix/bash utilities ─────────────────────────────────────────────
-  'bash', 'sh', 'zsh',     // to run .sh scripts — not pipe to shell
+  // NOTE: 'bash', 'sh', 'zsh' are intentionally excluded — use BLOCKED_PATTERNS
+  // NOTE: 'source' and 'export' intentionally excluded — they run arbitrary
+  //       shell files / set env vars and cannot be safely sandboxed.
   'ls', 'll',
   'cat',
   'pwd',
@@ -165,8 +172,6 @@ const ALLOWED_PREFIXES: readonly string[] = [
   'sort', 'uniq',
   'xargs',
   'env',
-  'export',
-  'source',
   'open',                  // macOS open
   'xdg-open',              // Linux open
 ];
@@ -246,6 +251,10 @@ const BLOCKED_PATTERNS: readonly RegExp[] = [
  *   # Install dependencies
  *   npm install express
  *   ```
+ *
+ * Each non-comment line is treated as a separate command block so that
+ * validation runs against every individual command rather than a joined
+ * string. This prevents bypass via `npm run build && rm -rf /`.
  */
 export function parseCommandBlocks(response: string): CommandBlock[] {
   const blocks: CommandBlock[] = [];
@@ -261,19 +270,22 @@ export function parseCommandBlocks(response: string): CommandBlock[] {
     const lines = body.split('\n').map(l => l.trim()).filter(Boolean);
     if (lines.length === 0) continue;
 
-    let reason: string | undefined;
-    let commandLine: string;
+    // Extract optional leading comment as shared reason
+    let sharedReason: string | undefined;
+    let commandLines: string[];
 
-    // If first line is a comment, treat it as the reason
     if (lines[0]!.startsWith('#') || lines[0]!.startsWith('//')) {
-      reason = lines[0]!.replace(/^[#/]+\s*/, '');
-      commandLine = lines.slice(1).join(' && ');
+      sharedReason = lines[0]!.replace(/^[#/]+\s*/, '');
+      commandLines = lines.slice(1);
     } else {
-      commandLine = lines.join(' && ');
+      commandLines = lines;
     }
 
-    if (commandLine) {
-      blocks.push({ command: commandLine.trim(), reason });
+    // Emit one CommandBlock per non-comment line so each is validated
+    // independently — prevents chain-operator injection across lines.
+    for (const line of commandLines) {
+      if (!line || line.startsWith('#') || line.startsWith('//')) continue;
+      blocks.push({ command: line.trim(), reason: sharedReason });
     }
   }
 
@@ -287,7 +299,23 @@ export type SafetyVerdict =
   | { safe: false; reason: string };
 
 /**
+ * Split a command string on shell chain operators (&&, ||, ;, |, &) and
+ * return each individual segment trimmed, discarding empty parts.
+ * This is used so that a command like `npm install && rm -rf /` cannot
+ * bypass validation by hiding the dangerous segment after an operator.
+ */
+function splitOnOperators(command: string): string[] {
+  // Split on: &&  ||  ;  |  &  (but keep the segments, not the operators)
+  return command
+    .split(/&&|\|\||\||;|&/)
+    .map(s => s.trim())
+    .filter(Boolean);
+}
+
+/**
  * Validate a command string against the allowlist and blocklist.
+ * Each operator-separated segment is validated independently so that
+ * chained commands cannot hide dangerous sub-commands behind an allowed prefix.
  * Returns { safe: true } or { safe: false, reason: string }.
  */
 export function validateCommand(command: string): SafetyVerdict {
@@ -297,31 +325,36 @@ export function validateCommand(command: string): SafetyVerdict {
     return { safe: false, reason: 'Empty command.' };
   }
 
-  // Check blocklist first — takes priority over allowlist
-  for (const pattern of BLOCKED_PATTERNS) {
-    if (pattern.test(trimmed)) {
+  // Split on chain operators — validate every segment independently
+  const segments = splitOnOperators(trimmed);
+
+  for (const segment of segments) {
+    // Check blocklist first — takes priority over allowlist
+    for (const pattern of BLOCKED_PATTERNS) {
+      if (pattern.test(segment)) {
+        return {
+          safe: false,
+          reason: `Blocked pattern detected in segment "${segment}": ${pattern.source}`,
+        };
+      }
+    }
+
+    // Extract the base command (first word, strip path separators)
+    const baseCommand = segment
+      .split(/\s+/)[0]!
+      .replace(/^.*[/\\]/, '') // strip directory prefix (e.g. /usr/bin/npm → npm)
+      .toLowerCase();
+
+    const allowed = ALLOWED_PREFIXES.some(
+      prefix => baseCommand === prefix || baseCommand.startsWith(prefix + '.'), // node.exe etc.
+    );
+
+    if (!allowed) {
       return {
         safe: false,
-        reason: `Blocked pattern detected: ${pattern.source}`,
+        reason: `"${baseCommand}" is not in the allowed command list.\nAllowed: ${ALLOWED_PREFIXES.join(', ')}`,
       };
     }
-  }
-
-  // Extract the base command (first word, strip path separators)
-  const baseCommand = trimmed
-    .split(/\s+/)[0]!
-    .replace(/^.*[/\\]/, '') // strip directory prefix (e.g. /usr/bin/npm → npm)
-    .toLowerCase();
-
-  const allowed = ALLOWED_PREFIXES.some(
-    prefix => baseCommand === prefix || baseCommand.startsWith(prefix + '.'), // node.exe etc.
-  );
-
-  if (!allowed) {
-    return {
-      safe: false,
-      reason: `"${baseCommand}" is not in the allowed command list.\nAllowed: ${ALLOWED_PREFIXES.join(', ')}`,
-    };
   }
 
   return { safe: true };
@@ -403,7 +436,19 @@ async function executeCommand(
       cwd,
       shell: true,
       stdio: 'pipe',
-      env: { ...process.env, FORCE_COLOR: '0' },
+      // Use a minimal env — never inherit secrets (AWS keys, DB passwords, tokens etc.)
+      // from process.env into the child process. Only pass essentials for commands to work.
+      env: {
+        PATH:        process.env['PATH']        ?? '',
+        HOME:        process.env['HOME']        ?? '',
+        USERPROFILE: process.env['USERPROFILE'] ?? '',
+        TEMP:        process.env['TEMP']        ?? '',
+        TMP:         process.env['TMP']         ?? '',
+        TMPDIR:      process.env['TMPDIR']      ?? '',
+        SYSTEMROOT:  process.env['SYSTEMROOT']  ?? '',
+        NODE_ENV:    process.env['NODE_ENV']    ?? '',
+        FORCE_COLOR: '0',
+      },
     });
 
     const timer = setTimeout(() => {

@@ -13,7 +13,7 @@ import { LLMError } from './base.js';
 export const GEMINI_MODELS: ModelInfo[] = [
   { id: 'gemini-2.0-flash',        name: 'Gemini 2.0 Flash',    description: 'Latest, fast & capable — recommended', contextWindow: 1_048_576 },
   { id: 'gemini-1.5-pro',          name: 'Gemini 1.5 Pro',      description: '2M context window, most capable',      contextWindow: 2_097_152 },
-  { id: 'gemini-1.5-flash',        name: 'Gemini 1.5 Flash',    description: 'Fast & cheap',                          contextWindow: 1_048_576 },
+  { id: 'gemini-2.5-flash-preview',  name: 'Gemini 2.5 Flash Preview', description: 'Fast & cheap',                          contextWindow: 1_048_576 },
   { id: 'gemini-1.5-flash-8b',     name: 'Gemini 1.5 Flash 8B', description: 'Fastest, lightest',                    contextWindow: 1_048_576 },
 ];
 
@@ -76,10 +76,13 @@ export class GeminiProvider implements LLMProvider {
   async healthCheck(): Promise<boolean> {
     try {
       const res = await fetch(
-        `${this.baseUrl}/${this.model}?key=${this.apiKey}`,
-        { signal: AbortSignal.timeout(5_000) },
+        `${this.baseUrl}/${this.model}`,
+        {
+          headers: { 'x-goog-api-key': this.apiKey },
+          signal:  AbortSignal.timeout(5_000),
+        },
       );
-      return res.ok || res.status === 404; // 404 = key valid but model name wrong
+      return res.ok; // 2xx only — 404 means invalid model or key, not healthy
     } catch { return false; }
   }
 

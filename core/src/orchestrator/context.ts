@@ -7,6 +7,7 @@ import { getGitStatus, getGitDiff } from '../utils/git-utils.js';
 import path from 'path';
 import { SESSION_HISTORY_SIZE } from '../config.js';
 import { getProjectIndexPath, getLegacyProjectIndexPath } from '../scanner/project-index.js';
+import { logger } from '../utils/logger.js';
 import type { AgentContext, AgentName, ProjectIndex, Message } from '../types.js';
 
 /**
@@ -65,17 +66,21 @@ export async function buildContext(params: {
     : [];
 
   // ── Skill ────────────────────────────────────────────────────────────────
-  const skill = await getSkillForAgent(agent, userMessage);
+  // Pass detected framework + languages so the scorer can boost relevant skills
+  const detectedFramework = projectIndex?.framework ?? null;
+  const detectedLanguages = projectIndex?.languages ?? [];
+  const skill = await getSkillForAgent(agent, userMessage, detectedFramework, detectedLanguages);
 
   // ── Available Skills ─────────────────────────────────────────────────────
   let availableSkills: string | undefined;
   try {
-    const { discoverSkills } = await import('../skills/skill-loader.js');
-    const skills = await discoverSkills();
-    const uniqueSkills = skills.filter(s => !s.path.includes('/references/'));
-    availableSkills = uniqueSkills.map(s => `- ${s.name}${s.description ? `: ${s.description}` : ''}`).join('\n');
+    const { rankSkillsForQuery } = await import('../skills/skill-loader.js');
+    const rankedSkills = await rankSkillsForQuery(userMessage, agent, 3, detectedFramework, detectedLanguages);
+    availableSkills = rankedSkills
+      .map(s => `- ${s.name} (score: ${s.score})${s.description ? `: ${s.description}` : ''}`)
+      .join('\n') || undefined;
   } catch (err) {
-    // Ignore errors resolving skills
+    logger.debug?.('Failed to discover skills: ' + String(err));
   }
 
   // ── History ──────────────────────────────────────────────────────────────
@@ -91,8 +96,19 @@ export async function buildContext(params: {
   if (projectPath) {
     const status = await getGitStatus(projectPath);
     if (status) gitStatus = status;
+
     const diff = await getGitDiff(projectPath);
-    if (diff) gitDiff = diff;
+    if (diff) {
+      // Truncate diff to avoid eating the whole context budget.
+      // Reserve ~3 000 chars for diff — enough for a meaningful change summary
+      // without crowding out project index and relevant file contents.
+      const MAX_DIFF_CHARS = 3_000;
+      if (diff.length > MAX_DIFF_CHARS) {
+        gitDiff = diff.slice(0, MAX_DIFF_CHARS) + '\n\n[... diff truncated — showing first 3 000 chars ...]';
+      } else {
+        gitDiff = diff;
+      }
+    }
   }
 
   return {

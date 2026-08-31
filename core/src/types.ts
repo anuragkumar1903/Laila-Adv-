@@ -81,6 +81,7 @@ export interface ScannedFile {
   sizeBytes: number;
   hash: string;
   symbols?: ExtractedSymbols;
+  content?: string;
 }
 
 export interface ProjectFileRecord {
