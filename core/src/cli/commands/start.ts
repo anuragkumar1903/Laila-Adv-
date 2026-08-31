@@ -297,6 +297,13 @@ export async function startCommand(): Promise<void> {
       spinner.start('Thinking…');
       
       let finalMessage = userMessage;
+      
+      const { readGlobalMemory } = await import('../../memory/episodic.js');
+      const globalMem = await readGlobalMemory();
+      if (globalMem.trim()) {
+        finalMessage += `\n\n[SYSTEM: GLOBAL EPISODIC MEMORY (Remember these user preferences/facts)]\n${globalMem}`;
+      }
+
       if (mcpManager) {
         await mcpManager.checkAutoTriggers(userMessage);
         if (mcpManager.tools.length > 0) {
@@ -599,6 +606,19 @@ export async function startCommand(): Promise<void> {
       printer.banner();
       printer.dim(`Session ${session.id}  •  ${path.basename(projectPath)}  •  ${activeProvider.id}`);
       printer.blank();
+      rl.resume(); rl.prompt(); return;
+    }
+
+    // ── /remember ─────────────────────────────────────────────────────────
+    if (normalized.startsWith('/remember ')) {
+      const fact = line.slice(10).trim();
+      if (!fact) {
+        printer.warn('Usage: /remember <fact or preference>');
+        rl.resume(); rl.prompt(); return;
+      }
+      const { rememberFact } = await import('../../memory/episodic.js');
+      await rememberFact(fact);
+      printer.success('Fact saved to Global Episodic Memory.');
       rl.resume(); rl.prompt(); return;
     }
 

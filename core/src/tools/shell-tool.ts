@@ -78,8 +78,9 @@ const ALLOWED_PREFIXES: readonly string[] = [
   // ── Version control ──────────────────────────────────────────────────
   'git',
 
-  // ── Laila CLI ────────────────────────────────────────────────────────
+  // ── Laila CLI & Containers ───────────────────────────────────────────
   'laila',
+  'docker', 'docker-compose', 'podman',
 
   // ── Windows CMD built-ins ────────────────────────────────────────────
   'dir',
