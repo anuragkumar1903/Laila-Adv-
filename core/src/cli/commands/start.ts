@@ -569,6 +569,33 @@ export async function startCommand(): Promise<void> {
       rl.resume(); rl.prompt(); return;
     }
 
+    // ── /look ─────────────────────────────────────────────────────────────
+    if (normalized.startsWith('/look ')) {
+      const match = line.match(/^\/look\s+([^\s]+)(?:\s+(.*))?$/);
+      if (!match) {
+        printer.warn('Usage: /look <path/to/image.png> [optional prompt]');
+        rl.resume(); rl.prompt(); return;
+      }
+      const [_, imgPath, prompt = 'Describe this image in detail.'] = match;
+      spinner.start(`Analyzing image: ${imgPath}…`);
+      try {
+        const { askVision } = await import('../../tools/vision-tool.js');
+        const absPath = path.resolve(projectPath, imgPath);
+        const analysis = await askVision(projectPath, absPath, prompt);
+        spinner.stop();
+        printer.section('Vision Analysis');
+        printer.response(analysis);
+        
+        // Push the analysis into the queue so the next prompt can use it!
+        promptQueue.push(`[Vision Analysis of ${imgPath}]: ${analysis}`);
+        printer.dim('  (Analysis added to context for your next prompt)');
+      } catch (e: any) {
+        spinner.fail();
+        printer.error(e.message);
+      }
+      rl.resume(); rl.prompt(); return;
+    }
+
     // ── /history ──────────────────────────────────────────────────────────
     if (normalized === '/history' || normalized === '.history') {
       const { findBySession } = await import('../../memory/repositories/tasks.js');

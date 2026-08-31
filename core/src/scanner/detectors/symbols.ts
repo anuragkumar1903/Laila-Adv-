@@ -12,7 +12,7 @@ const IMPORT_RE = /(?:import\s+(?:(?:\{[^}]*\})|(?:\w+))\s+from\s+['"]([^'"]+)['
 const EXPORT_FN_RE = /export\s+(?:async\s+)?function\s+(\w+)/g;
 const EXPORT_CLASS_RE = /export\s+(?:default\s+)?class\s+(\w+)/g;
 const EXPORT_CONST_RE = /export\s+(?:const|let|var)\s+(\w+)/g;
-const FUNCTION_RE = /(?:function\s+(\w+)|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\()/g;
+const FUNCTION_RE = /(?:function\s+(\w+\s*\([^)]*\))|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\(([^)]*)\)\s*=>)/g;
 
 /**
  * Extract imports, exports, functions, and classes from a TypeScript/JavaScript file.
@@ -42,8 +42,11 @@ export function extractSymbols(content: string): ExtractedSymbols {
   }
 
   for (const match of content.matchAll(FUNCTION_RE)) {
-    const name = match[1] ?? match[2];
-    if (name) functions.push(name);
+    if (match[1]) {
+      functions.push(match[1]); // normal function with args
+    } else if (match[2] && match[3] !== undefined) {
+      functions.push(`${match[2]}(${match[3]})`); // arrow function
+    }
   }
 
   return { imports, exports, functions, classes };
