@@ -497,32 +497,32 @@ async function _switchProviderImpl(
     {
       label:  'OpenAI',
       hint:   '  GPT-4o, o1, o3-mini',
-      action: () => _switchCloud('openai', 'OpenAI', [...OPENAI_COMPAT_PRESETS.openai.models], 'platform.openai.com', 1),
+      action: () => _switchCloud('openai', 'OpenAI', [...OPENAI_COMPAT_PRESETS.openai.models], 'platform.openai.com', 1, projectPath),
     },
     {
       label:  'Anthropic',
       hint:   '  Claude Opus, Sonnet, Haiku',
-      action: () => _switchCloud('anthropic', 'Anthropic', ANTHROPIC_MODELS, 'console.anthropic.com', 0),
+      action: () => _switchCloud('anthropic', 'Anthropic', ANTHROPIC_MODELS, 'console.anthropic.com', 0, projectPath),
     },
     {
       label:  'DeepSeek',
       hint:   '  deepseek-chat, R1',
-      action: () => _switchCloud('deepseek', 'DeepSeek', [...OPENAI_COMPAT_PRESETS.deepseek.models], 'platform.deepseek.com', 0),
+      action: () => _switchCloud('deepseek', 'DeepSeek', [...OPENAI_COMPAT_PRESETS.deepseek.models], 'platform.deepseek.com', 0, projectPath),
     },
     {
       label:  'Groq',
       hint:   '  Llama 3.1, Mixtral — very fast',
-      action: () => _switchCloud('groq', 'Groq', [...OPENAI_COMPAT_PRESETS.groq.models], 'console.groq.com', 0),
+      action: () => _switchCloud('groq', 'Groq', [...OPENAI_COMPAT_PRESETS.groq.models], 'console.groq.com', 0, projectPath),
     },
     {
       label:  'Google Gemini',
       hint:   '  Gemini 2.0 Flash, 1.5 Pro',
-      action: () => _switchCloud('gemini', 'Google Gemini', GEMINI_MODELS, 'aistudio.google.com', 0),
+      action: () => _switchCloud('gemini', 'Google Gemini', GEMINI_MODELS, 'aistudio.google.com', 0, projectPath),
     },
     {
       label:  'Mistral',
       hint:   '  mistral-large, codestral',
-      action: () => _switchCloud('mistral', 'Mistral', [...OPENAI_COMPAT_PRESETS.mistral.models], 'console.mistral.ai', 0),
+      action: () => _switchCloud('mistral', 'Mistral', [...OPENAI_COMPAT_PRESETS.mistral.models], 'console.mistral.ai', 0, projectPath),
     },
     {
       label:  'Custom endpoint',
@@ -604,12 +604,13 @@ async function _switchCloud(
   presetModels: ModelInfo[],
   keyHint: string,
   defaultModelIdx: number,
+  projectPath?: string,
 ): Promise<ProviderConfig | null> {
   console.log('');
 
   // Check if we already have a saved key
   const { loadProviderConfig } = await import('../config/config-loader.js');
-  const saved = await loadProviderConfig();
+  const saved = await loadProviderConfig(projectPath);
   const hasSavedKey = saved.provider === id && !!saved.apiKey;
 
   let apiKey = hasSavedKey ? saved.apiKey! : '';
