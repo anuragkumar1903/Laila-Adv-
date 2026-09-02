@@ -102,3 +102,28 @@ export function isConfigComplete(config: Partial<ProviderConfig>): boolean {
   if (config.provider === 'openai-compat' && !config.baseUrl) return false;
   return true;
 }
+
+/** 
+ * Search all config layers (env, project, global) for an API key that belongs 
+ * to the specified provider. This prevents a project-level provider override 
+ * from obscuring a valid global API key for a different provider.
+ */
+export async function getApiKeyForProvider(providerId: string, projectPath?: string): Promise<string | undefined> {
+  if (process.env['LAILA_PROVIDER'] === providerId && process.env['LAILA_API_KEY']) {
+    return process.env['LAILA_API_KEY'];
+  }
+  
+  if (projectPath) {
+    const fromProject = await readYamlConfig(getProjectConfigPath(projectPath));
+    if (fromProject && fromProject.provider === providerId && fromProject.apiKey) {
+      return fromProject.apiKey;
+    }
+  }
+
+  const fromGlobal = await readYamlConfig(getGlobalConfigPath());
+  if (fromGlobal && fromGlobal.provider === providerId && fromGlobal.apiKey) {
+    return fromGlobal.apiKey;
+  }
+
+  return undefined;
+}

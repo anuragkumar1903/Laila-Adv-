@@ -608,12 +608,12 @@ async function _switchCloud(
 ): Promise<ProviderConfig | null> {
   console.log('');
 
-  // Check if we already have a saved key
-  const { loadProviderConfig } = await import('../config/config-loader.js');
-  const saved = await loadProviderConfig(projectPath);
-  const hasSavedKey = saved.provider === id && !!saved.apiKey;
+  // Check if we already have a saved key for this specific provider
+  const { getApiKeyForProvider } = await import('../config/config-loader.js');
+  const savedApiKey = await getApiKeyForProvider(id, projectPath);
+  const hasSavedKey = !!savedApiKey;
 
-  let apiKey = hasSavedKey ? saved.apiKey! : '';
+  let apiKey = hasSavedKey ? savedApiKey! : '';
 
   if (!hasSavedKey) {
     console.log(chalk.dim(`  No API key found for ${displayName}.`));
