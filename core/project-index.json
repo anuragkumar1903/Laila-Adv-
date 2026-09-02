@@ -1,15 +1,16 @@
 {
-  "projectId": 3,
-  "projectName": "laila",
+  "projectId": 1,
+  "projectName": "laila-cli",
   "projectPath": "P:\\Laila(Adv)\\core",
   "framework": null,
   "languages": [
     "TypeScript",
+    "JavaScript",
     "JSON",
     "Markdown"
   ],
   "pkgManager": "npm",
-  "summary": "laila (unknown framework) • 74 files • TypeScript, JSON, Markdown • no routes detected",
+  "summary": "laila-cli (unknown framework) • 87 files • TypeScript, JavaScript, JSON, Markdown • no routes detected",
   "filesMeta": [
     {
       "path": "tsconfig.json",
@@ -18,75 +19,114 @@
       "hash": "7ae19a0e389d16228fcbc917d295f4be6dec124ed8056f2455a601b44741b7dd"
     },
     {
-      "path": "README.md",
+      "path": "scratch_vec2.js",
       "role": "other",
-      "language": "Markdown",
-      "hash": "0fc6a9bfa7a43434a49f8080c93687948a1ca6426f42eeaf9ad92c69c1016628"
-    },
-    {
-      "path": "project-index.json",
-      "role": "other",
-      "language": "JSON",
-      "hash": "0a04244c3d9f17fce49fcb91d6b751693849dda8870eba0de86ca22ab3691f0b"
-    },
-    {
-      "path": "package.json",
-      "role": "config",
-      "language": "JSON",
-      "hash": "b909b367bdb68fc3cfe7dd3ae2c96557f9d314de73c67b9f01ca96d4bae3dcf1"
-    },
-    {
-      "path": ".npmignore",
-      "role": "other",
-      "language": null,
-      "hash": "3e2a04e53ad3bd802c88a98ecf2acfe1261b0aff01e70bba150e99a1c5759ef2"
-    },
-    {
-      "path": "src\\types.ts",
-      "role": "other",
-      "language": "TypeScript",
-      "hash": "30666b08fefc7bcfe789082d108070fee8e0a7d85f8e3a7f03a36cbe94178c3c",
+      "language": "JavaScript",
+      "hash": "a32937612bf483ea6cbe14319509d5f79e51018a3986c1fdb5083c086519dcfb",
       "symbols": {
-        "imports": [],
+        "imports": [
+          "better-sqlite3"
+        ],
         "exports": [],
         "functions": [],
         "classes": []
       }
     },
     {
-      "path": "src\\config.ts",
+      "path": "scratch_vec.js",
       "role": "other",
-      "language": "TypeScript",
-      "hash": "428a3b67c138af453b021f1057fe84847fcbab04c87f61952d9deaa283dadce3",
+      "language": "JavaScript",
+      "hash": "58addf9a1d5ce3a92ac5b43583e095830235fc54e68e63b6562cd5b7330d58f9",
       "symbols": {
         "imports": [
-          "path",
-          "url"
+          "better-sqlite3"
         ],
-        "exports": [
-          "REPO_ROOT",
-          "SKILLS_DIR",
-          "DATA_DIR",
-          "PROJECTS_DIR",
-          "DB_PATH",
-          "OLLAMA_HOST",
-          "OLLAMA_MODEL",
-          "OLLAMA_TIMEOUT_MS",
-          "LAILA_PROVIDER",
-          "LAILA_MODEL",
-          "LAILA_API_KEY",
-          "LAILA_BASE_URL",
-          "MAX_FILE_LINES",
-          "MAX_RELEVANT_FILES",
-          "MAX_CONTEXT_CHARS",
-          "SESSION_HISTORY_SIZE",
-          "N8N_WEBHOOK_URL",
-          "N8N_ENABLED",
-          "SCAN_EXCLUDES"
-        ],
+        "exports": [],
         "functions": [],
         "classes": []
       }
+    },
+    {
+      "path": "scratch_test_highlight.js",
+      "role": "other",
+      "language": "JavaScript",
+      "hash": "9fe94c71a189a9f76fe570c24465cc16c65e49be96e7134070182081200537f9",
+      "symbols": {
+        "imports": [
+          "marked",
+          "marked-terminal"
+        ],
+        "exports": [],
+        "functions": [],
+        "classes": []
+      }
+    },
+    {
+      "path": "scratch_test_2.js",
+      "role": "other",
+      "language": "JavaScript",
+      "hash": "b931fc64037e9c193e3e1dfea00fa0678e4638e594cb8ded098293b2367b461a",
+      "symbols": {
+        "imports": [
+          "marked",
+          "marked-terminal"
+        ],
+        "exports": [],
+        "functions": [],
+        "classes": []
+      }
+    },
+    {
+      "path": "scratch_glob.js",
+      "role": "other",
+      "language": "JavaScript",
+      "hash": "638476da53a5c6452f0e40b834b1940f40b341c573e9469b87b6b319ff606787",
+      "symbols": {
+        "imports": [
+          "glob"
+        ],
+        "exports": [],
+        "functions": [
+          "test()"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "README.md",
+      "role": "other",
+      "language": "Markdown",
+      "hash": "1769b5c001c21dc35a2fdd52698a02746c8792c0dfe11170156c539768a8e3f8"
+    },
+    {
+      "path": "project-index.json",
+      "role": "other",
+      "language": "JSON",
+      "hash": "25dd3501d77c8965c1fd34382e37853c40f3b539c14e6d20271f7944bced92b7"
+    },
+    {
+      "path": "package.json",
+      "role": "config",
+      "language": "JSON",
+      "hash": "655b2ebb2d9b090afe713db39e86655b1f5e8c834bf568e84e8806e5e288f59c"
+    },
+    {
+      "path": "laila-cli-1.0.1.tgz",
+      "role": "other",
+      "language": null,
+      "hash": "cd1cafc9d397aa815fe421a7ef7b2ec32dcb815ecb92c531250890f281295ef2"
+    },
+    {
+      "path": "laila-cli-1.0.0.tgz",
+      "role": "other",
+      "language": null,
+      "hash": "7b340489aa99f57bd2cb174b7e4fcd1a3dc6fdc3c21754515d4a4fe52c99d8b5"
+    },
+    {
+      "path": ".npmignore",
+      "role": "other",
+      "language": null,
+      "hash": "3e2a04e53ad3bd802c88a98ecf2acfe1261b0aff01e70bba150e99a1c5759ef2"
     },
     {
       "path": "tests\\intent.test.ts",
@@ -121,6 +161,56 @@
       }
     },
     {
+      "path": "src\\types.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "4e89790acdc99379dc00130c7454da8f6de80524ae765ae25b80f431756a2ff4",
+      "symbols": {
+        "imports": [],
+        "exports": [],
+        "functions": [],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\config.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "bca3e43c25cc772842a3223231b2c35b0409bb9f6a8558735cbf880f02ea4023",
+      "symbols": {
+        "imports": [
+          "path",
+          "url",
+          "os"
+        ],
+        "exports": [
+          "REPO_ROOT",
+          "USER_HOME",
+          "LAILA_DIR",
+          "DATA_DIR",
+          "PROJECTS_DIR",
+          "DB_PATH",
+          "SKILLS_DIR",
+          "OLLAMA_HOST",
+          "OLLAMA_MODEL",
+          "OLLAMA_TIMEOUT_MS",
+          "LAILA_PROVIDER",
+          "LAILA_MODEL",
+          "LAILA_API_KEY",
+          "LAILA_BASE_URL",
+          "MAX_FILE_LINES",
+          "MAX_RELEVANT_FILES",
+          "MAX_CONTEXT_CHARS",
+          "SESSION_HISTORY_SIZE",
+          "N8N_WEBHOOK_URL",
+          "N8N_ENABLED",
+          "SCAN_EXCLUDES"
+        ],
+        "functions": [],
+        "classes": []
+      }
+    },
+    {
       "path": "scripts\\stress.ts",
       "role": "other",
       "language": "TypeScript",
@@ -143,13 +233,62 @@
       "path": "src\\validation\\validator.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "1ec52ab4f65183c5d9d1043e43397127b8e577f3959c7719e94a858a04fa6ebf"
+      "hash": "1ec52ab4f65183c5d9d1043e43397127b8e577f3959c7719e94a858a04fa6ebf",
+      "symbols": {
+        "imports": [
+          "path",
+          "../utils/fs-utils.js",
+          "./runner.js",
+          "../n8n/n8n-client.js",
+          "../utils/logger.js"
+        ],
+        "exports": [
+          "runValidation"
+        ],
+        "functions": [
+          "getAvailableScripts(projectPath: string)",
+          "getPmCmd(pkgManager: string)",
+          "runValidation(\n  projectPath: string,\n  pkgManager = 'npm',\n)"
+        ],
+        "classes": []
+      }
     },
     {
       "path": "src\\validation\\runner.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "56f92764760ccbb009a0ecdccb33e51d38262669aeb443152c193480bc0653d0"
+      "hash": "e5ad3ea86512a5cbdbbfe31261ee4a97cc0c47968ba9f0fbc8cb94e03c1d2009",
+      "symbols": {
+        "imports": [
+          "child_process"
+        ],
+        "exports": [
+          "runStep"
+        ],
+        "functions": [
+          "runStep(\n  step: ValidationResult['step'],\n  command: string,\n  args: string[],\n  cwd: string,\n)"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\utils\\prompt-utils.ts",
+      "role": "util",
+      "language": "TypeScript",
+      "hash": "cf6fdb3f0127758c1cd30f37dbedcef30b43c1c2a2a121cceb43f1d478ad809a",
+      "symbols": {
+        "imports": [],
+        "exports": [
+          "askQuestion",
+          "askYesNo"
+        ],
+        "functions": [
+          "askQuestion(\n  rl: Interface,\n  prompt: string,\n  cancelValue: string = ''\n)",
+          "onEsc(_str: string, key: any)",
+          "askYesNo(\n  rl: Interface,\n  prompt: string,\n  defaultYes: boolean = true\n)"
+        ],
+        "classes": []
+      }
     },
     {
       "path": "src\\utils\\n8n-webhook.ts",
@@ -173,7 +312,7 @@
       "path": "src\\utils\\markdown-parser.ts",
       "role": "util",
       "language": "TypeScript",
-      "hash": "69b5a5ac17e8788d9facad3f88208270d3a9697de023a0e3e9e5ca700b8a30f0",
+      "hash": "961a4dc35eff4ea8a931b126267dd6ef133ab4b61a43a67af5c402805bd428ad",
       "symbols": {
         "imports": [],
         "exports": [
@@ -189,13 +328,25 @@
       "path": "src\\utils\\logger.ts",
       "role": "util",
       "language": "TypeScript",
-      "hash": "0345cc18fe5a3f45ea89e1e3da6a50f3135009f58c19e1493da6e50e6a2f51c8"
+      "hash": "0345cc18fe5a3f45ea89e1e3da6a50f3135009f58c19e1493da6e50e6a2f51c8",
+      "symbols": {
+        "imports": [
+          "chalk"
+        ],
+        "exports": [
+          "logger"
+        ],
+        "functions": [
+          "shouldLog(level: LogLevel)"
+        ],
+        "classes": []
+      }
     },
     {
       "path": "src\\utils\\git-utils.ts",
       "role": "util",
       "language": "TypeScript",
-      "hash": "705bebb18f7eb0680f677f6596728861382a728a54c7498c53e0021e5437a3f9",
+      "hash": "fa13794ec6296fd749166e2b7500ab06e2079fc2f79712929dfe5eb9a4cdf650",
       "symbols": {
         "imports": [
           "child_process",
@@ -298,10 +449,30 @@
       }
     },
     {
+      "path": "src\\utils\\check-update.ts",
+      "role": "util",
+      "language": "TypeScript",
+      "hash": "61dcdef5023cf254934bc877d9a687caba6cc281b2c79528bb5bff76dfd289aa",
+      "symbols": {
+        "imports": [
+          "fs",
+          "path",
+          "chalk"
+        ],
+        "exports": [
+          "checkForUpdates"
+        ],
+        "functions": [
+          "checkForUpdates()"
+        ],
+        "classes": []
+      }
+    },
+    {
       "path": "src\\tools\\web-tool.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "7507d3a2c78d156eb7b4b1b54e0962c76b6fbd215d80d4ef7be1881d27a19a4d",
+      "hash": "74f3ed52fb4a78c0a1d86ff6c7c578dce85f8346c9a70adf486e5a5ee903e331",
       "symbols": {
         "imports": [
           "chalk",
@@ -313,6 +484,7 @@
         ],
         "functions": [
           "parseWebBlocks(response: string)",
+          "isPrivateIp(ip: string)",
           "isSafeUrl(targetUrl: string)",
           "executeSearch(query: string)",
           "executeUrl(url: string)",
@@ -325,7 +497,7 @@
       "path": "src\\tools\\vision-tool.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "a3d36773dd3974027bad3af8a9609b0dbbe9e7967b48392fe09913cbfb34940a",
+      "hash": "cb1f01e45d8e0b02338f447aff18af23616f20a6a40ae2856d381605733a3936",
       "symbols": {
         "imports": [
           "fs/promises",
@@ -344,7 +516,7 @@
       "path": "src\\tools\\shell-tool.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "d19d3f75b81ac108623812dd8f919fbb59c2ffa63848477cf40a34645e82dad2",
+      "hash": "d67f1a995a5d0523540880ff3a376d998d89c23d1637a11ed5720ef104d05975",
       "symbols": {
         "imports": [
           "child_process",
@@ -373,10 +545,26 @@
       }
     },
     {
+      "path": "src\\tools\\native-tools.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "81b10bc9f744bfc785278d5506afd527bc8926d231ad896db0ad49360447eab1",
+      "symbols": {
+        "imports": [],
+        "exports": [
+          "getNativeTools"
+        ],
+        "functions": [
+          "getNativeTools()"
+        ],
+        "classes": []
+      }
+    },
+    {
       "path": "src\\tools\\grep-tool.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "fd935a8da3cf7da62771ab33cc2bf8c954b402aa73749f69587f23327a25d7db",
+      "hash": "ca76fa222385c6787f53a2616e296cbf1dd53dc9fd9f275c30a89f260a09e0e0",
       "symbols": {
         "imports": [
           "fs/promises",
@@ -416,7 +604,7 @@
       "path": "src\\tools\\git-tool.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "8a77a8698f56c5f300c9174c8c1f70b4f6b41c56cf3b9485c8e2e386f0123e28",
+      "hash": "66cfa103cb0a7d75927938b1dff77c115a0e4db37fc33f226bd402848e501675",
       "symbols": {
         "imports": [
           "chalk",
@@ -443,7 +631,7 @@
       "path": "src\\tools\\file-tool.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "866f476dff1700992c72b26fd9b797084b50ee00c40269b4ad75cb3532dcf86e",
+      "hash": "b36228e2bc323275be62d342091415923a0bc5c6ba94d45134f382249188d56c",
       "symbols": {
         "imports": [
           "fs/promises",
@@ -463,8 +651,8 @@
           "runFileBlocks"
         ],
         "functions": [
-          "executeReadBlock(\n  block: ReadBlock,\n  projectRoot: string\n)",
-          "executeWriteBlock(\n  block: WriteBlock,\n  projectRoot: string\n)",
+          "executeReadBlock(\r\n  block: ReadBlock,\r\n  projectRoot: string\r\n)",
+          "executeWriteBlock(\r\n  block: WriteBlock,\r\n  projectRoot: string\r\n)",
           "parseReadBlocks(response: string)",
           "parseWriteBlocks(response: string)",
           "formatReadResultsForContext(results: ReadResult[])",
@@ -478,17 +666,21 @@
       "path": "src\\tools\\browser-tool.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "4722c72101bae8735bbc5acd457885d32be1ac7d5f4219b43facbf685d6d22c4",
+      "hash": "482320013feb77be7ff1ceaf0efc37e8176230f41eb9d0f61285c97b88e10f8b",
       "symbols": {
         "imports": [
-          "child_process",
+          "playwright",
           "path"
         ],
         "exports": [
+          "parseBrowserBlocks",
+          "runBrowserTool",
           "takeScreenshot"
         ],
         "functions": [
-          "takeScreenshot(url: string, projectPath: string)"
+          "parseBrowserBlocks(response: string)",
+          "runBrowserTool(projectRoot: string, block: BrowserBlock)",
+          "takeScreenshot(url: string, projectRoot: string)"
         ],
         "classes": []
       }
@@ -497,7 +689,7 @@
       "path": "src\\system\\tool-checks.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "cda7f1c621af31a43d10284e57292a48113db0e9106465b7ab77b7dbbf290170",
+      "hash": "4b1d6cce88568bdc9aae1ae56bf5c38c0349ad9456faf3013368dceb708e0e7a",
       "symbols": {
         "imports": [
           "child_process",
@@ -606,7 +798,7 @@
       "path": "src\\scanner\\scanner.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "9d3dd4b75a10570c4538f6e5225570f0057483996ef945304201f3058a4d773c",
+      "hash": "ac3ac9fe35de763e02e08050e51e44bf7a2f899b4de72cc65796acf8856d9dce",
       "symbols": {
         "imports": [
           "path",
@@ -653,10 +845,28 @@
           "writeProjectIndex"
         ],
         "functions": [
-          "getProjectIndexPath",
-          "getLegacyProjectIndexPath",
-          "buildProjectIndex",
-          "writeProjectIndex"
+          "getProjectIndexPath(projectId: number)",
+          "getLegacyProjectIndexPath(projectPath: string)",
+          "buildProjectIndex(projectId: number, projectPath: string, scan: ScanResult)",
+          "writeProjectIndex(projectPath: string, index: ProjectIndex)"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\orchestrator\\planner.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "5adaaff76c0f1e9fb738f5ff4ee736adeed35089176ff8235c5b7867be1803c1",
+      "symbols": {
+        "imports": [
+          "../llm/provider-factory.js"
+        ],
+        "exports": [
+          "generatePlan"
+        ],
+        "functions": [
+          "generatePlan(goal: string, projectPath: string, projectId: number | null)"
         ],
         "classes": []
       }
@@ -665,7 +875,7 @@
       "path": "src\\orchestrator\\orchestrator.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "bf0ab5b789b4171bbf22c134fe77b20e78adea156588c88e4ffcfd65a2d9cee5",
+      "hash": "2888d8f6bbd8bff4b82b18c6535f581b326e3cb02dd5ef1bc89a56eb744edae9",
       "symbols": {
         "imports": [
           "./intent.js",
@@ -675,7 +885,8 @@
           "../llm/prompt-builder.js",
           "../llm/provider-factory.js",
           "../n8n/n8n-client.js",
-          "../utils/logger.js"
+          "../utils/logger.js",
+          "../tools/native-tools.js"
         ],
         "exports": [
           "run"
@@ -691,7 +902,7 @@
       "path": "src\\orchestrator\\intent.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "d2a07b265555961ecf30f3b0dcbfae166a53618cf149652c814315d8c088eebe",
+      "hash": "cd6990c8e3d2f35c357e9cfbfe44412ac9857644bd383cc702185524e0d92626",
       "symbols": {
         "imports": [
           "../utils/logger.js"
@@ -737,7 +948,20 @@
       "path": "src\\n8n\\n8n-client.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "f38a4a187f2f7235bfc743d55d576d3f4d3e7336d7e5b2c113eb494e505631bc"
+      "hash": "f38a4a187f2f7235bfc743d55d576d3f4d3e7336d7e5b2c113eb494e505631bc",
+      "symbols": {
+        "imports": [
+          "../config.js",
+          "../utils/logger.js"
+        ],
+        "exports": [
+          "notify"
+        ],
+        "functions": [
+          "notify(event: N8nEvent)"
+        ],
+        "classes": []
+      }
     },
     {
       "path": "src\\memory\\schema.ts",
@@ -758,10 +982,33 @@
       }
     },
     {
+      "path": "src\\memory\\rag.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "07887ff0554e37822720dda56445f258279e33d8436c5d2add487e472ed7f0e0",
+      "symbols": {
+        "imports": [
+          "./db.js",
+          "../llm/providers/ollama.js"
+        ],
+        "exports": [
+          "initRagTable",
+          "indexFileContent",
+          "retrieveContext"
+        ],
+        "functions": [
+          "initRagTable()",
+          "indexFileContent(projectId: string, filePath: string, content: string)",
+          "retrieveContext(projectId: string, query: string, limit = 5)"
+        ],
+        "classes": []
+      }
+    },
+    {
       "path": "src\\memory\\episodic.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "cbc73bf65f48b1be0f04ad7664b97beff3120731f6ce5f4bb8d292c37626151c",
+      "hash": "1ebc2820dc90a8c012de43fc6727d12dc3d06c0ed07fce3b8b051884228b463f",
       "symbols": {
         "imports": [
           "fs/promises",
@@ -785,7 +1032,7 @@
       "path": "src\\memory\\db.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "20bc2799cfadb17299a030e53e8c402502bc8dc3975b3bec9772189d423528f2",
+      "hash": "159309ceba410f9030502fa23cac0aab3779ee4899187e411e078fa5324edb4b",
       "symbols": {
         "imports": [
           "fs",
@@ -807,7 +1054,7 @@
       "path": "src\\memory\\context-store.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "f8c8646f2237630fc594c8d91345533c70557613a0de2b2897a6f56d4b3398d7",
+      "hash": "03b716e1536f0cde938dcf64f216aebc5e24aebc35f28b97220fba613448a905",
       "symbols": {
         "imports": [
           "path",
@@ -829,15 +1076,18 @@
       "path": "src\\mcp\\mcp-client.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "3ff53b304085104b749ebeb3201cd381dd3124d1c1b859aa6a0764ee00b81955",
+      "hash": "3281eb7a5e4f9e9043e7e348f5455d5030023298ecb84c744891ce752a37fca4",
       "symbols": {
         "imports": [
           "@modelcontextprotocol/sdk/client/index.js",
           "@modelcontextprotocol/sdk/client/stdio.js",
-          "fs/promises"
+          "fs/promises",
+          "path"
         ],
         "exports": [],
-        "functions": [],
+        "functions": [
+          "isMcpCommandAllowed(command: string)"
+        ],
         "classes": [
           "MCPClientManager"
         ]
@@ -847,7 +1097,7 @@
       "path": "src\\llm\\setup-wizard.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "f0d74f5f05acf0b4048dd8bb654f127f2fa61e4fb0a2f4affd9a2acbd7ec2463",
+      "hash": "ae480f85cc1e13d730e123a18c2a613dcc518d92282e98a5dcb52de48ef52f9a",
       "symbols": {
         "imports": [
           "readline",
@@ -866,6 +1116,7 @@
         ],
         "functions": [
           "ask(prompt: string)",
+          "onEsc(_str: string, key: any)",
           "askSecret(prompt: string)",
           "menu(\n  title: string,\n  items: Array<{ label: string; hint?: string; badge?: string }>,\n)",
           "section(title: string)",
@@ -875,6 +1126,7 @@
           "setupCloudProvider(\n  id: ProviderConfig['provider'],\n  displayName: string,\n  presetModels: ModelInfo[],\n  apiKeyHint: string,\n  defaultModelIdx = 0,\n)",
           "setupCustomEndpoint()",
           "runSetupWizard(projectPath?: string)",
+          "_runSetupWizardImpl(projectPath?: string)",
           "askChangeProvider()",
           "switchProvider(\n  currentProviderName: string,\n  projectPath?: string,\n  rl?: import('readline')",
           "_switchProviderImpl(\n  currentProviderName: string,\n  projectPath?: string,\n)",
@@ -888,7 +1140,7 @@
       "path": "src\\llm\\provider-factory.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "e87630ab8d2aa5574051f01e13f4a982fd79e45bd4c5967a84242e5e80e720b8",
+      "hash": "d6065c612c019057eb5a9c96a81e8ec35658e56be2fbd0f0a3ac966b0e4912d0",
       "symbols": {
         "imports": [
           "./providers/base.js",
@@ -941,7 +1193,7 @@
       "path": "src\\llm\\prompt-builder.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "0f0c4b32702eff217819b043462386f8a5a863ff26772858531f10c2ef84ad42",
+      "hash": "afe8dea29256d0758645768cf1257bc1667c476248dfa9fcb83f2ce33799327c",
       "symbols": {
         "imports": [
           "./provider-factory.js",
@@ -962,14 +1214,34 @@
       "path": "src\\llm\\identity.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "9739f25ced9fe2f330b00c01d04c32e9cace51afedfbea41b2af287ecedb9bea",
+      "hash": "ab8a581e55fd5ed8e0af34749607341abfaaa4cec13eb66126c61f39cb355482",
       "symbols": {
         "imports": [],
         "exports": [
-          "LAILA_IDENTITY",
-          "path"
+          "LAILA_IDENTITY"
         ],
         "functions": [],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\editor\\validator.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "6aecca2de8e29baf2c4f28756d7c675dbed5d57af1e3e69d2bf643e980fa821e",
+      "symbols": {
+        "imports": [
+          "child_process",
+          "util",
+          "path",
+          "../utils/fs-utils.js"
+        ],
+        "exports": [
+          "validateProject"
+        ],
+        "functions": [
+          "validateProject(projectPath: string)"
+        ],
         "classes": []
       }
     },
@@ -977,11 +1249,12 @@
       "path": "src\\editor\\diff-editor.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "c05e693cc3e7f83b9a5e28d6da9a2809fb0c899152e249d3f2bfd686961a163c",
+      "hash": "6ca076f252d69dbff54b40fe1b67b7af9d18330b2f218ba1a4375a4a50b93701",
       "symbols": {
         "imports": [
           "path",
           "fs/promises",
+          "../utils/fs-utils.js",
           "diff",
           "chalk",
           "readline"
@@ -993,57 +1266,8 @@
         "functions": [
           "parseCodeBlocks(response: string)",
           "promptConfirm(message: string, rl?: RLInterface)",
-          "isYes(answer: string)",
           "generateAndPromptDiff(projectPath: string, blocks: ParsedBlock[], rl?: RLInterface)"
         ],
-        "classes": []
-      }
-    },
-    {
-      "path": "src\\cli\\workspace.ts",
-      "role": "other",
-      "language": "TypeScript",
-      "hash": "daf8315b56a38a120e1b73296d943664654932b0e53a2d44758dbd980f3e236c",
-      "symbols": {
-        "imports": [
-          "path",
-          "../memory/repositories/projects.js",
-          "../memory/repositories/sessions.js",
-          "../utils/fs-utils.js"
-        ],
-        "exports": [
-          "resolveInitialProjectPath",
-          "resolveWorkspace"
-        ],
-        "functions": [
-          "isProjectRoot(dir: string)",
-          "resolveInitialProjectPath()",
-          "resolveProjectFromCwd()",
-          "resolveWorkspace()"
-        ],
-        "classes": []
-      }
-    },
-    {
-      "path": "src\\cli\\index.ts",
-      "role": "other",
-      "language": "TypeScript",
-      "hash": "4beeebd365f2c4dc2b3d2159a51c9b94b295dc90955c7e5bc1815e1fc22d081f",
-      "symbols": {
-        "imports": [
-          "commander",
-          "./commands/start.js",
-          "./commands/ask.js",
-          "./commands/scan.js",
-          "./commands/status.js",
-          "./commands/history.js",
-          "./commands/skills.js",
-          "./commands/doctor.js",
-          "./commands/commit.js",
-          "../memory/schema.js"
-        ],
-        "exports": [],
-        "functions": [],
         "classes": []
       }
     },
@@ -1080,7 +1304,7 @@
       "path": "src\\config\\config-loader.ts",
       "role": "config",
       "language": "TypeScript",
-      "hash": "b85fae809522c9fa6e88801c6ecf3b661ee4eda72d8511f8ab904f6e6d6b432d",
+      "hash": "9f82081af0479c645492a176698e2b2eadef214f508c614e77d4b1107eae6e42",
       "symbols": {
         "imports": [
           "fs/promises",
@@ -1101,6 +1325,55 @@
           "loadProviderConfig(projectPath?: string)",
           "isConfigComplete(config: Partial<ProviderConfig>)"
         ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\cli\\workspace.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "daf8315b56a38a120e1b73296d943664654932b0e53a2d44758dbd980f3e236c",
+      "symbols": {
+        "imports": [
+          "path",
+          "../memory/repositories/projects.js",
+          "../memory/repositories/sessions.js",
+          "../utils/fs-utils.js"
+        ],
+        "exports": [
+          "resolveInitialProjectPath",
+          "resolveWorkspace"
+        ],
+        "functions": [
+          "isProjectRoot(dir: string)",
+          "resolveInitialProjectPath()",
+          "resolveProjectFromCwd()",
+          "resolveWorkspace()"
+        ],
+        "classes": []
+      }
+    },
+    {
+      "path": "src\\cli\\index.ts",
+      "role": "other",
+      "language": "TypeScript",
+      "hash": "fb8a2b7f952584fc55d7f8925cf88d0aef752d7a9934ab97dd5e0fe849a99c60",
+      "symbols": {
+        "imports": [
+          "commander",
+          "./commands/start.js",
+          "./commands/ask.js",
+          "./commands/scan.js",
+          "./commands/status.js",
+          "./commands/history.js",
+          "./commands/skills.js",
+          "./commands/doctor.js",
+          "./commands/commit.js",
+          "../memory/schema.js",
+          "../utils/check-update.js"
+        ],
+        "exports": [],
+        "functions": [],
         "classes": []
       }
     },
@@ -1129,25 +1402,76 @@
       "path": "src\\scanner\\detectors\\structure.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "234c3fb6ee432c3ed4afa9bbedc51cc02ba1e3207759b1b08d67c53949ded510"
+      "hash": "234c3fb6ee432c3ed4afa9bbedc51cc02ba1e3207759b1b08d67c53949ded510",
+      "symbols": {
+        "imports": [
+          "path"
+        ],
+        "exports": [
+          "categoriseFile"
+        ],
+        "functions": [
+          "categoriseFile(relPath: string)"
+        ],
+        "classes": []
+      }
     },
     {
       "path": "src\\scanner\\detectors\\package-manager.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "6d8d1ff79e587d14a9bbb8ad2c0db88d9aac49b519c3ce6caadd2cc389f8427e"
+      "hash": "6d8d1ff79e587d14a9bbb8ad2c0db88d9aac49b519c3ce6caadd2cc389f8427e",
+      "symbols": {
+        "imports": [
+          "../../utils/fs-utils.js",
+          "path"
+        ],
+        "exports": [
+          "detectPackageManager"
+        ],
+        "functions": [
+          "detectPackageManager(projectRoot: string)"
+        ],
+        "classes": []
+      }
     },
     {
       "path": "src\\scanner\\detectors\\language.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "8e13cbd059067b9f96da53e2995f3d04904f3c44dd7aec127e664fc301610594"
+      "hash": "8e13cbd059067b9f96da53e2995f3d04904f3c44dd7aec127e664fc301610594",
+      "symbols": {
+        "imports": [
+          "path"
+        ],
+        "exports": [
+          "getLanguage",
+          "detectLanguages"
+        ],
+        "functions": [
+          "getLanguage(filePath: string)",
+          "detectLanguages(filePaths: string[])"
+        ],
+        "classes": []
+      }
     },
     {
       "path": "src\\scanner\\detectors\\framework.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "8a246c73dc336398e696861199ec6bdd97cf1c46158fe44d5a6109c96186cbe3"
+      "hash": "8a246c73dc336398e696861199ec6bdd97cf1c46158fe44d5a6109c96186cbe3",
+      "symbols": {
+        "imports": [],
+        "exports": [
+          "detectFrameworkFromPkg",
+          "detectFrameworkFromFiles"
+        ],
+        "functions": [
+          "detectFrameworkFromPkg(pkg: PkgJson)",
+          "detectFrameworkFromFiles(fileNames: string[])"
+        ],
+        "classes": []
+      }
     },
     {
       "path": "src\\memory\\repositories\\tasks.ts",
@@ -1235,7 +1559,7 @@
       "path": "src\\memory\\repositories\\indexes.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "4bd55e203fcd0ef8e31093920aac14b201e63722e37221f1ea9f40a925cdcd3d",
+      "hash": "9f6b13d881a408043f0e1e0a7368e3b196ec2cfaf68c4faa2dbb34bb035a2ff6",
       "symbols": {
         "imports": [
           "../db.js"
@@ -1261,7 +1585,7 @@
       "path": "src\\llm\\providers\\openai-compat.ts",
       "role": "service",
       "language": "TypeScript",
-      "hash": "6bfa5464b2e1e5b66b3ee32b8255d6efa80fcc0b3337a65400471669ffdffdaa",
+      "hash": "ffe98f6196aeb7cf665968165cd00af1e435fe396e0297f20f9aa59997201961",
       "symbols": {
         "imports": [
           "./base.js"
@@ -1292,7 +1616,7 @@
       "path": "src\\llm\\providers\\ollama.ts",
       "role": "service",
       "language": "TypeScript",
-      "hash": "f1b9b32ef091fac7b03d8954bc6c1e6a70cb4806458c55f813ea330b018e68c2",
+      "hash": "a651b7c82dcb317ef5481341c9c42d8adf0369b48317cddb4fa15a80ce3f9c99",
       "symbols": {
         "imports": [
           "./base.js"
@@ -1308,7 +1632,7 @@
       "path": "src\\llm\\providers\\gemini.ts",
       "role": "service",
       "language": "TypeScript",
-      "hash": "0fe49cc9b7feac0ebbfc1a417c979c832ca439cfaa8d13cbf33ae52fd6225193",
+      "hash": "97a0f89dfcd0b29e848b129bab88d2ccb37fd779913c2076578228343e635bb9",
       "symbols": {
         "imports": [
           "./base.js"
@@ -1340,7 +1664,7 @@
       "path": "src\\llm\\providers\\anthropic.ts",
       "role": "service",
       "language": "TypeScript",
-      "hash": "22062181f5f2e4279f3bb0f5c0979685d8fcd95e7300f937ccd814cd7ee8d5ed",
+      "hash": "00f3761537aebaf8d93a28593d8b4b49bf01a3182d0b0eaab8864a7bffd44562",
       "symbols": {
         "imports": [
           "./base.js"
@@ -1383,11 +1707,13 @@
       "path": "src\\cli\\ui\\printer.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "845828fa4dfdb7da0faf91263565a423c906168c7b03612fb4e047e4b2f15716",
+      "hash": "84330e9dd6d1ace0f2dcb6e9a888bfba0a78b31a90f6584ae6ab511e353ada92",
       "symbols": {
         "imports": [
           "chalk",
           "readline",
+          "marked",
+          "marked-terminal",
           "./spinner.js"
         ],
         "exports": [
@@ -1432,13 +1758,28 @@
       "path": "src\\cli\\commands\\status.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "f8002329bf23dcc7f039c482a958dad5004461977bdd0f04a1dec3df5f42f763"
+      "hash": "f8002329bf23dcc7f039c482a958dad5004461977bdd0f04a1dec3df5f42f763",
+      "symbols": {
+        "imports": [
+          "../../memory/repositories/sessions.js",
+          "../../memory/repositories/projects.js",
+          "../../memory/repositories/tasks.js",
+          "../ui/printer.js"
+        ],
+        "exports": [
+          "statusCommand"
+        ],
+        "functions": [
+          "statusCommand()"
+        ],
+        "classes": []
+      }
     },
     {
       "path": "src\\cli\\commands\\start.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "e17d9be7571b541785d250ed63b045ab82ea933e1004f7883a3897ecb89ad62a",
+      "hash": "b49ea90a5957cdae1773e82d0d654683425a1d9d66825f4a3861f1d5c92a0bfe",
       "symbols": {
         "imports": [
           "readline",
@@ -1481,7 +1822,7 @@
           "updatePrompt()",
           "runPrompt(userMessage: string)",
           "drainQueue()",
-          "rlAsk(prompt: string)"
+          "rlAsk(promptText: string)"
         ],
         "classes": []
       }
@@ -1501,7 +1842,7 @@
           "skillsCommand"
         ],
         "functions": [
-          "skillsCommand"
+          "skillsCommand()"
         ],
         "classes": []
       }
@@ -1527,7 +1868,7 @@
           "scanCommand"
         ],
         "functions": [
-          "scanCommand"
+          "scanCommand(targetPath?: string)"
         ],
         "classes": []
       }
@@ -1536,13 +1877,27 @@
       "path": "src\\cli\\commands\\history.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "12620ed8b1af7fb8ede19099b316a96aac673597624486d5ef6b93040e0639a4"
+      "hash": "12620ed8b1af7fb8ede19099b316a96aac673597624486d5ef6b93040e0639a4",
+      "symbols": {
+        "imports": [
+          "../../memory/repositories/tasks.js",
+          "../ui/printer.js",
+          "chalk"
+        ],
+        "exports": [
+          "historyCommand"
+        ],
+        "functions": [
+          "historyCommand()"
+        ],
+        "classes": []
+      }
     },
     {
       "path": "src\\cli\\commands\\doctor.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "7c6db7ad0ad28eb567d415d505ab6a5f07b5517fbf61d26643857489dc7fca81",
+      "hash": "ea2d67beb4d767a697c93723b299850a3caca5b0b8742cc2bbd5a21c17a374c4",
       "symbols": {
         "imports": [
           "path",
@@ -1574,7 +1929,7 @@
       "path": "src\\cli\\commands\\commit.ts",
       "role": "other",
       "language": "TypeScript",
-      "hash": "15d69c4aeee7bd7a36fc4ea03c28e694679b78f067ed3473984360aa5cd10d40",
+      "hash": "1674b27a51ca592c0c23ee8b95c38a593b363302ea4d15827c90fd95c30a28c7",
       "symbols": {
         "imports": [
           "path",
@@ -1653,15 +2008,24 @@
     "schemas": [],
     "middleware": [],
     "utils": [
+      "src\\utils\\prompt-utils.ts",
       "src\\utils\\n8n-webhook.ts",
       "src\\utils\\markdown-parser.ts",
       "src\\utils\\logger.ts",
       "src\\utils\\git-utils.ts",
-      "src\\utils\\fs-utils.ts"
+      "src\\utils\\fs-utils.ts",
+      "src\\utils\\check-update.ts"
     ],
     "other": [
+      "scratch_vec2.js",
+      "scratch_vec.js",
+      "scratch_test_highlight.js",
+      "scratch_test_2.js",
+      "scratch_glob.js",
       "README.md",
       "project-index.json",
+      "laila-cli-1.0.1.tgz",
+      "laila-cli-1.0.0.tgz",
       ".npmignore",
       "src\\types.ts",
       "src\\config.ts",
@@ -1671,6 +2035,7 @@
       "src\\tools\\web-tool.ts",
       "src\\tools\\vision-tool.ts",
       "src\\tools\\shell-tool.ts",
+      "src\\tools\\native-tools.ts",
       "src\\tools\\grep-tool.ts",
       "src\\tools\\git-tool.ts",
       "src\\tools\\file-tool.ts",
@@ -1681,11 +2046,13 @@
       "src\\skills\\skill-loader.ts",
       "src\\scanner\\scanner.ts",
       "src\\scanner\\project-index.ts",
+      "src\\orchestrator\\planner.ts",
       "src\\orchestrator\\orchestrator.ts",
       "src\\orchestrator\\intent.ts",
       "src\\orchestrator\\context.ts",
       "src\\n8n\\n8n-client.ts",
       "src\\memory\\schema.ts",
+      "src\\memory\\rag.ts",
       "src\\memory\\episodic.ts",
       "src\\memory\\db.ts",
       "src\\memory\\context-store.ts",
@@ -1695,6 +2062,7 @@
       "src\\llm\\provider-detector.ts",
       "src\\llm\\prompt-builder.ts",
       "src\\llm\\identity.ts",
+      "src\\editor\\validator.ts",
       "src\\editor\\diff-editor.ts",
       "src\\cli\\workspace.ts",
       "src\\cli\\index.ts",
@@ -1724,5 +2092,5 @@
     "tests\\intent.test.ts",
     "tests\\framework.test.ts"
   ],
-  "scannedAt": "2026-08-31T22:10:31.952Z"
+  "scannedAt": "2026-09-02T18:39:50.346Z"
 }
