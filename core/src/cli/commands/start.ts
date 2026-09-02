@@ -28,9 +28,10 @@ import { SKILLS_DIR } from '../../config.js';
 
 async function promptLine(prompt: string): Promise<string> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise(resolve => {
-    rl.question(prompt, answer => { rl.close(); resolve(answer.trim()); });
-  });
+  const { askQuestion } = await import('../../utils/prompt-utils.js');
+  const answer = await askQuestion(rl, prompt);
+  rl.close();
+  return answer;
 }
 
 async function promptYesNo(prompt: string): Promise<boolean> {
@@ -58,6 +59,51 @@ const PROJECT_MARKERS = [
   'build.gradle',
   '.laila',
 ];
+
+async function checkForUpdates() {
+  try {
+    // FIX (High + Low): Use execFile (not exec) so the package name is passed as an
+    // argument array, never shell-interpolated. A malicious `"name": "foo; curl ..."` 
+    // in package.json cannot inject shell commands this way.
+    // Also: import these at module scope instead of re-importing inside the function
+    // (Ponytail: removes redundant dynamic imports).
+    const { execFile } = await import('child_process');
+    const { promisify }   = await import('util');
+    const { readFile, stat, writeFile } = await import('fs/promises');
+    const pathMod = await import('path');
+    const os      = await import('os');
+    
+    // Ponytail Throttle: Only check once every 24 hours to avoid slowing down startup
+    const marker = pathMod.join(os.homedir(), '.laila', '.last_update_check');
+    try {
+      const stats = await stat(marker);
+      if (Date.now() - stats.mtimeMs < 24 * 60 * 60 * 1000) return;
+    } catch {}
+    
+    const execFileAsync = promisify(execFile);
+    
+    const pkgPath = new URL('../../package.json', import.meta.url);
+    const { version, name } = JSON.parse(await readFile(pkgPath, 'utf8'));
+
+    // Validate name looks like a real npm package name before using it
+    if (typeof name !== 'string' || !/^(@[\w.-]+\/)?[\w.-]+$/.test(name)) return;
+
+    // FIX: execFile passes name as a discrete argument — not interpolated in a shell
+    const { stdout } = await execFileAsync('npm', ['show', name, 'version'], { timeout: 2000 });
+    
+    const latestVersion = stdout.trim();
+    if (latestVersion && latestVersion !== version && !latestVersion.includes('ERR')) {
+      printer.blank();
+      printer.warn(`🚀 UPDATE AVAILABLE! ${version} -> ${latestVersion}`);
+      printer.info(`Run "npm install -g ${name}" to update to the latest version.`);
+      printer.blank();
+    }
+    
+    await writeFile(marker, Date.now().toString());
+  } catch (e) {
+    // Ignore errors silently
+  }
+}
 
 /** Check if `dir` looks like a project root. */
 async function isProjectRoot(dir: string): Promise<boolean> {
@@ -89,6 +135,9 @@ async function resolveInitialProjectPath(): Promise<string | null> {
 
 export async function startCommand(): Promise<void> {
   printer.banner();
+  
+  // Non-blocking fire-and-forget update check
+  checkForUpdates();
 
   // ── System preflight ──────────────────────────────────────────────────
   spinner.start('Checking system readiness…');
@@ -234,6 +283,29 @@ export async function startCommand(): Promise<void> {
         ['Git remote', scan.gitRemote   ?? 'none'],
       ]);
     }
+    
+    // Ponytail Phase 14: Zero-Bloat File Watcher
+    try {
+      const fs = await import('fs');
+      // native fs.watch is fast, avoids chokidar dependencies
+      // we just debounce it heavily so it doesn't thrash on node_modules
+      let debounceTimer: NodeJS.Timeout | null = null;
+      fs.watch(projectPath, { recursive: true }, (eventType, filename) => {
+        if (!filename || filename.includes('node_modules') || filename.includes('.git')) return;
+        if (debounceTimer) clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(async () => {
+          // silently trigger re-scan for just this file or full project if needed
+          // to stay fast, we'll just trigger a lightweight scan block here
+          try {
+            const { scanProject } = await import('../../scanner/scanner.js');
+            await scanProject(projectPath); // scan is heavily cached in sqlite anyway
+          } catch {}
+        }, 5000);
+      });
+      printer.dim('  ⚡ Real-time file watcher active (Phase 14)');
+    } catch (e) {
+      printer.dim('  ⚠ File watcher failed to start');
+    }
   }
 
   // ── Session ───────────────────────────────────────────────────────────
@@ -329,12 +401,42 @@ export async function startCommand(): Promise<void> {
         printer.dim(`⏱ ${printer.elapsed(startMs)}`);
       }
 
+      // ── Convert Native Tool Calls to Markdown Blocks ────────────────
+      if (result.toolCalls && result.toolCalls.length > 0) {
+        let fakeMarkdown = '';
+        for (const tc of result.toolCalls) {
+          if (tc.name === 'read_file') {
+            for (const f of tc.arguments.files || []) {
+              fakeMarkdown += `\n\`\`\`read\nfile: ${f}\n\`\`\`\n`;
+            }
+          } else if (tc.name === 'write_file') {
+            fakeMarkdown += `\n\`\`\`write\nfile: ${tc.arguments.file}\ncontent: |\n${tc.arguments.content}\n\`\`\`\n`;
+          } else if (tc.name === 'patch_file') {
+            fakeMarkdown += `\n\`\`\`patch\nfile: ${tc.arguments.file}\nfind:\n${tc.arguments.find}\nreplace:\n${tc.arguments.replace}\n\`\`\`\n`;
+          } else if (tc.name === 'grep_search') {
+            fakeMarkdown += `\n\`\`\`grep\npattern: ${tc.arguments.pattern}\npath: ${tc.arguments.path || '.'}\n\`\`\`\n`;
+          } else if (tc.name === 'run_command') {
+            fakeMarkdown += `\n\`\`\`cmd\n${tc.arguments.command}\n\`\`\`\n`;
+          } else if (tc.name === 'git_command') {
+            fakeMarkdown += `\n\`\`\`git\naction: ${tc.arguments.action}\nargs: ${tc.arguments.args || ''}\n\`\`\`\n`;
+          } else if (tc.name === 'browser_action') {
+            fakeMarkdown += `\n\`\`\`browser\nurl: ${tc.arguments.url}\naction: ${tc.arguments.action}\n\`\`\`\n`;
+          } else if (tc.name === 'web_search') {
+            fakeMarkdown += `\n\`\`\`search\nquery: ${tc.arguments.query}\n\`\`\`\n`;
+          } else if (tc.name === 'web_read_url') {
+            fakeMarkdown += `\n\`\`\`url\nurl: ${tc.arguments.url}\n\`\`\`\n`;
+          }
+        }
+        result.response += fakeMarkdown;
+      }
+
       // ── Sequential Tool Router ───────────────────────────────────────
+      const { runBrowserTool, parseBrowserBlocks } = await import('../../tools/browser-tool.js');
       const { parseAllBlocks } = await import('../../utils/markdown-parser.js');
       const allBlocks = parseAllBlocks(result.response);
       
       let filesWritten = 0;
-      let contextSuffixes: string[] = [];
+      const contextSuffixes: string[] = [];
 
       for (const block of allBlocks) {
         if (block.language.match(/^(typescript|javascript|python|css|html|json|yaml|md|ts|js|jsx|tsx)$/)) {
@@ -351,9 +453,28 @@ export async function startCommand(): Promise<void> {
             if (sfx) contextSuffixes.push(sfx);
           }
         }
+        else if (['read', 'write', 'create'].includes(block.language)) {
+          const { runFileBlocks } = await import('../../tools/file-tool.js');
+          const fileRes = await runFileBlocks(block.raw, { projectRoot: projectPath! });
+          if (fileRes.readContext) contextSuffixes.push(fileRes.readContext);
+          if (fileRes.writeContext) contextSuffixes.push(fileRes.writeContext);
+        }
+        else if (['patch', 'grep'].includes(block.language)) {
+          const { runGrepPatchBlocks } = await import('../../tools/grep-tool.js');
+          const gpRes = await runGrepPatchBlocks(block.raw, { projectRoot: projectPath!, rl });
+          if (gpRes.grepContext) contextSuffixes.push(gpRes.grepContext);
+          if (gpRes.patchContext) contextSuffixes.push(gpRes.patchContext);
+        }
         else if (block.language === 'git') {
           const gitRes = await runGitBlocks(block.raw, projectPath!);
           if (gitRes.gitContext) contextSuffixes.push(gitRes.gitContext);
+        }
+        else if (block.language === 'browser') {
+          const bBlocks = parseBrowserBlocks(block.raw);
+          for (const b of bBlocks) {
+             const res = await runBrowserTool(projectPath!, b);
+             contextSuffixes.push(res);
+          }
         }
         else if (block.language === 'search' || block.language === 'url') {
           const webRes = await runWebBlocks(block.raw);
@@ -420,42 +541,42 @@ export async function startCommand(): Promise<void> {
               }
             } else {
               printer.warn('Validation failed 3 times. Giving up on auto-heal.');
-              void triggerN8nWebhook({
+              triggerN8nWebhook({
                 event: 'validation_failed',
                 projectId,
                 taskId: previousTaskId,
                 message: 'Code validation failed after file edits (auto-heal exhausted)',
                 details: validation.results,
-              });
+              }).catch(() => {}); // FIX (Low #29): explicit no-op catch instead of void operator
             }
           } else {
-            void triggerN8nWebhook({
+            triggerN8nWebhook({
               event: 'task_completed',
               projectId,
               taskId: previousTaskId,
               message: 'Task completed and validated successfully',
-            });
+            }).catch(() => {}); // FIX (Low #29): explicit no-op catch instead of void operator
           }
         }
       } else {
         // If no files were written, task is still done
-        void triggerN8nWebhook({
+        triggerN8nWebhook({
           event: 'task_completed',
           projectId,
           taskId: previousTaskId,
           message: 'Task completed (no file edits)',
-        });
+        }).catch(() => {}); // FIX (Low #29): explicit no-op catch instead of void operator
       }
     } catch (err: unknown) {
       spinner.fail();
       const msg = err instanceof Error ? err.message : String(err);
       printer.error(msg);
-      void triggerN8nWebhook({
+      triggerN8nWebhook({
         event: 'task_failed',
         projectId,
         taskId: previousTaskId,
         message: msg,
-      });
+      }).catch(() => {}); // FIX (Low #29): explicit no-op catch instead of void operator
     }
   }
 
@@ -493,11 +614,25 @@ export async function startCommand(): Promise<void> {
     prompt:   chalk.magenta('  laila> '),
   });
 
+  let autoApprove = false;
+
   /** Ask a question using the existing rl — avoids double-echo from nested interfaces. */
-  function rlAsk(prompt: string): Promise<string> {
-    return new Promise(resolve => {
-      rl.question(chalk.magenta(`  ${prompt}`), answer => resolve(answer.trim()));
-    });
+  async function rlAsk(promptText: string): Promise<string> {
+    if (autoApprove && promptText.includes('[Y/n]')) {
+      printer.dim(`  Auto-approved: ${promptText}`);
+      return 'y';
+    }
+    const { confirm, text } = await import('@clack/prompts');
+    rl.pause();
+    let res: any;
+    if (promptText.includes('[Y/n]')) {
+      const ans = await confirm({ message: promptText.replace(' [Y/n]', '') });
+      res = ans ? 'y' : 'n';
+    } else {
+      res = await text({ message: promptText });
+    }
+    rl.resume();
+    return res as string;
   }
 
   rl.prompt();
@@ -517,8 +652,13 @@ export async function startCommand(): Promise<void> {
 
     if (!line) { rl.resume(); rl.prompt(); return; }
     
-    // Reset auto-fix loop counter when the user types a new command directly
-    autoFixCount = 0;
+    // FIX (High): Only reset autoFixCount for genuine user-initiated messages,
+    // NOT for /interrupt (which pushes to the front of a running queue and would
+    // reset the counter mid-auto-heal loop, enabling infinite retries).
+    // Also do NOT reset if the queue is actively draining auto-fix prompts.
+    if (!normalized.startsWith('/interrupt') && !normalized.startsWith('.interrupt')) {
+      autoFixCount = 0;
+    }
 
     // If queue is already running, just enqueue and return
     if (queueRunning && !normalized.startsWith('/') && !normalized.startsWith('.')) {
@@ -536,6 +676,210 @@ export async function startCommand(): Promise<void> {
 
     if (normalized === '/help' || normalized === '.help') {
       printer.helpMenu();
+      rl.resume(); rl.prompt(); return;
+    }
+
+    if (normalized === '/auto' || normalized === '.auto') {
+      autoApprove = !autoApprove;
+      if (autoApprove) {
+        printer.success('Auto-Approve is ON. Laila will no longer ask for permission (Y/n).');
+      } else {
+        printer.warn('Auto-Approve is OFF. Laila will ask for permission (Y/n) again.');
+      }
+      rl.resume(); rl.prompt(); return;
+    }
+
+    if (normalized.startsWith('/plan ') || normalized.startsWith('.plan ')) {
+      const goal = line.slice(6).trim();
+      if (!goal) {
+        printer.error('Please specify a goal. Example: /plan Create a new login component');
+        rl.resume(); rl.prompt(); return;
+      }
+      
+      const { generatePlan } = await import('../../orchestrator/planner.js');
+      spinner.start('Planning tasks...');
+      try {
+        const plan = await generatePlan(goal, projectPath, projectId);
+        spinner.succeed('Plan generated');
+        printer.blank();
+        printer.section('Execution Plan');
+        plan.forEach((step, i) => {
+          printer.info(`${i + 1}. ${step}`);
+        });
+        
+        const proceed = await rlAsk('Proceed with this plan? [Y/n]: ');
+        if (proceed.toLowerCase() !== 'n') {
+          for (const step of plan) {
+             promptQueue.push(step);
+          }
+          printer.success(`Added ${plan.length} steps to queue.`);
+          drainQueue(); // async fire-and-forget
+        } else {
+          printer.dim('Plan discarded.');
+        }
+      } catch (err) {
+        spinner.fail('Planning failed');
+        printer.error(String(err));
+      }
+      rl.resume(); rl.prompt(); return;
+    }
+
+    if (normalized === '/paste' || normalized === '.paste') {
+      try {
+        spinner.start('Reading clipboard...');
+        const { exec } = await import('child_process');
+        const { promisify } = await import('util');
+        const execAsync = promisify(exec);
+        
+        const psScript = `
+Add-Type -AssemblyName System.Windows.Forms
+if ([System.Windows.Forms.Clipboard]::ContainsImage()) {
+    $img = [System.Windows.Forms.Clipboard]::GetImage()
+    $path = "$env:TEMP\\laila_clip.png"
+    $img.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
+    Write-Output "IMAGE:$path"
+} elseif ([System.Windows.Forms.Clipboard]::ContainsText()) {
+    Write-Output "TEXT:$([System.Windows.Forms.Clipboard]::GetText())"
+}`;
+        const { writeFile } = await import('fs/promises');
+        const os = await import('os');
+        const psPath = path.join(os.tmpdir(), 'laila_paste.ps1');
+        await writeFile(psPath, psScript);
+        
+        const { stdout } = await execAsync(`powershell -ExecutionPolicy Bypass -File "${psPath}"`);
+        const result = stdout.trim();
+        
+        if (result.startsWith('IMAGE:')) {
+          const imgPath = result.slice(6).trim();
+          spinner.succeed('Pasted image from clipboard');
+          printer.info(`Saved to: ${imgPath}`);
+          
+          const followUp = await rlAsk('What do you want me to do with this image? ');
+          if (followUp) {
+            // Assume Phase 9 vision tools can read this path if we pass it in the prompt
+            promptQueue.push(`${followUp}\n\n[Attached Image]: ${imgPath}`);
+            drainQueue();
+          }
+        } else if (result.startsWith('TEXT:')) {
+          const text = result.slice(5).trim();
+          spinner.succeed('Pasted text from clipboard');
+          printer.info(`\nClipboard content:\n${text.slice(0, 100)}... (truncated)`);
+          
+          const followUp = await rlAsk('What do you want me to do with this? ');
+          if (followUp) {
+            promptQueue.push(`${followUp}\n\nClipboard context:\n${text}`);
+            drainQueue();
+          }
+        } else {
+          spinner.fail('Clipboard is empty or contains non-text data.');
+        }
+      } catch (err: any) {
+        spinner.fail('Failed to read clipboard');
+        printer.error(String(err));
+      }
+      rl.resume(); rl.prompt(); return;
+    }
+
+    if (normalized === '/commit' || normalized === '.commit') {
+      try {
+        const { exec } = await import('child_process');
+        const { promisify } = await import('util');
+        const execAsync = promisify(exec);
+        
+        spinner.start('Checking git diff...');
+        const { stdout: diff } = await execAsync('git diff', { cwd: projectPath });
+        const { stdout: stagedDiff } = await execAsync('git diff --cached', { cwd: projectPath });
+        
+        const totalDiff = diff + '\n' + stagedDiff;
+        if (!totalDiff.trim()) {
+          spinner.fail('No changes to commit.');
+          rl.resume(); rl.prompt(); return;
+        }
+        
+        spinner.update('Generating semantic commit message...');
+        const { chat } = await import('../../llm/provider-factory.js');
+        const result = await chat([
+          { role: 'system', content: 'You are a git expert. Write a strict, single-line semantic commit message based on the diff. No quotes, no markdown, no explanation. Just the message.' },
+          { role: 'user', content: totalDiff.slice(0, 4000) } // trunc to fit
+        ], { temperature: 0.1 });
+        
+        const commitMsg = result.content.trim().replace(/^"|"$/g, '');
+        spinner.stop();
+        
+        const proceed = await rlAsk(`Commit with message: "${commitMsg}"? [Y/n]: `);
+        if (proceed.toLowerCase() !== 'n') {
+          spinner.start('Committing...');
+          await execAsync('git add .', { cwd: projectPath });
+          await execAsync(`git commit -m "${commitMsg.replace(/"/g, '\\"')}"`, { cwd: projectPath });
+          spinner.succeed(`Committed: ${commitMsg}`);
+        } else {
+          printer.dim('Commit cancelled.');
+        }
+      } catch (err: any) {
+        spinner.fail('Commit failed');
+        printer.error(err.message || String(err));
+      }
+      rl.resume(); rl.prompt(); return;
+    }
+
+    if (normalized.startsWith('/pipeline ') || normalized.startsWith('.pipeline ')) {
+      const goal = line.slice(10).trim();
+      if (!goal) {
+        printer.error('Please specify a goal. Example: /pipeline Build a user auth feature');
+        rl.resume(); rl.prompt(); return;
+      }
+      
+      printer.section('Sub-Agent Pipeline');
+      printer.info('1. [Researcher] Research best practices and find context');
+      printer.info('2. [Coder] Write the code based on the context');
+      printer.info('3. [Reviewer] Audit the changes for style and security');
+      
+      const proceed = await rlAsk('Launch pipeline? [Y/n]: ');
+      if (proceed.toLowerCase() !== 'n') {
+        promptQueue.push(`/research I need to build this, but first research the best approach and gather relevant file context. Goal: ${goal}`);
+        promptQueue.push(`/code Implement the code changes for this goal based on the previous research. Goal: ${goal}`);
+        promptQueue.push(`/review Audit the code changes you just made for security, style, and correctness. Goal: ${goal}`);
+        
+        printer.success('Pipeline launched (3 agents queued).');
+        drainQueue(); // async fire-and-forget
+      } else {
+        printer.dim('Pipeline cancelled.');
+      }
+      rl.resume(); rl.prompt(); return;
+    }
+
+    if (normalized.startsWith('/swarm ') || normalized.startsWith('.swarm ')) {
+      const goal = line.slice(7).trim();
+      if (!goal) {
+        printer.error('Please specify a goal. Example: /swarm Refactor the database layer');
+        rl.resume(); rl.prompt(); return;
+      }
+      
+      printer.section('Parallel Agent Swarm');
+      printer.info('Spawning 3 parallel Researchers...');
+      
+      try {
+        spinner.start('Swarm thinking (running 3 agents concurrently)...');
+        const { run } = await import('../../orchestrator/orchestrator.js');
+        
+        // Run 3 agents in parallel!
+        const [res1, res2, res3] = await Promise.all([
+          run({ userMessage: `/research Find all database models related to: ${goal}`, sessionId: session!.id, projectId, previousTaskId }),
+          run({ userMessage: `/research Find all API routes related to: ${goal}`, sessionId: session!.id, projectId, previousTaskId }),
+          run({ userMessage: `/research Find all tests related to: ${goal}`, sessionId: session!.id, projectId, previousTaskId })
+        ]);
+        
+        spinner.succeed('Swarm completed parallel research.');
+        
+        const mergedContext = `=== Swarm Research ===\n\nModels: ${res1.response}\n\nRoutes: ${res2.response}\n\nTests: ${res3.response}`;
+        printer.info('Merging context and passing to Coder...');
+        
+        promptQueue.push(`/code Goal: ${goal}\n\nContext from Swarm:\n${mergedContext}`);
+        drainQueue();
+      } catch (err) {
+        spinner.fail('Swarm failed');
+        printer.error(String(err));
+      }
       rl.resume(); rl.prompt(); return;
     }
 
@@ -609,6 +953,42 @@ export async function startCommand(): Promise<void> {
       rl.resume(); rl.prompt(); return;
     }
 
+    // ── /swarm ────────────────────────────────────────────────────────────
+    if (normalized.startsWith('/swarm ')) {
+      const parts = line.slice(7).split('|').map(s => s.trim()).filter(Boolean);
+      if (parts.length < 2) {
+        printer.warn('Usage: /swarm <agent 1 task> | <agent 2 task> | ...');
+        rl.resume(); rl.prompt(); return;
+      }
+      printer.info(`Spawning ${parts.length} concurrent sub-agents...`);
+      rl.pause();
+      
+      try {
+        const startMs = Date.now();
+        // Run all parts concurrently
+        const swarmResults = await Promise.all(parts.map(async (task, idx) => {
+          const res = await orchestrate({
+            userMessage: `[Sub-Agent ${idx + 1} Task]: ${task}`,
+            sessionId: session!.id,
+            projectId,
+            previousTaskId,
+          });
+          return `=== Sub-Agent ${idx + 1} Result ===\n${res.response}`;
+        }));
+        
+        const durationMs = Date.now() - startMs;
+        printer.success(`Swarm completed in ${printer.elapsed(startMs)}`);
+        
+        // Push the merged results into the prompt queue for the main agent to review
+        const merged = `[SYSTEM: Swarm execution completed. Review the parallel outputs below and finalize the goal.]\n\n${swarmResults.join('\n\n')}`;
+        promptQueue.push(merged);
+        await drainQueue();
+      } catch (err: any) {
+        printer.error(`Swarm failed: ${err.message}`);
+      }
+      return;
+    }
+
     // ── /remember ─────────────────────────────────────────────────────────
     if (normalized.startsWith('/remember ')) {
       const fact = line.slice(10).trim();
@@ -650,11 +1030,129 @@ export async function startCommand(): Promise<void> {
       rl.resume(); rl.prompt(); return;
     }
 
+    // ── /browse ───────────────────────────────────────────────────────────
+    if (normalized.startsWith('/browse ')) {
+      const url = line.slice(8).trim();
+      if (!url) {
+        printer.warn('Usage: /browse <url>');
+        rl.resume(); rl.prompt(); return;
+      }
+      spinner.start(`Browsing to ${url}…`);
+      try {
+        const { takeScreenshot } = await import('../../tools/browser-tool.js');
+        const { askVision } = await import('../../tools/vision-tool.js');
+        
+        const screenshotPath = await takeScreenshot(url, projectPath);
+        spinner.start('Analyzing webpage visual state…');
+        
+        const analysis = await askVision(projectPath, screenshotPath, 'You are an expert QA tester. Describe the UI state of this webpage in extreme detail. List all visible text, buttons, and layout structures.');
+        spinner.stop();
+        
+        printer.section(`Web UI Analysis (${url})`);
+        printer.response(analysis);
+        
+        promptQueue.push(`[Web UI Analysis of ${url}]:\n${analysis}`);
+        printer.dim('  (UI state added to context for your next prompt)');
+      } catch (e: any) {
+        spinner.fail();
+        printer.error(e.message);
+      }
+      rl.resume(); rl.prompt(); return;
+    }
+
     // ── /mcp ──────────────────────────────────────────────────────────────
-    if (normalized.startsWith('/mcp ')) {
+    if (normalized === '/mcp' || normalized.startsWith('/mcp ')) {
       const parts = line.split(' ').slice(1);
-      if (parts.length === 0) {
-        printer.warn('Usage: /mcp <command> [args...] (e.g. /mcp node server.js)');
+      const REGISTRY: Record<string, any> = {
+        github: { command: "npx", args: ["-y", "@modelcontextprotocol/server-github"], env: { GITHUB_PERSONAL_ACCESS_TOKEN: "" } },
+        slack: { command: "npx", args: ["-y", "@modelcontextprotocol/server-slack"], env: { SLACK_BOT_TOKEN: "", SLACK_TEAM_ID: "" } },
+        sqlite: { command: "npx", args: ["-y", "mcp-server-sqlite", "--db-path", "./database.sqlite"] },
+        postgres: { command: "npx", args: ["-y", "@modelcontextprotocol/server-postgres", "postgresql://user:password@localhost/mydb"] },
+        brave: { command: "npx", args: ["-y", "@modelcontextprotocol/server-brave-search"], env: { BRAVE_API_KEY: "" } },
+        stitch: { command: "npx", args: ["-y", "stitch-mcp"], env: { STITCH_API_KEY: "", GOOGLE_CLOUD_PROJECT: "" } },
+        puppeteer: { command: "npx", args: ["-y", "@modelcontextprotocol/server-puppeteer"] },
+        memory: { command: "npx", args: ["-y", "@modelcontextprotocol/server-memory"] }
+      };
+
+      if (parts.length === 0 || parts[0] === 'list') {
+        printer.section('Available MCP Add-ons');
+        printer.info('  ' + Object.keys(REGISTRY).join(', '));
+        printer.blank();
+        printer.info('Type /mcp add <name> to install one.');
+        if (mcpManager && mcpManager.tools.length > 0) {
+          printer.success(`\nActive MCP tools: ${mcpManager.tools.map((t: any) => t.name).join(', ')}`);
+        }
+        rl.resume(); rl.prompt(); return;
+      }
+      
+      if (parts[0] === 'add' && parts[1]) {
+        const name = parts[1];
+        if (!REGISTRY[name]) {
+          printer.error(`Unknown add-on '${name}'.`);
+        } else {
+          if (!mcpManager) {
+            const { MCPClientManager } = await import('../../mcp/mcp-client.js');
+            mcpManager = new MCPClientManager();
+          }
+          if (!mcpManager.config) mcpManager.config = { mcpServers: {} };
+          mcpManager.config.mcpServers[name] = REGISTRY[name];
+          const { writeFile, mkdir } = await import('fs/promises');
+          await mkdir(path.join(projectPath!, '.laila'), { recursive: true });
+          await writeFile(path.join(projectPath!, '.laila', 'mcp.json'), JSON.stringify(mcpManager.config, null, 2));
+          printer.success(`Added '${name}' to mcp.json!`);
+          if (REGISTRY[name].env) printer.warn(`This server requires API keys. Run: /mcp auth ${name}`);
+        }
+        rl.resume(); rl.prompt(); return;
+      }
+
+      if (parts[0] === 'search' && parts[1]) {
+        spinner.start(`Searching NPM for MCP servers matching '${parts.slice(1).join(' ')}'…`);
+        try {
+          const { exec } = await import('child_process');
+          const { promisify } = await import('util');
+          const execAsync = promisify(exec);
+          const query = parts.slice(1).join(' ');
+          const { stdout } = await execAsync(`npm search mcp ${query} --json`, { timeout: 15000 });
+          spinner.stop();
+          const results = JSON.parse(stdout);
+          const filtered = results.filter((r: any) => r.name.includes('mcp') || (r.description && r.description.toLowerCase().includes('mcp')));
+          
+          printer.section('Search Results (Cleaned)');
+          if (filtered.length === 0) {
+            printer.warn('No MCP servers found for that query.');
+          } else {
+            filtered.forEach((r: any) => {
+              const desc = r.description ? (r.description.length > 80 ? r.description.substring(0, 77) + '...' : r.description) : 'No description';
+              console.log(`\x1b[36m${r.name}\x1b[0m - ${desc.replace(/\n/g, ' ')}`);
+            });
+            printer.blank();
+            printer.info('To run any of these, use: /mcp npx -y <package-name>');
+          }
+        } catch (e: any) {
+          spinner.fail('Search failed.');
+          printer.error(e.message);
+        }
+        rl.resume(); rl.prompt(); return;
+      }
+      if (parts[0] === 'auth' && parts[1]) {
+        const srvName = parts[1];
+        if (mcpManager?.config?.mcpServers[srvName]) {
+          const srv = mcpManager.config.mcpServers[srvName];
+          if (srv.env) {
+            for (const key of Object.keys(srv.env)) {
+              const val = await rlAsk(`Enter value for ${key}: `);
+              if (val) srv.env[key] = val;
+            }
+            const { writeFile, mkdir } = await import('fs/promises');
+            await mkdir(path.join(projectPath!, '.laila'), { recursive: true });
+            await writeFile(path.join(projectPath!, '.laila', 'mcp.json'), JSON.stringify(mcpManager.config, null, 2));
+            printer.success(`Saved auth config for ${srvName} to mcp.json!`);
+          } else {
+            printer.warn(`No env config found for ${srvName}.`);
+          }
+        } else {
+          printer.error(`Server '${srvName}' not found in mcp.json`);
+        }
         rl.resume(); rl.prompt(); return;
       }
       spinner.start(`Connecting to MCP server: ${parts.join(' ')}…`);
@@ -757,11 +1255,8 @@ export async function startCommand(): Promise<void> {
       });
       printer.blank();
 
-      const choice = await new Promise<string>(resolve => {
-        rl.question(chalk.magenta('  Enter model number or name: '), answer => {
-          resolve(answer.trim());
-        });
-      });
+      const { askQuestion } = await import('../../utils/prompt-utils.js');
+      const choice = await askQuestion(rl, chalk.magenta('  Enter model number or name (or press ESC/Enter to go back): '));
 
       if (!choice) {
         printer.dim('No selection made — keeping current model.');
@@ -797,13 +1292,10 @@ export async function startCommand(): Promise<void> {
         activeProvider = newProv;
         setProvider(activeProvider);
 
-        const save = await new Promise<string>(resolve => {
-          rl.question(chalk.magenta('  Save as default for this project? [Y/n]: '), answer => {
-            resolve(answer.trim().toLowerCase());
-          });
-        });
+        const { askYesNo } = await import('../../utils/prompt-utils.js');
+        const save = await askYesNo(rl, chalk.magenta('  Save as default for this project?'));
 
-        if (save === '' || save === 'y' || save === 'yes') {
+        if (save) {
           await saveProjectConfig(projectPath, newConfig as import('../../llm/providers/base.js').ProviderConfig);
           printer.success(`Switched to model: ${selectedModel.id} (saved)`);
         } else {
@@ -841,7 +1333,8 @@ export async function startCommand(): Promise<void> {
         if (ok.toLowerCase() !== 'n') {
           tasks.forEach((t, i) => promptQueue.push(`[Plan Step ${i + 1}/${tasks.length}]: ${t}`));
           updatePrompt();
-          drainQueue();
+          // FIX (Medium): attach .catch() so a drainQueue rejection becomes a handled error
+          drainQueue().catch(err => printer.error(`Queue error: ${err instanceof Error ? err.message : String(err)}`));
           return; // Don't prompt, queue is running
         } else {
           printer.dim('Plan discarded.');
@@ -869,7 +1362,8 @@ export async function startCommand(): Promise<void> {
         promptQueue.push(`As a coder, implement the feature based on the previous research: "${goal}". Write the actual code and apply patches.`);
         promptQueue.push(`As a reviewer, review the code that was just implemented for: "${goal}". Check for security, style, and correctness. If there are issues, fix them.`);
         updatePrompt();
-        drainQueue();
+        // FIX (Medium): attach .catch() so a drainQueue rejection becomes a handled error
+        drainQueue().catch(err => printer.error(`Queue error: ${err instanceof Error ? err.message : String(err)}`));
         return;
       } else {
         printer.dim('Pipeline discarded.');

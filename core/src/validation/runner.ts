@@ -20,11 +20,41 @@ export async function runStep(
     let stderr = '';
     let timedOut = false;
 
+    // FIX (Medium #18): Use a minimal env — do NOT pass the full process.env.
+    // The validation runner may execute `npm test`, which could be a malicious
+    // script. It must not have access to LAILA_API_KEY, AWS credentials, etc.
+    const safeEnv: Record<string, string> = {
+      PATH:        process.env['PATH']        ?? '',
+      HOME:        process.env['HOME']        ?? '',
+      USERPROFILE: process.env['USERPROFILE'] ?? '',
+      TEMP:        process.env['TEMP']        ?? '',
+      TMP:         process.env['TMP']         ?? '',
+      TMPDIR:      process.env['TMPDIR']      ?? '',
+      SYSTEMROOT:  process.env['SYSTEMROOT']  ?? '',
+      NODE_ENV:    process.env['NODE_ENV']    ?? '',
+      CI:          'true',
+      FORCE_COLOR: '0',
+    };
+
     const child = spawn(command, args, {
       cwd,
-      shell: true,
+      shell: false,  // FIX: args are already an array, no shell needed
       stdio: 'pipe',
-      env: { ...process.env, CI: 'true', FORCE_COLOR: '0' },
+      env: safeEnv,
+    });
+
+    // FIX (High #10): Handle spawn 'error' event — fires when the binary doesn't
+    // exist or cannot be executed. Without this the process crashes.
+    child.on('error', (err) => {
+      clearTimeout(timer);
+      resolve({
+        step,
+        success: false,
+        stdout: stdout.slice(-4000),
+        stderr: (stderr + `\nSpawn error: ${err.message}`).slice(-4000),
+        exitCode: 1,
+        durationMs: Date.now() - start,
+      });
     });
 
     const timer = setTimeout(() => {

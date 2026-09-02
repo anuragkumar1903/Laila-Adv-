@@ -1,8 +1,11 @@
 {
-  "name": "laila",
+  "name": "laila-cli",
   "version": "1.0.0",
-  "description": "Local-first AI developer assistant",
+  "description": "Laila: An advanced, local-first AI developer assistant with MCP, Vision, and Multi-Agent Swarm capabilities.",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "bin": {
     "laila-cli": "./dist/cli/index.js",
     "laila": "./dist/cli/index.js"
@@ -10,6 +13,7 @@
   "scripts": {
     "dev": "tsx src/cli/index.ts",
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "start": "node dist/cli/index.js",
     "lint": "tsc --noEmit",
     "test": "node --import tsx --test tests/**/*.test.ts"
@@ -18,11 +22,19 @@
     "ai",
     "cli",
     "developer-tools",
-    "ollama"
+    "ollama",
+    "mcp",
+    "agent",
+    "swarm"
   ],
-  "author": "",
+  "author": "Anurag Kumar",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anuragkumar1903/Laila-Adv-.git"
+  },
   "dependencies": {
+    "@clack/prompts": "^1.7.0",
     "@modelcontextprotocol/sdk": "^1.30.0",
     "better-sqlite3": "^12.11.1",
     "chalk": "^5.6.2",
@@ -30,11 +42,16 @@
     "diff": "^9.0.0",
     "glob": "^11.0.0",
     "ignore": "^7.0.0",
-    "ora": "^9.4.1"
+    "marked": "^15.0.12",
+    "marked-terminal": "^7.3.0",
+    "ora": "^9.4.1",
+    "playwright": "^1.62.1",
+    "sqlite-vec": "^0.1.9"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.0",
     "@types/diff": "^7.0.2",
+    "@types/marked-terminal": "^6.1.1",
     "@types/node": "^26.0.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"

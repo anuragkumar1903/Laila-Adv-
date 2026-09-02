@@ -10,7 +10,8 @@ export interface MarkdownBlock {
 
 export function parseAllBlocks(text: string): MarkdownBlock[] {
   const blocks: MarkdownBlock[] = [];
-  const regex = /```(\w+)\n([\s\S]*?)```/g;
+  // More resilient regex: tolerates leading spaces/tabs, \r\n, and hyphens in language name
+  const regex = /^[ \t]*```([A-Za-z0-9_-]+)[ \t]*\r?\n([\s\S]*?)^[ \t]*```/gm;
   let match;
   while ((match = regex.exec(text)) !== null) {
     blocks.push({

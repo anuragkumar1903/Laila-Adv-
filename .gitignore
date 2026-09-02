@@ -137,4 +137,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+# Laila Specific Ignores
 .laila/
+skills/
+data/
+project-index.json
+*.txt

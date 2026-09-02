@@ -188,8 +188,8 @@ export function setProvider(provider: LLMProvider): void {
 export async function chat(
   messages: import('./providers/base.js').LLMMessage[],
   options?: import('./providers/base.js').ChatOptions,
-): Promise<{ content: string; tokensUsed: number }> {
+): Promise<{ content: string; toolCalls?: import('./providers/base.js').ToolCall[]; tokensUsed: number }> {
   const provider = await getProvider();
   const response = await provider.chat(messages, options);
-  return { content: response.content, tokensUsed: response.tokensUsed };
+  return { content: response.content, toolCalls: response.toolCalls, tokensUsed: response.tokensUsed };
 }

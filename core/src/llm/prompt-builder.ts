@@ -99,7 +99,7 @@ export async function buildMessages(ctx: AgentContext): Promise<LLMMessage[]> {
   if (ctx.availableSkills) {
     messages.push({
       role: 'system',
-      content: `[AVAILABLE SKILLS]\nYou have access to the following custom skills in the workspace. Adopt the guidelines of the most relevant skill if requested:\n\n${ctx.availableSkills}`,
+      content: `[AVAILABLE SKILLS]\nYou have access to the following custom skills. Automatically adopt their guidelines if they apply to the user's task, even if not explicitly requested:\n\n${ctx.availableSkills}`,
     });
   }
 

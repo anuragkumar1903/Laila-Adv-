@@ -20,7 +20,7 @@ interface OllamaTagsResponse {
 
 interface OllamaChatResponse {
   model: string;
-  message: { role: string; content: string };
+  message: { role: string; content: string | null; tool_calls?: any[] };
   done: boolean;
   eval_count?: number;
   prompt_eval_count?: number;
@@ -83,10 +83,18 @@ export class OllamaProvider implements LLMProvider {
   async modelExists(model: string): Promise<boolean> {
     const models = await this.listModels();
     const target = model.toLowerCase();
-    return models.some(
-      m => m.id.toLowerCase() === target ||
-           m.id.toLowerCase().startsWith(target.split(':')[0] ?? ''),
-    );
+    // FIX (Low #31): Use exact match first, then fall back to tag-aware prefix match.
+    // Old code used startsWith(name.split(':')[0]) which made `llama3` match
+    // `llama3.1`, `llama3-uncensored`, etc. — selecting the wrong model.
+    // New logic: exact id match OR (id without tag) === (model without tag).
+    return models.some(m => {
+      const mId = m.id.toLowerCase();
+      if (mId === target) return true;
+      // Allow matching by name without the version tag (e.g. "llama3" matches "llama3:latest")
+      const mBase = mId.split(':')[0] ?? mId;
+      const tBase = target.split(':')[0] ?? target;
+      return mBase === tBase; // must be exact base match, not just startsWith
+    });
   }
 
   async chat(messages: LLMMessage[], options: ChatOptions = {}): Promise<ChatResponse> {
@@ -95,7 +103,7 @@ export class OllamaProvider implements LLMProvider {
       throw new LLMError('No models available in Ollama. Pull a model first: ollama pull <model>', this.id);
     }
 
-    const body = {
+    const body: Record<string, unknown> = {
       model:   modelToUse,
       messages,
       stream:  false,
@@ -105,6 +113,18 @@ export class OllamaProvider implements LLMProvider {
         num_ctx:     8192,   // 8k context — enough for identity + skill + files + history
       },
     };
+    
+    // Wire up Native Tool Calling!
+    if (options.tools && options.tools.length > 0) {
+      body['tools'] = options.tools.map(t => ({
+        type: 'function',
+        function: {
+          name: t.name,
+          description: t.description,
+          parameters: t.parameters
+        }
+      }));
+    }
 
     let res: Response;
     try {
@@ -128,10 +148,26 @@ export class OllamaProvider implements LLMProvider {
 
     const data = await res.json() as OllamaChatResponse;
     return {
-      content:    data.message.content,
+      content:    data.message.content || '',
+      toolCalls:  data.message.tool_calls?.map((tc: any) => ({
+        id: tc.id || tc.function.name, // Ollama sometimes omits ID
+        name: tc.function.name,
+        arguments: (typeof tc.function.arguments === 'string' && tc.function.arguments) ? JSON.parse(tc.function.arguments) : (tc.function.arguments || {})
+      })),
       tokensUsed: (data.eval_count ?? 0) + (data.prompt_eval_count ?? 0),
       model:      data.model,
       provider:   this.id,
     };
+  }
+
+  async embed(text: string, embedModel = 'nomic-embed-text'): Promise<number[]> {
+    const res = await fetch(`${this.host}/api/embeddings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: embedModel, prompt: text }),
+    });
+    if (!res.ok) throw new Error('Ollama embed failed: ' + await res.text());
+    const data = await res.json() as { embedding: number[] };
+    return data.embedding;
   }
 }

@@ -38,7 +38,12 @@ function parseSimpleYaml(content: string): Record<string, string> {
     if (colonIdx === -1) continue;
     const key   = line.slice(0, colonIdx).trim();
     const value = line.slice(colonIdx + 1).trim().replace(/^["']|["']$/g, ''); // strip quotes
-    if (key && value) result[key] = value;
+    if (!key) continue;
+    // FIX (High): Store the key regardless of whether value is empty.
+    // An empty value is meaningful — it tells downstream code "this key was set
+    // but left blank", so it won't silently fall back to a higher-priority config.
+    // Callers should treat '' as "explicitly cleared" and warn the user.
+    result[key] = value;
   }
   return result;
 }

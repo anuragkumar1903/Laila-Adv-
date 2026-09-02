@@ -1,6 +1,10 @@
 import chalk from 'chalk';
 import readline from 'readline';
+import { marked } from 'marked';
+import TerminalRenderer from 'marked-terminal';
 import { clearCurrentInput, redrawPrompt } from './spinner.js';
+
+marked.setOptions({ renderer: new TerminalRenderer() as any });
 
 const BRAND  = chalk.bold.hex('#7C3AED');
 const ACCENT = chalk.hex('#7C3AED');
@@ -40,13 +44,22 @@ export const printer = {
     });
   },
 
-  /** Print an LLM response with a subtle left border */
+  /** Print an LLM response with a subtle left border and Markdown formatting */
   response(text: string): void {
     print(() => {
       console.log();
-      const lines = text.split('\n');
-      for (const line of lines) {
-        console.log(chalk.hex('#7C3AED')('│ ') + line);
+      try {
+        const rendered = marked(text) as string;
+        const lines = rendered.trim().split('\n');
+        for (const line of lines) {
+          console.log(chalk.hex('#7C3AED')('│ ') + line);
+        }
+      } catch {
+        // Fallback if marked fails
+        const lines = text.trim().split('\n');
+        for (const line of lines) {
+          console.log(chalk.hex('#7C3AED')('│ ') + line);
+        }
       }
       console.log();
     });

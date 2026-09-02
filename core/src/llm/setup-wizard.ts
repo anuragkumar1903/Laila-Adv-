@@ -30,15 +30,34 @@ import { GEMINI_MODELS }    from './providers/gemini.js';
 let _externalRl: import('readline').Interface | undefined;
 
 function ask(prompt: string): Promise<string> {
-  if (_externalRl) {
-    return new Promise(resolve => {
-      _externalRl!.question(chalk.magenta(`  ${prompt}`), answer => resolve(answer.trim()));
+  const doAsk = (rlInst: import('readline').Interface, autoClose: boolean) => {
+    return new Promise<string>((resolve, reject) => {
+      const ac = new AbortController();
+      const onEsc = (_str: string, key: any) => {
+        if (key && key.name === 'escape') {
+          ac.abort();
+          process.stdin.removeListener('keypress', onEsc);
+          console.log();
+          if (autoClose) rlInst.close();
+          reject(new Error('ESC_CANCEL'));
+        }
+      };
+      process.stdin.on('keypress', onEsc);
+
+      rlInst.question(chalk.magenta(`  ${prompt}`), { signal: ac.signal }, answer => {
+        process.stdin.removeListener('keypress', onEsc);
+        if (autoClose) rlInst.close();
+        resolve(answer.trim());
+      });
+    }).catch(err => {
+      if (err.name === 'AbortError') throw new Error('ESC_CANCEL');
+      throw err;
     });
-  }
+  };
+
+  if (_externalRl) return doAsk(_externalRl, false);
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise(resolve => {
-    rl.question(chalk.magenta(`  ${prompt}`), answer => { rl.close(); resolve(answer.trim()); });
-  });
+  return doAsk(rl, true);
 }
 
 async function askSecret(prompt: string): Promise<string> {
@@ -220,6 +239,18 @@ async function setupCustomEndpoint(): Promise<ProviderConfig> {
  * Returns a ready-to-use LLMProvider and saves the config to disk.
  */
 export async function runSetupWizard(projectPath?: string): Promise<LLMProvider> {
+  try {
+    return await _runSetupWizardImpl(projectPath);
+  } catch (err: any) {
+    if (err.message === 'ESC_CANCEL') {
+      console.log(chalk.red('\n  Setup cancelled. Exiting.'));
+      process.exit(1);
+    }
+    throw err;
+  }
+}
+
+async function _runSetupWizardImpl(projectPath?: string): Promise<LLMProvider> {
   console.log('');
   console.log(chalk.bold.cyan('  ╔══════════════════════════════════════════════╗'));
   console.log(chalk.bold.cyan('  ║      Laila — First Time Setup                ║'));
@@ -383,8 +414,13 @@ export async function runSetupWizard(projectPath?: string): Promise<LLMProvider>
  * Ask user if they want to change provider (shown when config already exists)
  */
 export async function askChangeProvider(): Promise<boolean> {
-  const answer = await ask('Change provider/model? [y/N]: ');
-  return ['y', 'yes'].includes(answer.toLowerCase());
+  try {
+    const answer = await ask('Change provider/model? [y/N] (ESC to skip): ');
+    return ['y', 'yes'].includes(answer.toLowerCase());
+  } catch (err: any) {
+    if (err.message === 'ESC_CANCEL') return false;
+    throw err;
+  }
 }
 
 // ─── Mid-session provider switch ─────────────────────────────────────────
@@ -406,6 +442,9 @@ export async function switchProvider(
   _externalRl = rl;
   try {
     return await _switchProviderImpl(currentProviderName, projectPath);
+  } catch (err: any) {
+    if (err.message === 'ESC_CANCEL') return null;
+    throw err;
   } finally {
     _externalRl = undefined;
   }

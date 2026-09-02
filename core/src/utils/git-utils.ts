@@ -63,10 +63,18 @@ export async function commitChanges(dir: string, message: string): Promise<boole
 export async function getGitLog(dir: string, limit = 5): Promise<Array<{ hash: string; message: string }>> {
   const raw = await git(dir, 'log', `--oneline`, `-${limit}`);
   if (!raw) return [];
-  return raw.split('\n').filter(Boolean).map(line => ({
-    hash:    line.slice(0, 7),
-    message: line.slice(8),
-  }));
+  // FIX (Medium): git --oneline emits variable-length abbreviated hashes
+  // (typically 7-12 chars depending on repo size). Split on the FIRST space
+  // instead of hardcoding slice(0,7)/slice(8) which would truncate longer hashes
+  // and silently drop the first char(s) of the message.
+  return raw.split('\n').filter(Boolean).map(line => {
+    const spaceIdx = line.indexOf(' ');
+    if (spaceIdx === -1) return { hash: line, message: '' };
+    return {
+      hash:    line.slice(0, spaceIdx),
+      message: line.slice(spaceIdx + 1),
+    };
+  });
 }
 
 /** Get staged files list */

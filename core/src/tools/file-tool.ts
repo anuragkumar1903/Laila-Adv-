@@ -25,7 +25,7 @@
  *   ```
  */
 
-import { readFile, writeFile } from 'fs/promises';
+import { readFile, writeFile, realpath } from 'fs/promises';
 import path from 'path';
 import chalk from 'chalk';
 import readline from 'readline';
@@ -38,8 +38,11 @@ export async function executeReadBlock(
   block: ReadBlock,
   projectRoot: string
 ): Promise<ReadResult> {
-  const fullPath = path.resolve(projectRoot, block.file);
-  if (!fullPath.startsWith(path.resolve(projectRoot))) {
+  const resolvedRoot = path.resolve(projectRoot);
+  const fullPath = path.resolve(resolvedRoot, block.file);
+
+  // FIX (High): Primary path-traversal check
+  if (!fullPath.startsWith(resolvedRoot + path.sep) && fullPath !== resolvedRoot) {
     return { file: block.file, content: '', error: 'Cannot read outside project root.' };
   }
 
@@ -47,7 +50,28 @@ export async function executeReadBlock(
     return { file: block.file, content: '', error: `File not found: ${block.file}` };
   }
 
-  const content = await readFileSafe(fullPath);
+  // FIX (High): Resolve symlinks AFTER the lexical check — prevents a symlink
+  // inside the project that points outside (e.g. .laila/secrets -> /etc/passwd).
+  let realFullPath: string;
+  try {
+    realFullPath = await realpath(fullPath);
+  } catch {
+    return { file: block.file, content: '', error: `Cannot resolve path: ${block.file}` };
+  }
+
+  // Resolve the real root too (the root itself might have a symlink component)
+  let realRoot: string;
+  try {
+    realRoot = await realpath(resolvedRoot);
+  } catch {
+    realRoot = resolvedRoot;
+  }
+
+  if (!realFullPath.startsWith(realRoot + path.sep) && realFullPath !== realRoot) {
+    return { file: block.file, content: '', error: 'Cannot read outside project root (symlink escape detected).' };
+  }
+
+  const content = await readFileSafe(realFullPath);
   if (content === null) {
     return { file: block.file, content: '', error: `Failed to read file: ${block.file}` };
   }
@@ -67,8 +91,11 @@ export async function executeWriteBlock(
   block: WriteBlock,
   projectRoot: string
 ): Promise<WriteResult> {
-  const fullPath = path.resolve(projectRoot, block.file);
-  if (!fullPath.startsWith(path.resolve(projectRoot))) {
+  const resolvedRoot = path.resolve(projectRoot);
+  const fullPath = path.resolve(resolvedRoot, block.file);
+
+  // FIX (High): Primary lexical path-traversal check
+  if (!fullPath.startsWith(resolvedRoot + path.sep) && fullPath !== resolvedRoot) {
     return { file: block.file, approved: false, applied: false, error: 'Cannot write outside project root.' };
   }
 
@@ -86,27 +113,23 @@ export async function executeWriteBlock(
   }
   console.log(chalk.gray('---------------'));
 
-  return new Promise((resolve) => {
-    rl.question(chalk.green('Allow write? [Y/n] '), async (answer) => {
-      rl.close();
-      const approved = answer.trim() === '' || answer.trim().toLowerCase() === 'y';
-      
-      if (!approved) {
-        console.log(chalk.red('Write blocked by user.'));
-        resolve({ file: block.file, approved: false, applied: false });
-        return;
-      }
+  const { askYesNo } = await import('../utils/prompt-utils.js');
+  const approved = await askYesNo(rl, chalk.green('Allow write? '));
+  rl.close();
 
-      try {
-        await writeFile(fullPath, block.content, 'utf-8');
-        console.log(chalk.green(`✓ Wrote to ${block.file}`));
-        resolve({ file: block.file, approved: true, applied: true });
-      } catch (err: any) {
-        console.error(chalk.red(`✗ Failed to write to ${block.file}: ${err.message}`));
-        resolve({ file: block.file, approved: true, applied: false, error: err.message });
-      }
-    });
-  });
+  if (!approved) {
+    console.log(chalk.red('Write blocked by user.'));
+    return { file: block.file, approved: false, applied: false };
+  }
+
+  try {
+    await writeFile(fullPath, block.content, 'utf-8');
+    console.log(chalk.green(`✓ Wrote to ${block.file}`));
+    return { file: block.file, approved: true, applied: true };
+  } catch (err: any) {
+    console.error(chalk.red(`✗ Failed to write to ${block.file}: ${err.message}`));
+    return { file: block.file, approved: true, applied: false, error: err.message };
+  }
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────
@@ -140,7 +163,7 @@ export interface WriteResult {
 
 export function parseReadBlocks(response: string): ReadBlock[] {
   const blocks: ReadBlock[] = [];
-  const regex = /```read\n([\s\S]*?)```/gi;
+  const regex = /^[ \t]*```read[ \t]*\r?\n([\s\S]*?)^[ \t]*```/gim;
   let match: RegExpExecArray | null;
 
   while ((match = regex.exec(response)) !== null) {
@@ -177,7 +200,7 @@ export function parseReadBlocks(response: string): ReadBlock[] {
 
 export function parseWriteBlocks(response: string): WriteBlock[] {
   const blocks: WriteBlock[] = [];
-  const writeRegex = /```(write|create)\n([\s\S]*?)```/gi;
+  const writeRegex = /^[ \t]*```(write|create)[ \t]*\r?\n([\s\S]*?)^[ \t]*```/gim;
   let match: RegExpExecArray | null;
 
   while ((match = writeRegex.exec(response)) !== null) {
@@ -204,9 +227,15 @@ export function parseWriteBlocks(response: string): WriteBlock[] {
       } else if (trimmed.toLowerCase().startsWith('content:')) {
         readingContent = true;
         const inlineContent = trimmed.slice(8).trim();
+        // FIX (Medium #17): If there's an inline value (e.g. `content: some code`)
+        // AND it's not the YAML block scalar indicator `|`, treat the inline value
+        // as the COMPLETE content — do NOT continue appending subsequent lines,
+        // which would double-capture the content.
         if (inlineContent && inlineContent !== '|') {
-          content += inlineContent + '\n';
+          content = inlineContent;
+          readingContent = false; // inline value is the whole content — stop here
         }
+        // If inlineContent is '|' or empty, fall through to line-by-line reading
       }
     }
 

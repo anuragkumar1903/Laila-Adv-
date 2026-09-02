@@ -1,6 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { readFile } from 'fs/promises';
+import path from 'path';
 
 export interface MCPTool {
   serverName: string;
@@ -20,6 +21,33 @@ export interface MCPConfig {
   mcpServers: Record<string, MCPServerConfig>;
 }
 
+/**
+ * Allowlist of executables that MCP servers may use.
+ * These are the only commands that can be specified as `command` in mcp.json.
+ * Keeping this tight prevents a compromised mcp.json from running arbitrary binaries.
+ */
+const MCP_ALLOWED_COMMANDS: ReadonlySet<string> = new Set([
+  // Node / Bun runtimes — most MCP servers are JS/TS
+  'node', 'bun', 'npx', 'tsx', 'ts-node',
+  // Python runtimes
+  'python', 'python3', 'uv', 'uvx',
+  // Other common MCP server runtimes
+  'deno',
+  'go',
+  'java',
+]);
+
+/**
+ * Validate that a command from mcp.json is in the allowed set.
+ * Strips any path prefix (e.g. /usr/bin/node → node) before checking.
+ */
+function isMcpCommandAllowed(command: string): boolean {
+  if (!command || typeof command !== 'string') return false;
+  // Strip directory prefix — only the basename is checked
+  const base = path.basename(command).replace(/\.exe$/i, '').toLowerCase();
+  return MCP_ALLOWED_COMMANDS.has(base);
+}
+
 export class MCPClientManager {
   private clients = new Map<string, { client: Client, transport: StdioClientTransport }>();
   public tools: MCPTool[] = [];
@@ -28,7 +56,13 @@ export class MCPClientManager {
   async loadConfig(configPath: string) {
     try {
       const content = await readFile(configPath, 'utf8');
-      this.config = JSON.parse(content) as MCPConfig;
+      // FIX (Low): Surface JSON parse errors so the user knows their config is broken
+      try {
+        this.config = JSON.parse(content) as MCPConfig;
+      } catch (parseErr) {
+        console.error(`[MCP] Invalid JSON in ${configPath}: ${parseErr instanceof Error ? parseErr.message : String(parseErr)}`);
+        this.config = null;
+      }
     } catch {
       this.config = null;
     }
@@ -37,7 +71,29 @@ export class MCPClientManager {
   async connect(serverName: string, command: string, args: string[], env?: Record<string, string>) {
     if (this.clients.has(serverName)) return; // Already connected
 
-    const mergedEnv = env ? { ...process.env, ...env } : process.env;
+    // FIX (Critical): Validate command against allowlist before spawning.
+    // mcp.json is user-writable and could be tampered or socially-engineered.
+    if (!isMcpCommandAllowed(command)) {
+      throw new Error(
+        `MCP server '${serverName}' uses a disallowed command: "${command}". ` +
+        `Only the following commands are permitted: ${[...MCP_ALLOWED_COMMANDS].join(', ')}.`
+      );
+    }
+
+    // FIX (Critical): Only pass the server-specific env overrides merged with a
+    // minimal base env, NOT the full process.env (which may contain LAILA_API_KEY,
+    // AWS credentials, DB passwords, etc.).
+    const safeBaseEnv: Record<string, string> = {
+      PATH:        process.env['PATH']        ?? '',
+      HOME:        process.env['HOME']        ?? '',
+      USERPROFILE: process.env['USERPROFILE'] ?? '',
+      TEMP:        process.env['TEMP']        ?? '',
+      TMP:         process.env['TMP']         ?? '',
+      TMPDIR:      process.env['TMPDIR']      ?? '',
+      SYSTEMROOT:  process.env['SYSTEMROOT']  ?? '',
+      NODE_ENV:    process.env['NODE_ENV']    ?? '',
+    };
+    const mergedEnv = env ? { ...safeBaseEnv, ...env } : safeBaseEnv;
 
     const transport = new StdioClientTransport({
       command,
@@ -120,7 +176,9 @@ export class MCPClientManager {
   }
 
   async disconnectAll() {
-    for (const serverName of this.clients.keys()) {
+    // FIX (High): Snapshot keys before iteration — disconnect() calls
+    // this.clients.delete() which mutates the Map mid-loop and skips entries.
+    for (const serverName of [...this.clients.keys()]) {
       await this.disconnect(serverName);
     }
   }

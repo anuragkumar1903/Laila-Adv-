@@ -13,9 +13,13 @@ export async function askVision(projectPath: string, imagePath: string, prompt: 
   if (imagePath.endsWith('.png')) mimeType = 'image/png';
   if (imagePath.endsWith('.webp')) mimeType = 'image/webp';
 
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${config.apiKey}`, {
+  // FIX (Critical): Use x-goog-api-key header instead of URL query param
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type':   'application/json',
+      'x-goog-api-key': config.apiKey,
+    },
     body: JSON.stringify({
       contents: [{
         parts: [

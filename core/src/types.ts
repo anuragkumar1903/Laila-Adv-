@@ -162,6 +162,7 @@ export interface AgentContext {
 
 export interface AgentResponse {
   content: string;
+  toolCalls?: import('./llm/providers/base.js').ToolCall[];
   tokensUsed?: number;
 }
 

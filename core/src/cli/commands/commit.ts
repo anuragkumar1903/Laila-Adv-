@@ -54,14 +54,11 @@ ${diff}
     printer.blank();
 
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    const answer = await new Promise<string>((resolve) => {
-      rl.question(chalk.magenta('  Accept and commit? [Y/n] '), (ans) => {
-        rl.close();
-        resolve(ans);
-      });
-    });
+    const { askYesNo } = await import('../../utils/prompt-utils.js');
+    const approved = await askYesNo(rl, chalk.magenta('  Accept and commit?'));
+    rl.close();
 
-    if (answer.trim().toLowerCase() !== 'n') {
+    if (approved) {
       spinner.start('Committing changes…');
       const success = await commitChanges(resolvedPath, commitMsg);
       if (success) {

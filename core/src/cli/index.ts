@@ -18,7 +18,10 @@ try {
   process.exit(1);
 }
 
+import { checkForUpdates } from '../utils/check-update.js';
+
 if (process.argv.length <= 2) {
+  await checkForUpdates();
   await startCommand();
 } else {
   program
@@ -30,6 +33,7 @@ if (process.argv.length <= 2) {
     .command('start')
     .description('Start an interactive REPL session with Laila')
     .action(async () => {
+      await checkForUpdates();
       await startCommand();
     });
 

@@ -524,7 +524,7 @@ Never claim success without running real validation commands in the project envi
 
 > **Current Goal**: Evolve Laila into a fully agentic, Kiro-class local AI assistant — retaining local-first, offline principles while matching the tool-use depth and context intelligence of cloud-based assistants.
 
-### Phase 1 — File Tools (Highest Impact) ✅ In Progress
+### Phase 1 — File Tools (Highest Impact) ✅ Done
 - Implement dedicated `file-tool.ts` with read, write, create, and insert operations.
 - Expose file tools to all agents so they can read/modify files directly without relying on shell commands.
 - Safety: never overwrite files without showing a diff and requiring user confirmation.
@@ -532,12 +532,12 @@ Never claim success without running real validation commands in the project envi
 ### Phase 2 — Shell Tool: `laila` Binary Allowed ✅ Done
 - Added `laila` to the `ALLOWED_PREFIXES` list in `shell-tool.ts` so Laila can invoke its own CLI sub-commands.
 
-### Phase 3 — Auto Skill Selection (Context-Aware)
+### Phase 3 — Auto Skill Selection (Context-Aware) ✅ Done
 - Improve `skill-loader.ts` to score and rank skills based on task keywords, detected frameworks, and agent role.
 - Auto-inject the top N most relevant skills rather than loading all or a fixed set.
 - Add Redis, RAG, and remaining Kiro-parity skill files to `skills/` directory.
 
-### Phase 4 — Multi-Step Task Planning
+### Phase 4 — Multi-Step Task Planning ✅ Done
 - Add a `planner` module in `orchestrator/` that breaks complex tasks into ordered sub-steps.
 - Each sub-step runs as an independent agent call with its own context and skill injection.
 - Present the plan to the user before execution; allow approval or edit.
@@ -548,19 +548,48 @@ Never claim success without running real validation commands in the project envi
 - Store embeddings in SQLite (via `sqlite-vec` extension) to keep local-first guarantee.
 - Retrieve top-K semantically relevant file snippets per task.
 
-### Phase 6 — Sub-Agent / Pipeline System
+### Phase 6 — Sub-Agent / Pipeline System ✅ Done
 - Allow the orchestrator to spawn and coordinate multiple agents in a DAG pipeline.
 - Example: Researcher → Coder → Reviewer → Writer in a single task run.
 - Persist inter-agent messages and results in SQLite for full auditability.
 
-### Phase 7 — Validation & Test Hardening
+### Phase 7 — Validation & Test Hardening ✅ Done
 - Add unit tests for scanner heuristics, intent detection, and skill loader.
 - Add integration tests that run the full validation pipeline on small sample projects.
 - Enforce validation before any file write is accepted.
 
-### Phase 8 — Optional N8N Integration
+### Phase 8 — Optional N8N Integration ✅ Done
 - N8N integration for notifications and scheduled scans (task completed, validation failed).
 - N8N is not the brain; it only receives events and triggers external notifications.
+
+### Phase 9 — Multi-Modal Vision, AST Repo Mapping & MCP ✅ Done
+- Implement Multi-Modal Vision capabilities.
+- Enhance scanner with AST-like signature repo mapping for better context.
+- Implement Model Context Protocol (MCP) client and Named Servers with auto-triggering.
+
+### Phase 10 — Episodic Memory & Docker Sandbox ✅ Done
+- Implement long-term Episodic Memory for the agent to remember facts across sessions.
+- Self-healing build loops and Docker sandbox execution capabilities.
+
+### Phase 11 — Surgical Regex Search (Ripgrep) ✅ Done
+- Provide Laila with a dedicated fast-regex search tool for exact variable/reference lookups.
+- Ponytail approach: Leverage `git grep` natively since it's already installed, avoiding `ripgrep` binary bloat.
+
+### Phase 12 — Git-Ops & Auto-Commits ✅ Done
+- Add a `/commit` slash command.
+- Laila reads the `git diff`, writes a concise semantic commit message, and commits the work automatically.
+
+### Phase 13 — Autonomous Self-Healing Loop ✅ Done
+- When validation (`npm run build`) fails, instead of just rolling back, automatically feed the error log back to the Coder.
+- Allow Laila up to 3 automatic retry attempts to fix her own syntax/type errors before giving up.
+
+### Phase 14 — Zero-Bloat File Watcher (Real-time Indexing) ✅ Done
+- Run a native Node.js `fs.watch` loop in the background.
+- Update SQLite and RAG embeddings the millisecond a file is saved in the IDE.
+
+### Phase 16 — Native Clipboard Ingestion & Browser Agent ✅ Done
+- Implement `/paste` to instantly read text and images from the OS clipboard without heavy dependencies, feeding them into Laila's context.
+- Equip Laila with Playwright via `browser-tool.ts` so she can load URLs, scrape DOM, intercept console logs, and take full-page screenshots for visual UI debugging.
 
 ---
 

@@ -22,6 +22,7 @@ import chalk from 'chalk';
 import * as dns from 'dns';
 import { promisify } from 'util';
 const lookup = promisify(dns.lookup);
+// resolve4/resolve6 are used inline in isSafeUrl via promisify(dns.resolve4/6)
 
 export interface WebBlock {
   type: 'search' | 'url';
@@ -72,24 +73,108 @@ export function parseWebBlocks(response: string): WebBlock[] {
 
 // ─── Security ─────────────────────────────────────────────────────────────
 
-/** Prevents SSRF by ensuring the host resolves to a public IP address. */
+/**
+ * Returns true if the given IP address is a private/reserved/non-routable address.
+ * Covers:
+ *  - IPv4 loopback (127.x.x.x)
+ *  - IPv4 private ranges (10.x, 172.16-31.x, 192.168.x)
+ *  - IPv4 link-local & cloud metadata (169.254.x.x — AWS/GCP/Azure IMDS)
+ *  - Bind-all (0.0.0.0)
+ *  - IPv6 loopback (::1)
+ *  - IPv6 link-local (fe80::/10)
+ *  - IPv4-mapped IPv6 (::ffff:127.x.x.x, etc.)
+ */
+function isPrivateIp(ip: string): boolean {
+  // Strip IPv6 zone ID (e.g. fe80::1%eth0)
+  const addr = ip.split('%')[0]!.toLowerCase();
+
+  // ── IPv4-mapped IPv6 (::ffff:a.b.c.d or ::ffff:0a00:0000) ─────────────
+  if (addr.startsWith('::ffff:')) {
+    const v4part = addr.slice(7);
+    // Could be dotted-decimal or hex groups
+    if (v4part.includes('.')) {
+      return isPrivateIp(v4part);
+    }
+    // Hex notation - YAGNI, URL() normalizes these.
+    return false;
+  }
+
+  // ── IPv6 checks ────────────────────────────────────────────────────────
+  if (addr.includes(':')) {
+    if (addr === '::1') return true;                         // loopback
+    if (addr.startsWith('fe80:') || addr.startsWith('fe8') ||
+        addr.startsWith('fe9') || addr.startsWith('fea') ||
+        addr.startsWith('feb')) return true;                 // link-local fe80::/10
+    if (addr.startsWith('fc') || addr.startsWith('fd')) return true; // ULA fc00::/7
+    return false;
+  }
+
+  // ── IPv4 checks ────────────────────────────────────────────────────────
+  const parts = addr.split('.').map(Number);
+  if (parts.length !== 4 || parts.some(p => isNaN(p))) return true; // malformed → block
+
+  const [a, b] = parts as [number, number, number, number];
+
+  if (a === 0)   return true;                          // 0.0.0.0/8  — bind-all
+  if (a === 10)  return true;                          // 10.0.0.0/8
+  if (a === 127) return true;                          // 127.0.0.0/8 — loopback
+  if (a === 169 && b === 254) return true;             // 169.254.0.0/16 — link-local / IMDS
+  if (a === 172 && b >= 16 && b <= 31) return true;   // 172.16.0.0/12
+  if (a === 192 && b === 168) return true;             // 192.168.0.0/16
+  if (a === 100 && b >= 64 && b <= 127) return true;  // 100.64.0.0/10 — carrier NAT
+  if (a === 198 && (b === 18 || b === 19)) return true; // 198.18.0.0/15 — benchmarking
+  if (a === 203 && b === 0 && parts[2] === 113) return true; // 203.0.113.0/24 — TEST-NET
+  if (a >= 224) return true;                           // 224+ — multicast / reserved
+
+  return false;
+}
+
+/**
+ * Prevents SSRF by resolving ALL addresses for the hostname and checking
+ * every one against the private-IP blocklist.
+ *
+ * Security properties:
+ * - Rejects non-HTTP(S) protocols
+ * - Rejects localhost by name
+ * - Resolves hostname to ALL IP addresses (dns.resolve4 + resolve6) and
+ *   blocks if ANY address is private (multi-A-record attack mitigation)
+ * - Falls back to dns.lookup (OS resolver) if resolve4/6 return nothing
+ * - Returns false (block) on any error — fail-safe
+ */
 async function isSafeUrl(targetUrl: string): Promise<boolean> {
   try {
     const parsed = new URL(targetUrl);
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
-    if (parsed.hostname === 'localhost') return false;
 
-    // Check IP
-    const res = await lookup(parsed.hostname);
-    const ip = res.address;
-    
-    // Disallow private ranges (simplified checks)
-    if (ip.startsWith('127.') || ip.startsWith('10.') || ip.startsWith('192.168.')) return false;
-    if (ip.match(/^172\.(1[6-9]|2[0-9]|3[0-1])\./)) return false;
-    
-    return true;
+    const hostname = parsed.hostname.toLowerCase();
+
+    // Reject obviously private hostnames by name
+    if (hostname === 'localhost' || hostname === 'ip6-localhost' || hostname === 'ip6-loopback') {
+      return false;
+    }
+    // Reject numeric IP directly in URL (no DNS needed)
+    if (isPrivateIp(hostname)) return false;
+
+    // Resolve ALL A (IPv4) and AAAA (IPv6) records — block if any are private
+    const resolve4Async = promisify(dns.resolve4);
+    const resolve6Async = promisify(dns.resolve6);
+
+    const v4Addrs: string[] = await resolve4Async(hostname).catch(() => []);
+    const v6Addrs: string[] = await resolve6Async(hostname).catch(() => []);
+    const allAddrs = [...v4Addrs, ...v6Addrs];
+
+    // If multi-resolution returned nothing, fall back to OS resolver (single address)
+    if (allAddrs.length === 0) {
+      const res = await lookup(hostname);
+      allAddrs.push(res.address);
+    }
+
+    // Block if ANY resolved address is private
+    if (allAddrs.some(isPrivateIp)) return false;
+
+    return allAddrs.length > 0; // block if we got no address at all
   } catch {
-    return false;
+    return false; // fail-safe: unknown error → block
   }
 }
 

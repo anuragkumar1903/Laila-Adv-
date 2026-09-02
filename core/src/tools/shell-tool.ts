@@ -47,7 +47,9 @@ const COMMAND_TIMEOUT_MS = 120_000; // 2 minutes
  * any command can be run via e.g. `bash -c "rm -rf /"`. They are explicitly blocked
  * by BLOCKED_PATTERNS instead.
  */
-const ALLOWED_PREFIXES: readonly string[] = [
+// Ponytail: wrap in Set to eliminate duplicates (ls, dir, cat, copy, move, etc.
+// appear in both the Windows CMD and Unix sections above).
+const ALLOWED_PREFIXES: ReadonlySet<string> = new Set([
   // ── Package managers ────────────────────────────────────────────────
   'npm', 'npx', 'pnpm', 'yarn', 'bun',
   'pip', 'pip3', 'pipenv', 'poetry', 'uv',
@@ -71,7 +73,7 @@ const ALLOWED_PREFIXES: readonly string[] = [
   // ── Build / compile tools ────────────────────────────────────────────
   'tsc',
   'make', 'cmake', 'ninja',
-  'msbuild', 'dotnet build', 'dotnet run', 'dotnet test',
+  'msbuild',
   'xcodebuild',
   'ant',
 
@@ -82,100 +84,48 @@ const ALLOWED_PREFIXES: readonly string[] = [
   'laila',
   'docker', 'docker-compose', 'podman',
 
-  // ── Windows CMD built-ins ────────────────────────────────────────────
-  'dir',
-  'echo',
-  'type',           // cat equivalent (type file.txt)
-  'copy',           // safe copy
-  'move',           // safe move / rename
-  'mkdir', 'md',
-  'ren', 'rename',
-  'cls',
-  'set',            // show/set env vars (blocked for dangerous patterns below)
-  'ver',
-  'where',
-  'whoami',
-  'hostname',
-  'ipconfig',
-  'ping',
-  'tasklist',
-  'fc',             // file compare
-  'findstr',        // grep equivalent
-  'tree',
-
-  // ── PowerShell cmdlets ──────────────────────────────────────────────
-  // Get-* (safe read operations)
-  'get-childitem', 'gci', 'ls', 'dir',
-  'get-content', 'gc', 'cat', 'type',
-  'get-item', 'gi',
-  'get-location', 'gl', 'pwd',
-  'get-process', 'gps', 'ps',
-  'get-service',
-  'get-command', 'gcm',
-  'get-help',
-  'get-variable', 'gv',
-  'get-env',
-  'get-date',
-  'get-host',
-  'get-module',
-  'get-installedmodule',
-  // Write-* (output)
-  'write-host',
-  'write-output',
-  'write-verbose',
-  // Set-* (limited safe ones)
-  'set-location', 'sl', 'cd',
-  'set-variable', 'sv',
-  // New-* (create)
-  'new-item', 'ni', 'mkdir',
-  'new-object',
-  'new-module',
-  // Copy / Move
-  'copy-item', 'copy', 'cp',
-  'move-item', 'move', 'mv',
-  // Test-*
-  'test-path',
-  'test-connection',
-  'test-json',
-  // Invoke-* (scripts and commands — but NOT Invoke-Expression which is dangerous)
-  'invoke-webrequest', 'iwr', 'curl', 'wget',
-  'invoke-restmethod', 'irm',
-  // Select / Sort / Where
-  'select-object', 'select',
-  'sort-object', 'sort',
-  'where-object', 'where',
-  'measure-object', 'measure',
-  'format-list', 'fl',
-  'format-table', 'ft',
+  // ── Windows CMD + PowerShell cmdlet aliases ──────────────────────────
+  'dir', 'echo', 'type', 'copy', 'move', 'mkdir', 'md', 'ren', 'rename',
+  'cls', 'set', 'ver', 'where', 'whoami', 'hostname', 'ipconfig', 'ping',
+  'tasklist', 'fc', 'findstr', 'tree',
+  // PowerShell Get-*
+  'get-childitem', 'gci', 'get-content', 'gc', 'get-item', 'gi',
+  'get-location', 'gl', 'get-process', 'gps', 'ps', 'get-service',
+  'get-command', 'gcm', 'get-help', 'get-variable', 'gv', 'get-env',
+  'get-date', 'get-host', 'get-module', 'get-installedmodule',
+  // PowerShell Write-*
+  'write-host', 'write-output', 'write-verbose',
+  // PowerShell Set-*
+  'set-location', 'sl', 'cd', 'set-variable', 'sv',
+  // PowerShell New-*
+  'new-item', 'ni', 'new-object', 'new-module',
+  // PowerShell Copy/Move
+  'copy-item', 'cp', 'move-item', 'mv',
+  // PowerShell Test-*
+  'test-path', 'test-connection', 'test-json',
+  // PowerShell Invoke-* (NOT Invoke-Expression — that's in BLOCKED_PATTERNS)
+  'invoke-webrequest', 'iwr', 'invoke-restmethod', 'irm',
+  // PowerShell pipeline helpers
+  'select-object', 'select', 'sort-object', 'sort',
+  'where-object', 'measure-object', 'measure',
+  'format-list', 'fl', 'format-table', 'ft',
 
   // ── Unix/bash utilities ─────────────────────────────────────────────
-  // NOTE: 'bash', 'sh', 'zsh' are intentionally excluded — use BLOCKED_PATTERNS
-  // NOTE: 'source' and 'export' intentionally excluded — they run arbitrary
-  //       shell files / set env vars and cannot be safely sandboxed.
-  'ls', 'll',
-  'cat',
-  'pwd',
-  'which',
-  'grep', 'rg',            // ripgrep
+  // NOTE: bash, sh, zsh are intentionally excluded — blocked by BLOCKED_PATTERNS
+  // NOTE: source, export excluded — run arbitrary shell files / set env vars
+  'ls', 'll', 'cat', 'pwd', 'which',
+  'grep', 'rg',
   'find',
-  'curl',                  // blocked below if piping to bash
-  'wget',
-  'tar',
-  'unzip', 'zip',
-  'chmod',                 // blocked below for 777
-  'chown',
-  'ln',
-  'touch',
-  'wc',
-  'head', 'tail',
+  'curl', 'wget',
+  'tar', 'unzip', 'zip',
+  'chmod', 'chown', 'ln', 'touch',
+  'wc', 'head', 'tail',
   'diff', 'patch',
   'sed', 'awk',
-  'sort', 'uniq',
-  'xargs',
-  'env',
-  'open',                  // macOS open
-  'xdg-open',              // Linux open
-];
+  'uniq', 'xargs',
+  // NOTE: 'env' excluded — `env CMD args` defeats the allowlist
+  'open', 'xdg-open',
+]);
 
 /**
  * Dangerous patterns — always blocked even if the prefix is allowed.
@@ -184,6 +134,7 @@ const ALLOWED_PREFIXES: readonly string[] = [
 const BLOCKED_PATTERNS: readonly RegExp[] = [
   // ── Destructive file operations ────────────────────────────────────
   /rm\s+-rf/i,
+  /rm\s+--recursive/i,               // rm --recursive (long flag bypass)
   /rm\s+--force/i,
   /rm\s+-[a-z]*r[a-z]*f/i,       // rm -fr, rm -Rf etc.
   /del\s+\/[fFsS]/i,              // del /f, del /s
@@ -193,6 +144,11 @@ const BLOCKED_PATTERNS: readonly RegExp[] = [
   /rmdir\s+\/s/i,
   /remove-item\s+-recurse\s+-force/i,  // PowerShell rm -rf equivalent
   /remove-item\s+-force\s+-recurse/i,
+
+  // ── env prefix bypass ───────────────────────────────────────────────
+  // `env VARNAME=val dangerous-cmd` passes `env` as the base command but
+  // executes `dangerous-cmd` directly. Block env at the start of a segment.
+  /^env\s+/i,
 
   // ── Disk / system destructive ops ─────────────────────────────────
   /format\s+[a-z]:/i,             // format C:
@@ -300,17 +256,90 @@ export type SafetyVerdict =
   | { safe: false; reason: string };
 
 /**
- * Split a command string on shell chain operators (&&, ||, ;, |, &) and
- * return each individual segment trimmed, discarding empty parts.
- * This is used so that a command like `npm install && rm -rf /` cannot
- * bypass validation by hiding the dangerous segment after an operator.
+ * Split a command string on shell chain operators AND subshell delimiters,
+ * returning each individual segment trimmed, discarding empty parts.
+ *
+ * Handles:
+ *   &&  ||  ;  |  &          — standard chain operators
+ *   `...`                    — backtick subshells
+ *   $(...)                   — dollar-paren subshells
+ *   <<<                      — here-string
+ *   <(...)  >(...)            — process substitution
+ *
+ * Quote-aware: operators inside single-quoted or double-quoted strings are
+ * NOT split, preventing false positives like `echo "hello && world"`.
+ *
+ * This prevents bypasses like:
+ *   npm install `rm -rf /`
+ *   cat <<< $(rm -rf /)
  */
 function splitOnOperators(command: string): string[] {
-  // Split on: &&  ||  ;  |  &  (but keep the segments, not the operators)
-  return command
-    .split(/&&|\|\||\||;|&/)
-    .map(s => s.trim())
-    .filter(Boolean);
+  // First extract any backtick-subshell contents and add them as segments
+  const segments: string[] = [];
+
+  // Replace backtick subshells with sentinel so they get split out
+  // e.g.  npm install `rm -rf /`  → we extract "rm -rf /" as a segment
+  let remaining = command;
+
+  // Extract backtick subshell contents
+  remaining = remaining.replace(/`([^`]*)`/g, (_match, inner: string) => {
+    segments.push(inner.trim());
+    return ' ';
+  });
+
+  // Extract $(...) subshell contents (non-nested, handles common cases)
+  remaining = remaining.replace(/\$\(([^)]*)\)/g, (_match, inner: string) => {
+    segments.push(inner.trim());
+    return ' ';
+  });
+
+  // Extract <(...) and >(...) process substitution contents
+  remaining = remaining.replace(/[<>]\(([^)]*)\)/g, (_match, inner: string) => {
+    segments.push(inner.trim());
+    return ' ';
+  });
+
+  // Extract <<< (here-string) — the word after <<< is data, not a command,
+  // but we still want to split on it in case it embeds something dangerous
+  remaining = remaining.replace(/<<<\s*(\S+)/g, (_match, word: string) => {
+    segments.push(word.trim());
+    return ' ';
+  });
+
+  // FIX (Medium #13): Split on chain operators ONLY outside of quoted strings.
+  // A naive regex split would split `echo "hello && world"` into two segments.
+  const chainParts: string[] = [];
+  let current = '';
+  let inSingle = false;
+  let inDouble = false;
+
+  for (let i = 0; i < remaining.length; i++) {
+    const ch = remaining[i]!;
+    const next = remaining[i + 1];
+    const next2 = remaining[i + 2];
+
+    if (ch === "'" && !inDouble) { inSingle = !inSingle; current += ch; continue; }
+    if (ch === '"' && !inSingle) { inDouble = !inDouble; current += ch; continue; }
+
+    if (!inSingle && !inDouble) {
+      // &&
+      if (ch === '&' && next === '&') { chainParts.push(current); current = ''; i++; continue; }
+      // ||
+      if (ch === '|' && next === '|') { chainParts.push(current); current = ''; i++; continue; }
+      // |
+      if (ch === '|') { chainParts.push(current); current = ''; continue; }
+      // ;
+      if (ch === ';') { chainParts.push(current); current = ''; continue; }
+      // & (single, not &&)
+      if (ch === '&' && next !== '&') { chainParts.push(current); current = ''; continue; }
+    }
+    current += ch;
+  }
+  if (current) chainParts.push(current);
+
+  segments.push(...chainParts.map(s => s.trim()).filter(Boolean));
+
+  return segments.filter(Boolean);
 }
 
 /**
@@ -346,14 +375,13 @@ export function validateCommand(command: string): SafetyVerdict {
       .replace(/^.*[/\\]/, '') // strip directory prefix (e.g. /usr/bin/npm → npm)
       .toLowerCase();
 
-    const allowed = ALLOWED_PREFIXES.some(
-      prefix => baseCommand === prefix || baseCommand.startsWith(prefix + '.'), // node.exe etc.
-    );
+    const allowed = ALLOWED_PREFIXES.has(baseCommand) ||
+      ALLOWED_PREFIXES.has(baseCommand.replace(/\.exe$/, '')); // node.exe → node
 
     if (!allowed) {
       return {
         safe: false,
-        reason: `"${baseCommand}" is not in the allowed command list.\nAllowed: ${ALLOWED_PREFIXES.join(', ')}`,
+        reason: `"${baseCommand}" is not in the allowed command list.\nAllowed: ${[...ALLOWED_PREFIXES].join(', ')}`,
       };
     }
   }
@@ -396,23 +424,16 @@ async function askPermission(block: CommandBlock, cwd: string, rl?: import('read
 
   renderCommandBox(block, cwd);
 
+  const { askYesNo } = await import('../utils/prompt-utils.js');
+  let result = false;
   if (rl) {
-    return new Promise(resolve => {
-      rl.question(chalk.magenta('  Run this command? [Y/n]: '), answer => {
-        const trimmed = answer.trim().toLowerCase();
-        resolve(trimmed === '' || trimmed === 'y' || trimmed === 'yes');
-      });
-    });
+    result = await askYesNo(rl, chalk.magenta('  Run this command?'), false);
+  } else {
+    const tempRl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    result = await askYesNo(tempRl, chalk.magenta('  Run this command?'), false);
+    tempRl.close();
   }
-
-  const tempRl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise(resolve => {
-    tempRl.question(chalk.magenta('  Run this command? [Y/n]: '), answer => {
-      tempRl.close();
-      const trimmed = answer.trim().toLowerCase();
-      resolve(trimmed === '' || trimmed === 'y' || trimmed === 'yes');
-    });
-  });
+  return result;
 }
 
 // ─── Executor ────────────────────────────────────────────────────────────
@@ -452,6 +473,19 @@ async function executeCommand(
         NODE_ENV:    process.env['NODE_ENV']    ?? '',
         FORCE_COLOR: '0',
       },
+    });
+
+    // FIX (High): Handle spawn 'error' event — fires when the shell binary doesn't
+    // exist or can't be executed. Without this, the error becomes an unhandled
+    // exception that crashes the Node.js process.
+    child.on('error', (err) => {
+      clearTimeout(timer);
+      resolve({
+        exitCode:   1,
+        stdout:     stdoutBuf,
+        stderr:     stderrBuf + `\nSpawn error: ${err.message}`,
+        durationMs: Date.now() - start,
+      });
     });
 
     const timer = setTimeout(() => {

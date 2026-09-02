@@ -131,7 +131,7 @@ export class AnthropicProvider implements LLMProvider {
       merged.unshift({ role: 'user', content: 'Continue.' });
     }
 
-    const body: AnthropicRequest = {
+    const body: Record<string, any> = {
       model:      this.model,
       max_tokens: options.maxTokens ?? 8192,
       messages:   merged,
@@ -139,6 +139,14 @@ export class AnthropicProvider implements LLMProvider {
       top_p:       options.top_p       ?? 0.9,
     };
     if (system) body.system = system;
+
+    if (options.tools && options.tools.length > 0) {
+      body.tools = options.tools.map(t => ({
+        name: t.name,
+        description: t.description,
+        input_schema: t.parameters
+      }));
+    }
 
     let res: Response | undefined;
     for (let attempt = 0; attempt <= 1; attempt++) {
@@ -176,10 +184,15 @@ export class AnthropicProvider implements LLMProvider {
     if (!res) throw new LLMError('Anthropic request failed: no response received', this.id);
     const data = await res.json() as AnthropicResponse;
     const textBlock = data.content.find(c => c.type === 'text');
-    if (!textBlock) throw new LLMError('Anthropic returned no text content', this.id);
+    const toolBlocks = data.content.filter(c => c.type === 'tool_use');
 
     return {
-      content:    textBlock.text,
+      content:    textBlock ? textBlock.text : '',
+      toolCalls:  toolBlocks.map((tb: any) => ({
+        id: tb.id,
+        name: tb.name,
+        arguments: tb.input
+      })),
       tokensUsed: data.usage.input_tokens + data.usage.output_tokens,
       model:      data.model,
       provider:   this.id,

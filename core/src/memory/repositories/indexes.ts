@@ -66,6 +66,14 @@ export function bulkUpsertFiles(
           category: f.category,
           content: f.content,
         });
+        
+        // ponytail: async fire-and-forget rag indexing
+        import('../rag.js').then(rag => {
+          rag.indexFileContent(String(projectId), f.relPath, f.content!).catch(async err => {
+            const { logger } = await import('../../utils/logger.js');
+            logger.debug('RAG index failed for', f.relPath, err);
+          });
+        }).catch(() => {});
       }
     }
   });

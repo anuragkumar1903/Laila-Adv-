@@ -102,15 +102,10 @@ const DESTRUCTIVE_ACTIONS = new Set([
 
 async function confirmAction(action: string, detail: string): Promise<boolean> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise((resolve) => {
-    rl.question(
-      chalk.yellow(`  ⚠ git ${action}: ${detail}\n`) + chalk.green('  Allow? [Y/n] '),
-      (answer) => {
-        rl.close();
-        resolve(answer.trim() === '' || answer.trim().toLowerCase() === 'y');
-      },
-    );
-  });
+  const { askYesNo } = await import('../utils/prompt-utils.js');
+  const result = await askYesNo(rl, chalk.yellow(`  ⚠ git ${action}: ${detail}\n`) + chalk.green('  Allow?'));
+  rl.close();
+  return result;
 }
 
 // ─── Executor ─────────────────────────────────────────────────────────────

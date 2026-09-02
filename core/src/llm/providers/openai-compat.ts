@@ -73,7 +73,7 @@ interface OpenAIChatResponse {
   id: string;
   model: string;
   choices: Array<{
-    message: { role: string; content: string };
+    message: { role: string; content: string | null; tool_calls?: any[] };
     finish_reason: string;
   }>;
   usage?: {
@@ -192,6 +192,21 @@ export class OpenAICompatProvider implements LLMProvider {
       stream:      false,
     };
     if (options.maxTokens) body['max_tokens'] = options.maxTokens;
+    
+    // Wire up Native Tool Calling!
+    if (options.tools && options.tools.length > 0) {
+      body['tools'] = options.tools.map(t => ({
+        type: 'function',
+        function: {
+          name: t.name,
+          description: t.description,
+          parameters: t.parameters
+        }
+      }));
+      if (options.toolChoice) {
+        body['tool_choice'] = options.toolChoice;
+      }
+    }
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (this.apiKey) headers['Authorization'] = `Bearer ${this.apiKey}`;
@@ -251,7 +266,12 @@ export class OpenAICompatProvider implements LLMProvider {
       if (!choice) throw new LLMError(`${this.displayName} returned no choices`, this.id);
 
       return {
-        content:    choice.message.content,
+        content:    choice.message.content || '',
+        toolCalls:  choice.message.tool_calls?.map((tc: any) => ({
+          id: tc.id,
+          name: tc.function.name,
+          arguments: (typeof tc.function.arguments === 'string' && tc.function.arguments) ? JSON.parse(tc.function.arguments) : (tc.function.arguments || {})
+        })),
         tokensUsed: data.usage?.total_tokens ?? 0,
         model:      data.model,
         provider:   this.id,

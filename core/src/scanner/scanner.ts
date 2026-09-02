@@ -30,15 +30,28 @@ function hashContent(content: string): string {
 
 // Concurrency limiter — avoids EMFILE errors on large repos
 async function mapConcurrent<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
-  const results: R[] = [];
+  const results: R[] = new Array(items.length);
   let idx = 0;
+  // FIX (Medium #20): idx++ is synchronous (safe in single-threaded JS), but if
+  // fn() throws, Promise.all rejects and other workers are abandoned with holes in
+  // results. Wrap each fn call in a try/catch so one failure doesn't abort the rest,
+  // and re-throw at the end if any item failed.
+  const errors: Array<{ index: number; error: unknown }> = [];
   async function worker() {
     while (idx < items.length) {
       const i = idx++;
-      results[i] = await fn(items[i]!);
+      try {
+        results[i] = await fn(items[i]!);
+      } catch (err) {
+        errors.push({ index: i, error: err });
+      }
     }
   }
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  if (errors.length > 0) {
+    // Re-throw the first error (callers can decide how to handle it)
+    throw errors[0]!.error;
+  }
   return results;
 }
 
@@ -114,14 +127,25 @@ export async function scanProject(projectPath: string, previousIndex?: ProjectIn
   if (gitignoreContent) ig.add(gitignoreContent);
 
   // ── Glob all files ──────────────────────────────────────────────────────
-  const rawPaths = await glob('**/*', {
+  const { globStream } = await import('glob');
+  const stream = globStream('**/*', {
     cwd: absPath,
     nodir: true,
     dot: true,
     follow: false,
+    ignore: SCAN_EXCLUDES.map(p => p.startsWith('/') ? p.slice(1) : p).map(p => `**/${p}/**`).concat(SCAN_EXCLUDES),
   });
 
-  const filteredPaths = rawPaths.filter(p => !ig.ignores(p) && isTextFile(p));
+  const filteredPaths: string[] = [];
+  for await (const pStr of stream) {
+    const rel = path.isAbsolute(pStr) ? path.relative(absPath, pStr) : pStr;
+    if (!ig.ignores(rel.replace(/\\/g, '/')) && isTextFile(pStr)) {
+      filteredPaths.push(rel);
+      if (filteredPaths.length > 50000) {
+        throw new Error(`Scan aborted: exceeded 50,000 text files. Did you accidentally scan a root drive or missing an ignore rule?`);
+      }
+    }
+  }
 
   // ── Categorise files (Incremental) ──────────────────────────────────────
   const prevFiles = new Map<string, ProjectFileRecord>();

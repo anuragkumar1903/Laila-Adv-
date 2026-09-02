@@ -55,6 +55,16 @@ function countMatches(text: string, keywords: string[]): number {
  * intents are preferred over explanatory ones.
  */
 export function detectIntent(input: string): { intent: TaskIntent; agent: AgentName } {
+  const agentMap: Record<TaskIntent, AgentName> = { code: 'coder', review: 'reviewer', research: 'researcher', write: 'writer', general: 'general' };
+  
+  // Slash commands override
+  if (input.startsWith('/')) {
+    const cmd = input.trim().split(/\s+/)[0]?.toLowerCase();
+    const map: Record<string, TaskIntent> = { '/code': 'code', '/plan': 'code', '/goal': 'code', '/review': 'review', '/research': 'research', '/write': 'write' };
+    const intent = map[cmd as string];
+    if (intent) return { intent, agent: agentMap[intent] };
+  }
+
   // Priority used when scores tie (lower index = higher priority)
   const PRIORITY: TaskIntent[] = ['code', 'review', 'research', 'write', 'general'];
 
@@ -85,14 +95,6 @@ export function detectIntent(input: string): { intent: TaskIntent; agent: AgentN
   }
 
   const intent: TaskIntent = candidates[0]?.[0] ?? 'general';
-
-  const agentMap: Record<TaskIntent, AgentName> = {
-    code:     'coder',
-    review:   'reviewer',
-    research: 'researcher',
-    write:    'writer',
-    general:  'general',
-  };
 
   logger.debug?.(`Intent detected: ${intent} (scores: ${JSON.stringify(scores)})`);
 

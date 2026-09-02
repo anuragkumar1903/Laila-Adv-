@@ -90,8 +90,13 @@ export class GeminiProvider implements LLMProvider {
     // Fetch live from Google's models endpoint — always up to date
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models?key=${this.apiKey}`,
-        { signal: AbortSignal.timeout(5_000) },
+        `https://generativelanguage.googleapis.com/v1beta/models`,
+        {
+          // FIX (Critical): Use header instead of URL query param — prevents key
+          // appearing in server access logs, proxy logs, and stack traces.
+          headers: { 'x-goog-api-key': this.apiKey },
+          signal: AbortSignal.timeout(5_000),
+        },
       );
 
       if (res.ok) {
@@ -157,7 +162,7 @@ export class GeminiProvider implements LLMProvider {
       ? { parts: [{ text: systemMsgs.map(m => m.content).join('\n\n') }] }
       : undefined;
 
-    const body: GeminiRequest = {
+    const body: Record<string, any> = {
       contents,
       generationConfig: {
         temperature:     options.temperature ?? 0.2,
@@ -167,13 +172,28 @@ export class GeminiProvider implements LLMProvider {
     };
     if (systemInstruction) body.systemInstruction = systemInstruction;
 
-    const url = `${this.baseUrl}/${this.model}:generateContent?key=${this.apiKey}`;
+    if (options.tools && options.tools.length > 0) {
+      body.tools = [{
+        functionDeclarations: options.tools.map(t => ({
+          name: t.name,
+          description: t.description,
+          parameters: t.parameters
+        }))
+      }];
+    }
+
+    // FIX (Critical): Use header instead of URL query param — prevents key
+    // appearing in server access logs, proxy logs, and stack traces.
+    const url = `${this.baseUrl}/${this.model}:generateContent`;
 
     let res: Response;
     try {
       res = await fetch(url, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type':    'application/json',
+          'x-goog-api-key':  this.apiKey,
+        },
         body:    JSON.stringify(body),
         signal:  AbortSignal.timeout(this.timeoutMs),
       });
@@ -194,12 +214,21 @@ export class GeminiProvider implements LLMProvider {
     }
 
     const data     = await res.json() as GeminiResponse;
-    const candidate = data.candidates[0];
-    if (!candidate) throw new LLMError('Gemini returned no candidates', this.id);
+    // FIX (Medium): Guard both `data.candidates` being undefined (API returned no
+    // field at all — e.g. safety filter block) and being an empty array.
+    const candidate = Array.isArray(data.candidates) ? data.candidates[0] : undefined;
+    if (!candidate) throw new LLMError('Gemini returned no candidates (possibly blocked by safety filters)', this.id);
 
-    const text = candidate.content.parts.map(p => p.text).join('');
+    const textParts = candidate.content.parts.filter((p: any) => p.text);
+    const functionCalls = candidate.content.parts.filter((p: any) => p.functionCall).map((p: any) => p.functionCall);
+
     return {
-      content:    text,
+      content:    textParts.map((p: any) => p.text).join(''),
+      toolCalls:  functionCalls.map((fc: any) => ({
+        id: fc.name, // Gemini doesn't provide tool call IDs, use name
+        name: fc.name,
+        arguments: (typeof fc.args === 'string' && fc.args) ? JSON.parse(fc.args) : (fc.args || {})
+      })),
       tokensUsed: data.usageMetadata?.totalTokenCount ?? 0,
       model:      data.modelVersion ?? this.model,
       provider:   this.id,

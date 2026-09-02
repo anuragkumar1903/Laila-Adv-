@@ -8,12 +8,15 @@ import { notify } from '../n8n/n8n-client.js';
 import { logger } from '../utils/logger.js';
 import type { AgentName, AgentContext, AgentResponse } from '../types.js';
 
+import { getNativeTools } from '../tools/native-tools.js';
+
 async function runAgent(name: AgentName, ctx: AgentContext): Promise<AgentResponse> {
   const messages = await buildMessages(ctx);
   // Only coder and reviewer need strict determinism
   const temperature = (name === 'coder' || name === 'reviewer') ? 0.1 : 0.7;
-  const result = await chat(messages, { temperature });
-  return { content: result.content, tokensUsed: result.tokensUsed };
+  const tools = getNativeTools();
+  const result = await chat(messages, { temperature, tools });
+  return { content: result.content, toolCalls: result.toolCalls, tokensUsed: result.tokensUsed };
 }
 
 export interface OrchestratorInput {
@@ -28,6 +31,7 @@ export interface OrchestratorResult {
   intent: string;
   agent: AgentName;
   response: string;
+  toolCalls?: import('../llm/providers/base.js').ToolCall[];
   tokensUsed?: number;
 }
 
@@ -80,6 +84,7 @@ export async function run(input: OrchestratorInput): Promise<OrchestratorResult>
       intent,
       agent,
       response: agentResponse.content,
+      toolCalls: agentResponse.toolCalls,
       tokensUsed: agentResponse.tokensUsed,
     };
   } catch (err: unknown) {

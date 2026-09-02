@@ -95,7 +95,7 @@ export interface PatchResult {
  */
 export function parseGrepBlocks(response: string): GrepBlock[] {
   const blocks: GrepBlock[] = [];
-  const regex = /```grep\n([\s\S]*?)```/gi;
+  const regex = /^[ \t]*```grep[ \t]*\r?\n([\s\S]*?)^[ \t]*```/gim;
   let match: RegExpExecArray | null;
 
   while ((match = regex.exec(response)) !== null) {
@@ -156,7 +156,7 @@ export function parseGrepBlocks(response: string): GrepBlock[] {
  */
 export function parsePatchBlocks(response: string): PatchBlock[] {
   const blocks: PatchBlock[] = [];
-  const regex = /```patch\n([\s\S]*?)```/gi;
+  const regex = /^[ \t]*```patch[ \t]*\r?\n([\s\S]*?)^[ \t]*```/gim;
   let match: RegExpExecArray | null;
 
   while ((match = regex.exec(response)) !== null) {
@@ -247,8 +247,44 @@ export async function runGrep(projectRoot: string, block: GrepBlock): Promise<Gr
   if (relCheck.startsWith('..') || path.isAbsolute(relCheck)) {
     return { pattern: block.pattern, matches: [], truncated: false, totalMatches: 0 };
   }
+  
+  const isGit = await pathExists(path.join(projectRoot, '.git'));
+  if (isGit && !block.pattern.includes('\n')) {
+    try {
+      const { exec } = await import('child_process');
+      const { promisify } = await import('util');
+      const execAsync = promisify(exec);
+      
+      const args = ['grep', '-I', '-E', '-n']; // -I ignores binary files, -E for extended regex, -n for line numbers
+      args.push('-e', `"${block.pattern.replace(/"/g, '\\"')}"`);
+      
+      // if searchPath is given, constrain it
+      const gitPath = block.searchPath || '.';
+      
+      const { stdout } = await execAsync(`git ${args.slice(1).join(' ')} -- ${gitPath}`, { cwd: projectRoot });
+      const lines = stdout.split('\n').filter(l => l.trim());
+      
+      const matches: GrepMatch[] = lines.slice(0, MAX).map(line => {
+        const firstColon = line.indexOf(':');
+        const secondColon = line.indexOf(':', firstColon + 1);
+        if (firstColon === -1 || secondColon === -1) return { file: line, line: 1, content: line };
+        
+        return {
+          file: line.slice(0, firstColon).replace(/\\/g, '/'),
+          line: parseInt(line.slice(firstColon + 1, secondColon), 10) || 1,
+          content: line.slice(secondColon + 1).trim()
+        };
+      });
+      
+      return { pattern: block.pattern, matches, truncated: lines.length > MAX, totalMatches: lines.length };
+    } catch (err: any) {
+      // git grep returns exit code 1 if no matches found
+      if (err.code === 1) return { pattern: block.pattern, matches: [], truncated: false, totalMatches: 0 };
+      // fallback to node if git grep fails for other reasons
+    }
+  }
 
-  // Build ignore rules identical to the scanner
+  // Fallback to naive node search
   const ig = ignoreLib();
   ig.add(SCAN_EXCLUDES);
   const gitignoreContent = await readFileSafe(path.join(projectRoot, '.gitignore'));
@@ -384,7 +420,14 @@ export async function applyPatch(
     };
   }
 
-  const original    = await readFile(absFilePath, 'utf-8');
+  let original    = await readFile(absFilePath, 'utf-8');
+  
+  // Normalize Windows CRLF to LF for reliable string matching
+  const isCRLF = original.includes('\r\n');
+  original = original.replace(/\r\n/g, '\n');
+  block.find = block.find.replace(/\r\n/g, '\n');
+  block.replace = block.replace.replace(/\r\n/g, '\n');
+
   const occurrences = original.split(block.find).length - 1;
 
   if (occurrences === 0) {
@@ -397,7 +440,8 @@ export async function applyPatch(
     };
   }
 
-  const patched = original.split(block.find).join(block.replace);
+  let patched = original.split(block.find).join(block.replace);
+  if (isCRLF) patched = patched.replace(/\n/g, '\r\n');
 
   // ── Show diff preview ──────────────────────────────────────────────────
   const boxWidth = 54;
@@ -428,22 +472,15 @@ export async function applyPatch(
   }
 
   // ── Ask permission ─────────────────────────────────────────────────────
-  const approved = await new Promise<boolean>(resolve => {
-    const q = chalk.magenta('  Apply this patch? [Y/n]: ');
-    if (rl) {
-      rl.question(q, ans => {
-        const t = ans.trim().toLowerCase();
-        resolve(t === '' || t === 'y' || t === 'yes');
-      });
-    } else {
-      const tempRl = readline.createInterface({ input: process.stdin, output: process.stdout });
-      tempRl.question(q, ans => {
-        tempRl.close();
-        const t = ans.trim().toLowerCase();
-        resolve(t === '' || t === 'y' || t === 'yes');
-      });
-    }
-  });
+  const { askYesNo } = await import('../utils/prompt-utils.js');
+  let approved = false;
+  if (rl) {
+    approved = await askYesNo(rl, chalk.magenta('  Apply this patch?'));
+  } else {
+    const tempRl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    approved = await askYesNo(tempRl, chalk.magenta('  Apply this patch?'));
+    tempRl.close();
+  }
 
   logPatchToDb(block, approved);
 

@@ -1,0 +1,6 @@
+src/
+tests/
+tsconfig.json
+.git/
+.laila/
+project-index.json

@@ -59,17 +59,38 @@ export async function getRelevantFiles(
   let candidates: Array<{ rel_path: string; category: FileCategory }> = [];
 
   if (keywords.length > 0) {
-    // Generate an FTS MATCH query: e.g. "user" OR "login"
-    // Using OR means any match will rank the file, but BM25 will score files with multiple matches higher.
-    const ftsQuery = keywords.map(kw => `"${kw}"`).join(' OR ');
+    try {
+      const { retrieveContext } = await import('./rag.js');
+      const ragResults = await retrieveContext(String(projectId), query, maxFiles * 2);
+      // Get unique file paths from chunks
+      const uniquePaths = Array.from(new Set(ragResults.map(r => r.filePath))).slice(0, maxFiles);
+      
+      // We don't have category in chunk_metadata, so we fallback to 'other' or look it up
+      // But since we are reading the file later, category isn't strictly necessary for the retrieval output
+      // Let's look it up from project_files just to be safe
+      for (const p of uniquePaths) {
+        const row = db.prepare('SELECT category FROM project_files WHERE project_id = ? AND rel_path = ?').get(projectId, p) as any;
+        candidates.push({ rel_path: p, category: row?.category || 'other' });
+      }
+    } catch (e) {
+      const { logger } = await import('../utils/logger.js');
+      logger.debug('RAG retrieval unavailable (Ollama down?), falling back to FTS5', e);
+    }
     
-    candidates = db.prepare(`
-      SELECT rel_path, category 
-      FROM project_files_fts 
-      WHERE project_id = ? AND project_files_fts MATCH ? 
-      ORDER BY bm25(project_files_fts) 
-      LIMIT ?
-    `).all(projectId, ftsQuery, maxFiles) as any;
+    // Fallback to FTS if RAG returned nothing or threw (e.g. no ollama or no indexed files)
+    if (candidates.length === 0) {
+      const ftsQuery = keywords
+        .map(kw => `"${kw.replace(/"/g, '""')}"`)
+        .join(' OR ');
+      
+      candidates = db.prepare(`
+        SELECT rel_path, category 
+        FROM project_files_fts 
+        WHERE project_id = ? AND project_files_fts MATCH ? 
+        ORDER BY bm25(project_files_fts) 
+        LIMIT ?
+      `).all(projectId, ftsQuery, maxFiles) as any;
+    }
   } else {
     // Fallback if no keywords: grab the most recently modified files
     candidates = db.prepare(`
@@ -93,7 +114,11 @@ export async function getRelevantFiles(
         category: candidate.category,
         truncated,
       });
-    } catch {
+    } catch (err: unknown) {
+      // FIX (Low #25): Only silently skip ENOENT (file deleted since last scan).
+      // Re-throw anything unexpected (EACCES, OOM, DB corruption) so it surfaces.
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code !== 'ENOENT' && code !== 'EISDIR') throw err;
       // File deleted since last scan — silently skip
     }
   }

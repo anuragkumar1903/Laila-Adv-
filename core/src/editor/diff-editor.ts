@@ -1,5 +1,6 @@
 import path from 'path';
-import { readFile, writeFile, mkdir, rename as fsRename } from 'fs/promises';
+import { readFile, writeFile, rename as fsRename, mkdir } from 'fs/promises';
+import { pathExists } from '../utils/fs-utils.js';
 import { createTwoFilesPatch } from 'diff';
 import chalk from 'chalk';
 import readline from 'readline';
@@ -18,8 +19,17 @@ export function parseCodeBlocks(response: string): ParsedBlock[] {
   while ((match = regex.exec(response)) !== null) {
     if (match[1] && match[2]) {
       const fileName = match[1].trim();
-      if (!/^[\w./\-]+$/.test(fileName)) {
-        continue; // skip blocks with suspicious filenames
+      // FIX (Medium #21): Previous regex /^[\w./\-]+$/ rejected legitimate filenames
+      // that contain: spaces, @ (npm scopes like @types/node), +, or non-ASCII chars.
+      // New rules:
+      //  - Must not be empty
+      //  - Must not start with / or contain .. (absolute paths / traversal)
+      //  - Must not contain null bytes or shell metacharacters (;|&`$<>)
+      if (!fileName ||
+          path.isAbsolute(fileName) ||
+          fileName.includes('..') ||
+          /[\0;|&`$<>]/.test(fileName)) {
+        continue; // skip blocks with dangerous filenames
       }
       blocks.push({
         file: fileName,
@@ -36,25 +46,15 @@ export function parseCodeBlocks(response: string): ParsedBlock[] {
  * If `rl` is provided (REPL context) use it directly to avoid double-echo.
  * Otherwise open a temporary interface (standalone use).
  */
-function promptConfirm(message: string, rl?: RLInterface): Promise<boolean> {
-  // Require explicit 'y' or 'yes'; blank/enter defaults to NO
-  const isYes = (answer: string) => ['y', 'yes'].includes(answer.trim().toLowerCase());
-
+async function promptConfirm(message: string, rl?: RLInterface): Promise<boolean> {
+  const { askYesNo } = await import('../utils/prompt-utils.js');
   if (rl) {
-    return new Promise(resolve => {
-      rl.question(chalk.magenta(`\n  ${message} [y/N] `), answer => {
-        resolve(isYes(answer));
-      });
-    });
+    return askYesNo(rl, chalk.magenta(`\n  ${message}`), false);
   }
-
   const tempRl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise(resolve => {
-    tempRl.question(chalk.magenta(`\n  ${message} [y/N] `), answer => {
-      tempRl.close();
-      resolve(isYes(answer));
-    });
-  });
+  const result = await askYesNo(tempRl, chalk.magenta(`\n  ${message}`), false);
+  tempRl.close();
+  return result;
 }
 
 export async function generateAndPromptDiff(projectPath: string, blocks: ParsedBlock[], rl?: RLInterface): Promise<number> {
@@ -109,14 +109,48 @@ export async function generateAndPromptDiff(projectPath: string, blocks: ParsedB
     const apply = await promptConfirm(`Apply changes to ${block.file}?`, rl);
     if (apply) {
       try {
-        // Ensure parent directory exists (handles new files in new subdirectories)
         await mkdir(path.dirname(absPath), { recursive: true });
-        // Atomic write: write to temp file then rename — prevents partial writes on crash
+        
+        // Backup for rollback
+        const backupPath = absPath + '.laila.bak';
+        let existed = false;
+        if (await pathExists(absPath)) {
+          existed = true;
+          await fsRename(absPath, backupPath);
+        }
+
         const tmpPath = absPath + '.laila.tmp';
         await writeFile(tmpPath, block.content, 'utf8');
         await fsRename(tmpPath, absPath);
-        console.log(chalk.green(`  ✔ Saved ${block.file}`));
-        filesWritten++;
+        
+        // Ponytail validation loop
+        const { validateProject } = await import('./validator.js');
+        const spinner = (await import('../cli/ui/spinner.js')).spinner;
+        spinner.start(`Validating ${block.file}...`);
+        const { success, log } = await validateProject(projectPath);
+        
+        if (!success) {
+          spinner.fail(`Validation failed! Auto-rolling back ${block.file}.`);
+          console.log(chalk.red(log.slice(-500))); // only show tail of log
+          
+          // Rollback
+          if (existed) {
+            await fsRename(backupPath, absPath);
+          } else {
+            const { unlink } = await import('fs/promises');
+            await unlink(absPath);
+          }
+        } else {
+          spinner.succeed(`Validation passed.`);
+          console.log(chalk.green(`  ✔ Saved ${block.file}`));
+          filesWritten++;
+          
+          // Cleanup backup
+          if (existed) {
+            const { unlink } = await import('fs/promises');
+            await unlink(backupPath).catch(() => {});
+          }
+        }
       } catch (err) {
         console.log(chalk.red(`  ✖ Failed to save ${block.file}: ${String(err)}`));
       }

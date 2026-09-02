@@ -58,12 +58,26 @@ async function scanSkillFiles(rootDir: string, entries: SkillEntry[] = []): Prom
     const inferredName = meta['name'] ?? (relative.toLowerCase().endsWith('/skill.md') || relative.toLowerCase().endsWith('/index.md')
       ? path.basename(path.dirname(entryPath))
       : baseName);
+      
+    // Ponytail Dynamic Reference Check: See if a 'references/' folder exists next to this skill
+    let refNote = '';
+    try {
+      const refPath = path.join(path.dirname(entryPath), 'references');
+      const { readdir } = await import('fs/promises');
+      const refs = await readdir(refPath, { withFileTypes: true });
+      const refFiles = refs.filter(r => r.isFile()).map(r => r.name);
+      if (refFiles.length > 0) {
+        refNote = `\n(Available reference docs: ${refFiles.join(', ')}. Use shell tools to read them from ${refPath.replace(/\\/g, '/')} if needed.)`;
+      }
+    } catch {
+      // No references folder, ignore
+    }
 
     entries.push({
       name: inferredName,
       path: entryPath,
       agent: (meta['agent'] ?? 'general') as AgentName,
-      description: meta['description'],
+      description: (meta['description'] ?? '') + refNote,
       triggers: meta['triggers'] ? meta['triggers'].split(',').map(t => t.trim()) : [],
     });
   }
