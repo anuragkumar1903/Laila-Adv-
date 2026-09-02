@@ -1,6 +1,6 @@
 {
   "name": "laila-cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Laila: An advanced, local-first AI developer assistant with MCP, Vision, and Multi-Agent Swarm capabilities.",
   "type": "module",
   "files": [
@@ -36,11 +36,11 @@
   "dependencies": {
     "@clack/prompts": "^1.7.0",
     "@modelcontextprotocol/sdk": "^1.30.0",
-    "better-sqlite3": "^12.11.1",
+    "better-sqlite3": "^13.0.3",
     "chalk": "^5.6.2",
     "commander": "^15.0.0",
     "diff": "^9.0.0",
-    "glob": "^11.0.0",
+    "glob": "^13.0.6",
     "ignore": "^7.0.0",
     "marked": "^15.0.12",
     "marked-terminal": "^7.3.0",

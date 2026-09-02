@@ -88,8 +88,8 @@ export async function doctorCommand(...args: string[]): Promise<void> {
   const healthScore = Math.round((passedChecks / totalChecks) * 100);
 
   addSuggestion(suggestions, !gitRepo,                    'Initialize Git in the project root so the assistant can use repository context and change tracking.');
-  addSuggestion(suggestions, node?.status !== 'available', 'Install Node.js LTS. On Windows, use `winget install --id OpenJS.NodeJS.LTS -e` or the official installer.');
-  addSuggestion(suggestions, git?.status  !== 'available', 'Install Git. On Windows, `winget install --id Git.Git -e` works well.');
+  addSuggestion(suggestions, node?.status !== 'available', 'Install Node.js LTS. On Windows, use `winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements` or the official installer.');
+  addSuggestion(suggestions, git?.status  !== 'available', 'Install Git. On Windows, `winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements` works well.');
   addSuggestion(suggestions, providerConfigured,           'Run `laila-cli` to configure an LLM provider (Ollama, OpenAI, Anthropic, DeepSeek, etc.).');
   addSuggestion(suggestions, !providerConfigured || providerAlive, 'The configured LLM provider is unreachable. Check your API key or local server, then try again.');
   addSuggestion(suggestions, !await pathExists(path.join(cwd, 'package.json')), 'Run the CLI from a project folder, or pass the target project path when prompted.');

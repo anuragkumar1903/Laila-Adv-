@@ -66,7 +66,7 @@ async function checkNode(installers: InstallerAvailability): Promise<ToolCheck> 
       installHint: 'Install Node.js LTS.',
       installable: true,
       installCommand: pickInstallCommand({
-        winget: 'winget install --id OpenJS.NodeJS.LTS -e',
+        winget: 'winget install --id OpenJS.NodeJS.LTS -e --accept-source-agreements --accept-package-agreements',
         choco:  'choco install nodejs-lts -y',
         scoop:  'scoop install nodejs-lts',
       }, installers),
@@ -91,7 +91,7 @@ async function checkGit(installers: InstallerAvailability): Promise<ToolCheck> {
       installHint: 'Install Git for Windows.',
       installable: true,
       installCommand: pickInstallCommand({
-        winget: 'winget install --id Git.Git -e',
+        winget: 'winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements',
         choco:  'choco install git -y',
         scoop:  'scoop install git',
       }, installers),

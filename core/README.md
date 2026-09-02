@@ -16,7 +16,7 @@ Laila is an elite, local-first AI developer assistant that runs entirely in your
 ## 📦 Installation
 
 ```bash
-npm install -g laila
+npm install -g laila-cli
 ```
 
 ## 🎮 Quickstart
