@@ -610,19 +610,30 @@ async function _switchCloud(
 
   // Check if we already have a saved key for this specific provider
   const { getApiKeyForProvider } = await import('../config/config-loader.js');
-  const savedApiKey = await getApiKeyForProvider(id, projectPath);
-  const hasSavedKey = !!savedApiKey;
+  let apiKey = await getApiKeyForProvider(id, projectPath) || '';
 
-  let apiKey = hasSavedKey ? savedApiKey! : '';
+  if (apiKey) {
+    process.stdout.write(chalk.dim(`  Checking saved API key for ${displayName}…`));
+    try {
+      const testProvider = buildProvider({ provider: id, model: presetModels[defaultModelIdx]?.id ?? '', apiKey });
+      const valid = await testProvider.healthCheck();
+      if (valid) {
+        console.log(chalk.green(' ✔'));
+      } else {
+        console.log(chalk.yellow(' ✖  Invalid or expired.'));
+        apiKey = ''; // Force re-prompt
+      }
+    } catch {
+      console.log(chalk.yellow(' ✖  Unreachable.'));
+      apiKey = ''; // Force re-prompt
+    }
+  }
 
-  if (!hasSavedKey) {
-    console.log(chalk.dim(`  No API key found for ${displayName}.`));
-    console.log(chalk.dim(`  Get one at: ${keyHint}`));
+  if (!apiKey) {
+    console.log(chalk.dim(`  Get an API key at: ${keyHint}`));
     console.log('');
     apiKey = await _promptApiKeyWithRetry(displayName, id, presetModels[defaultModelIdx]?.id ?? '', 3);
     if (!apiKey) return null; // user cancelled
-  } else {
-    console.log(chalk.dim(`  Using saved API key for ${displayName}.`));
   }
 
   // Always fetch live models after key is confirmed — picks up new releases automatically
