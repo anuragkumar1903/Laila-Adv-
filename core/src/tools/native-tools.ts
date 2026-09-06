@@ -562,7 +562,7 @@ async function execGitCommand(args: any, ctx: ToolExecutionContext): Promise<str
       }
       case 'log': {
         const l = await getGitLog(ctx.projectRoot, 10);
-        return l ?? 'No log.';
+        return l.length ? l.map(e => `${e.hash} ${e.message}`).join('\n') : 'No log.';
       }
       case 'diff': {
         const d = await getGitDiff(ctx.projectRoot, false);
@@ -575,7 +575,7 @@ async function execGitCommand(args: any, ctx: ToolExecutionContext): Promise<str
       case 'branch':
       case 'branches': {
         const b = await gitListBranches(ctx.projectRoot);
-        return b ?? 'No branches.';
+        return b.length ? b.join('\n') : 'No branches.';
       }
       case 'checkout': {
         await gitCheckout(ctx.projectRoot, gitArgs);
@@ -603,7 +603,7 @@ async function execGitCommand(args: any, ctx: ToolExecutionContext): Promise<str
       }
       case 'stash-list': {
         const l = await gitStashList(ctx.projectRoot);
-        return l ?? 'No stashes.';
+        return l.length ? l.join('\n') : 'No stashes.';
       }
       case 'show': {
         const s = await gitShow(ctx.projectRoot, gitArgs);
