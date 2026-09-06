@@ -8,6 +8,7 @@ import path from 'path';
 import { SESSION_HISTORY_SIZE } from '../config.js';
 import { getProjectIndexPath, getLegacyProjectIndexPath } from '../scanner/project-index.js';
 import { logger } from '../utils/logger.js';
+import { getDb } from '../memory/db.js';
 import type { AgentContext, AgentName, ProjectIndex, Message } from '../types.js';
 
 /**
@@ -19,14 +20,17 @@ import type { AgentContext, AgentName, ProjectIndex, Message } from '../types.js
  * 3. Relevant files — top-N files scored against the user's query keywords
  * 4. Skill — the best-matching skill markdown for the active agent
  * 5. Available skills — full list of discovered skills for the system prompt
- * 6. History — last {@link SESSION_HISTORY_SIZE} messages from the previous task
+ * 6. History — last {@link SESSION_HISTORY_SIZE} messages across all tasks in
+ *    the current session (when `sessionId` is provided), or from
+ *    `previousTaskId` alone as a fallback
  * 7. Git context — current `git status` and unstaged diff
  *
- * @param params.userMessage  - Raw text entered by the user
- * @param params.agent        - The agent role selected by intent detection
- * @param params.taskId       - ID of the newly created task record
- * @param params.projectId    - Active project ID, or `null` in global mode
- * @param params.previousTaskId - ID of the last completed task (for history)
+ * @param params.userMessage    - Raw text entered by the user
+ * @param params.agent          - The agent role selected by intent detection
+ * @param params.taskId         - ID of the newly created task record
+ * @param params.projectId      - Active project ID, or `null` in global mode
+ * @param params.sessionId      - Active session ID (enables cross-task history)
+ * @param params.previousTaskId - ID of the last completed task (fallback history)
  * @returns A fully populated {@link AgentContext} ready for prompt building
  */
 export async function buildContext(params: {
@@ -34,9 +38,10 @@ export async function buildContext(params: {
   agent: AgentName;
   taskId: number;
   projectId: number | null;
+  sessionId?: number;
   previousTaskId?: number;
 }): Promise<AgentContext> {
-  const { userMessage, agent, taskId, projectId, previousTaskId } = params;
+  const { userMessage, agent, taskId, projectId, sessionId, previousTaskId } = params;
 
   // ── Project index ────────────────────────────────────────────────────────
   let projectIndex: ProjectIndex | null = null;
@@ -61,9 +66,11 @@ export async function buildContext(params: {
   }
 
   // ── Relevant files ───────────────────────────────────────────────────────
-  const relevantFiles = projectId !== null && projectPath
-    ? await getRelevantFiles(projectId, projectPath, userMessage)
-    : [];
+  // Passive file injection is disabled — the model reads files itself via
+  // the read_file / list_directory / grep_search tools in the agentic loop.
+  // Pre-loading guessed files often wastes context budget with irrelevant
+  // content and narrows the model's reasoning before it starts.
+  const relevantFiles: import('../types.js').RelevantFile[] = [];
 
   // ── Skill ────────────────────────────────────────────────────────────────
   // Pass detected framework + languages so the scorer can boost relevant skills
@@ -85,7 +92,27 @@ export async function buildContext(params: {
 
   // ── History ──────────────────────────────────────────────────────────────
   let history: Message[] = [];
-  if (previousTaskId !== undefined) {
+  if (sessionId !== undefined) {
+    // Load last N messages from ALL tasks in the current session, newest-first,
+    // then reverse to chronological order for the prompt.
+    const sessionTasks = getDb()
+      .prepare('SELECT id FROM tasks WHERE session_id = ? AND id != ? ORDER BY created_at DESC')
+      .all(sessionId, taskId) as { id: number }[];
+
+    const accumulated: Message[] = [];
+    for (const t of sessionTasks) {
+      if (accumulated.length >= SESSION_HISTORY_SIZE) break;
+      const msgs = getMessages(t.id);
+      // Add messages from this task (most-recent tasks fill quota first)
+      for (const m of msgs.reverse()) {
+        if (accumulated.length >= SESSION_HISTORY_SIZE) break;
+        accumulated.push(m);
+      }
+    }
+    // Reverse back to chronological order so the prompt reads naturally
+    history = accumulated.reverse();
+  } else if (previousTaskId !== undefined) {
+    // Fallback: only load from the single previous task
     const all = getMessages(previousTaskId);
     history = all.slice(-SESSION_HISTORY_SIZE);
   }

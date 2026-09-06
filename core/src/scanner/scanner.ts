@@ -1,5 +1,6 @@
 import path from 'path';
 import { createHash } from 'crypto';
+import { readFile } from 'fs/promises';
 import { glob } from 'glob';
 import ignoreLib from 'ignore';
 import { readFileSafe, readFileLines, isTextFile, getFileStat } from '../utils/fs-utils.js';
@@ -11,6 +12,31 @@ import { categoriseFile } from './detectors/structure.js';
 import { extractSymbols } from './detectors/symbols.js';
 import { SCAN_EXCLUDES } from '../config.js';
 import type { ScanResult, ScannedFile, ProjectIndex, ProjectFileRecord } from '../types.js';
+
+/**
+ * Load and parse a `.lailaignore` file from the given project root.
+ *
+ * The format mirrors `.gitignore`:
+ *  - Lines starting with `#` are comments and are ignored.
+ *  - Blank lines are ignored.
+ *  - All other lines are treated as glob patterns.
+ *
+ * @param projectPath  - Absolute path to the project root directory.
+ * @returns            Array of glob patterns, or `[]` if the file doesn't exist.
+ */
+export async function loadLailaIgnore(projectPath: string): Promise<string[]> {
+  const filePath = path.join(projectPath, '.lailaignore');
+  try {
+    const content = await readFile(filePath, 'utf-8');
+    return content
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0 && !line.startsWith('#'));
+  } catch {
+    // File doesn't exist or is unreadable — that's fine, return empty
+    return [];
+  }
+}
 
 type PkgJson = {
   name?: string;
@@ -126,6 +152,12 @@ export async function scanProject(projectPath: string, previousIndex?: ProjectIn
   const gitignoreContent = await readFileSafe(path.join(absPath, '.gitignore'));
   if (gitignoreContent) ig.add(gitignoreContent);
 
+  // Load project-specific .lailaignore and merge into ignore rules
+  const lailaIgnorePatterns = await loadLailaIgnore(absPath);
+  if (lailaIgnorePatterns.length > 0) ig.add(lailaIgnorePatterns);
+
+  const allExcludes = [...SCAN_EXCLUDES, ...lailaIgnorePatterns];
+
   // ── Glob all files ──────────────────────────────────────────────────────
   const { globStream } = await import('glob');
   const stream = globStream('**/*', {
@@ -133,7 +165,7 @@ export async function scanProject(projectPath: string, previousIndex?: ProjectIn
     nodir: true,
     dot: true,
     follow: false,
-    ignore: SCAN_EXCLUDES.map(p => p.startsWith('/') ? p.slice(1) : p).map(p => `**/${p}/**`).concat(SCAN_EXCLUDES),
+    ignore: allExcludes.map(p => p.startsWith('/') ? p.slice(1) : p).map(p => `**/${p}/**`).concat(allExcludes),
   });
 
   const filteredPaths: string[] = [];

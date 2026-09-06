@@ -346,11 +346,14 @@ export async function startCommand(): Promise<void> {
   let mcpManager: import('../../mcp/mcp-client.js').MCPClientManager | null = null;
   try {
     const { MCPClientManager } = await import('../../mcp/mcp-client.js');
+    const { registerMcpManager } = await import('../../tools/native-tools.js');
     mcpManager = new MCPClientManager();
     if (projectPath) {
       await mcpManager.loadConfig(path.join(projectPath, '.laila', 'mcp.json'));
       await mcpManager.connectAllFromConfig();
     }
+    // Register with native-tools so mcp__ calls route correctly in the tool loop
+    registerMcpManager(mcpManager);
   } catch (e) {
     // Ignore initialization errors for MCP
   }
@@ -383,17 +386,31 @@ export async function startCommand(): Promise<void> {
         }
       }
 
+      // Stop spinner before orchestrate — the orchestrator streams output directly
+      // to the terminal and a running spinner would corrupt the streamed text.
+      spinner.stop();
+
       const result = await orchestrate({
         userMessage: finalMessage,
         sessionId: session!.id,
         projectId,
         previousTaskId,
+        verbose,
+        mcpTools: mcpManager?.tools?.length
+          ? (await import('../../tools/native-tools.js')).getMcpTools(mcpManager.tools)
+          : undefined,
       });
       spinner.stop();
       const durationMs = Date.now() - startMs;
 
       previousTaskId = result.taskId;
-      printer.response(result.response);
+      // Response was already streamed to terminal by the orchestrator's agentic loop.
+      // Only show the non-streamed response if orchestrator returned content without
+      // streaming (e.g. error fallback or noStream path).
+      if (result.response && !result.tokensUsed) {
+        // Fallback: orchestrator returned content without streaming (shouldn't normally happen)
+        printer.response(result.response);
+      }
 
       if (result.tokensUsed) {
         printer.tokenUsage(result.tokensUsed, durationMs);
@@ -401,36 +418,11 @@ export async function startCommand(): Promise<void> {
         printer.dim(`⏱ ${printer.elapsed(startMs)}`);
       }
 
-      // ── Convert Native Tool Calls to Markdown Blocks ────────────────
-      if (result.toolCalls && result.toolCalls.length > 0) {
-        let fakeMarkdown = '';
-        for (const tc of result.toolCalls) {
-          if (tc.name === 'read_file') {
-            for (const f of tc.arguments.files || []) {
-              fakeMarkdown += `\n\`\`\`read\nfile: ${f}\n\`\`\`\n`;
-            }
-          } else if (tc.name === 'write_file') {
-            fakeMarkdown += `\n\`\`\`write\nfile: ${tc.arguments.file}\ncontent: |\n${tc.arguments.content}\n\`\`\`\n`;
-          } else if (tc.name === 'patch_file') {
-            fakeMarkdown += `\n\`\`\`patch\nfile: ${tc.arguments.file}\nfind:\n${tc.arguments.find}\nreplace:\n${tc.arguments.replace}\n\`\`\`\n`;
-          } else if (tc.name === 'grep_search') {
-            fakeMarkdown += `\n\`\`\`grep\npattern: ${tc.arguments.pattern}\npath: ${tc.arguments.path || '.'}\n\`\`\`\n`;
-          } else if (tc.name === 'run_command') {
-            fakeMarkdown += `\n\`\`\`cmd\n${tc.arguments.command}\n\`\`\`\n`;
-          } else if (tc.name === 'git_command') {
-            fakeMarkdown += `\n\`\`\`git\naction: ${tc.arguments.action}\nargs: ${tc.arguments.args || ''}\n\`\`\`\n`;
-          } else if (tc.name === 'browser_action') {
-            fakeMarkdown += `\n\`\`\`browser\nurl: ${tc.arguments.url}\naction: ${tc.arguments.action}\n\`\`\`\n`;
-          } else if (tc.name === 'web_search') {
-            fakeMarkdown += `\n\`\`\`search\nquery: ${tc.arguments.query}\n\`\`\`\n`;
-          } else if (tc.name === 'web_read_url') {
-            fakeMarkdown += `\n\`\`\`url\nurl: ${tc.arguments.url}\n\`\`\`\n`;
-          }
-        }
-        result.response += fakeMarkdown;
-      }
-
       // ── Sequential Tool Router ───────────────────────────────────────
+      // Note: native tool calls (read_file, write_file, etc.) are now handled
+      // directly inside the orchestrator's agentic loop with proper tool-role
+      // messages. The blocks below handle legacy markdown-formatted output only
+      // (```cmd, ```patch, ```mcp, etc.) which some models still emit as plain text.
       const { runBrowserTool, parseBrowserBlocks } = await import('../../tools/browser-tool.js');
       const { parseAllBlocks } = await import('../../utils/markdown-parser.js');
       const allBlocks = parseAllBlocks(result.response);
@@ -480,34 +472,20 @@ export async function startCommand(): Promise<void> {
           const webRes = await runWebBlocks(block.raw);
           if (webRes.webContext) contextSuffixes.push(webRes.webContext);
         }
-        else if (block.language === 'mcp' && mcpManager) {
-          try {
-            const parsed = JSON.parse(block.content);
-            const srv = parsed.serverName || 'default';
-            const toolName = parsed.name || parsed.tool;
-            spinner.start(`Calling MCP tool ${toolName} on ${srv}…`);
-            const mcpRes = await mcpManager.callTool(srv, toolName, parsed.args);
-            spinner.stop();
-            contextSuffixes.push(`=== MCP Tool Result (${srv}:${toolName}) ===\n${JSON.stringify(mcpRes, null, 2)}`);
-          } catch (e: any) {
-            spinner.fail();
-            contextSuffixes.push(`=== MCP Tool Error ===\n${e.message}`);
-          }
-        }
+        // Note: ```mcp blocks are no longer needed — MCP tools are now
+        // registered as native tools (mcp__serverName__toolName) and handled
+        // directly in the orchestrator's agentic loop.
       }
 
       if (contextSuffixes.length > 0) {
         printer.warn('Tools executed. Asking Laila to process the output…');
-        spinner.start('Thinking…');
         const followUp = await orchestrate({
           userMessage: `The following tools ran after your previous response. Review the output and continue:\n\n${contextSuffixes.join('\n\n')}`,
           sessionId: session!.id,
           projectId,
           previousTaskId: result.taskId,
         });
-        spinner.stop();
         previousTaskId = followUp.taskId;
-        printer.response(followUp.response);
         
         // Very basic recursion for just files if the follow-up generated files directly
         const followUpBlocks = parseCodeBlocks(followUp.response);
@@ -615,6 +593,8 @@ export async function startCommand(): Promise<void> {
   });
 
   let autoApprove = false;
+  let verbose = false;
+  let sessionTokens = 0;
 
   /** Ask a question using the existing rl — avoids double-echo from nested interfaces. */
   async function rlAsk(promptText: string): Promise<string> {
@@ -686,6 +666,81 @@ export async function startCommand(): Promise<void> {
       } else {
         printer.warn('Auto-Approve is OFF. Laila will ask for permission (Y/n) again.');
       }
+      rl.resume(); rl.prompt(); return;
+    }
+
+    // ── /verbose ──────────────────────────────────────────────────────────
+    if (normalized === '/verbose' || normalized === '.verbose') {
+      verbose = !verbose;
+      if (verbose) {
+        printer.success('Verbose mode ON — tool call results will be shown inline.');
+      } else {
+        printer.warn('Verbose mode OFF — tool call results hidden.');
+      }
+      rl.resume(); rl.prompt(); return;
+    }
+
+    // ── /undo ─────────────────────────────────────────────────────────────
+    if (normalized === '/undo' || normalized === '.undo') {
+      const { listCheckpoints, restoreCheckpoint } = await import('../../tools/checkpoint.js');
+      const checkpoints = listCheckpoints();
+      if (checkpoints.length === 0) {
+        printer.warn('No checkpoints available. Write a file first.');
+        rl.resume(); rl.prompt(); return;
+      }
+      if (checkpoints.length === 1) {
+        const absPath = checkpoints[0]!;
+        const ok = await restoreCheckpoint(absPath);
+        if (ok) {
+          printer.success(`Restored: ${path.relative(projectPath, absPath)}`);
+        } else {
+          printer.error(`Failed to restore: ${absPath}`);
+        }
+      } else {
+        printer.section('Checkpoints (most recent last)');
+        checkpoints.forEach((p, i) => {
+          printer.dim(`  ${i + 1}. ${path.relative(projectPath, p)}`);
+        });
+        printer.blank();
+        const choice = await rlAsk('Enter number to restore (or press Enter to cancel): ');
+        const idx = parseInt(choice, 10);
+        if (!isNaN(idx) && idx >= 1 && idx <= checkpoints.length) {
+          const absPath = checkpoints[idx - 1]!;
+          const ok = await restoreCheckpoint(absPath);
+          if (ok) {
+            printer.success(`Restored: ${path.relative(projectPath, absPath)}`);
+          } else {
+            printer.error(`Failed to restore: ${absPath}`);
+          }
+        } else {
+          printer.dim('Undo cancelled.');
+        }
+      }
+      rl.resume(); rl.prompt(); return;
+    }
+
+    // ── /cost ─────────────────────────────────────────────────────────────
+    if (normalized === '/cost' || normalized === '.cost') {
+      const { getSessionCost, estimateCost } = await import('../../memory/cost-tracker.js');
+      const costData = getSessionCost(session.id);
+      if (!costData) {
+        printer.warn('No token usage recorded for this session yet.');
+        rl.resume(); rl.prompt(); return;
+      }
+      const cfg = await loadProviderConfig(projectPath);
+      const model = cfg.model ?? activeProvider.id;
+      const estimatedUsd = estimateCost(costData.totalTokens, model);
+      const durationSecs = Math.floor((Date.now() / 1000) - costData.startedAt);
+      const mins = Math.floor(durationSecs / 60);
+      const secs = durationSecs % 60;
+      printer.section('Session Cost');
+      printer.table([
+        ['Tokens',    costData.totalTokens.toLocaleString()],
+        ['Est. cost', estimatedUsd > 0 ? `$${estimatedUsd.toFixed(4)}` : 'free (local)'],
+        ['Model',     model],
+        ['Tasks',     String(costData.taskCount)],
+        ['Duration',  `${mins}m ${secs}s`],
+      ]);
       rl.resume(); rl.prompt(); return;
     }
 
@@ -862,11 +917,11 @@ if ([System.Windows.Forms.Clipboard]::ContainsImage()) {
         spinner.start('Swarm thinking (running 3 agents concurrently)...');
         const { run } = await import('../../orchestrator/orchestrator.js');
         
-        // Run 3 agents in parallel!
+        // Run 3 agents in parallel — noStream prevents concurrent output corruption
         const [res1, res2, res3] = await Promise.all([
-          run({ userMessage: `/research Find all database models related to: ${goal}`, sessionId: session!.id, projectId, previousTaskId }),
-          run({ userMessage: `/research Find all API routes related to: ${goal}`, sessionId: session!.id, projectId, previousTaskId }),
-          run({ userMessage: `/research Find all tests related to: ${goal}`, sessionId: session!.id, projectId, previousTaskId })
+          run({ userMessage: `/research Find all database models related to: ${goal}`, sessionId: session!.id, projectId, previousTaskId, noStream: true }),
+          run({ userMessage: `/research Find all API routes related to: ${goal}`, sessionId: session!.id, projectId, previousTaskId, noStream: true }),
+          run({ userMessage: `/research Find all tests related to: ${goal}`, sessionId: session!.id, projectId, previousTaskId, noStream: true })
         ]);
         
         spinner.succeed('Swarm completed parallel research.');
@@ -965,13 +1020,14 @@ if ([System.Windows.Forms.Clipboard]::ContainsImage()) {
       
       try {
         const startMs = Date.now();
-        // Run all parts concurrently
+        // Run all parts concurrently — noStream prevents concurrent output corruption
         const swarmResults = await Promise.all(parts.map(async (task, idx) => {
           const res = await orchestrate({
             userMessage: `[Sub-Agent ${idx + 1} Task]: ${task}`,
             sessionId: session!.id,
             projectId,
             previousTaskId,
+            noStream: true,
           });
           return `=== Sub-Agent ${idx + 1} Result ===\n${res.response}`;
         }));
@@ -1317,6 +1373,7 @@ if ([System.Windows.Forms.Clipboard]::ContainsImage()) {
         userMessage: `Break this goal into 3-5 independent, sequential tasks: "${goal}". Return ONLY a JSON array of strings representing the tasks. Do not include markdown blocks or any other text.`,
         sessionId: session.id,
         projectId,
+        noStream: true,
       });
 
       try {
@@ -1433,10 +1490,22 @@ if ([System.Windows.Forms.Clipboard]::ContainsImage()) {
 
   rl.on('close', () => {
     endSession(session.id);
-    printer.blank();
-    printer.dim('Session ended. Goodbye.');
-    printer.blank();
-    process.exit(0);
+    // Auto-generate LAILA.md session summary (fire-and-forget, never blocks exit)
+    import('../../memory/session-summary.js')
+      .then(({ generateSessionSummary }) =>
+        generateSessionSummary({
+          sessionId: session.id,
+          projectPath: projectPath ?? '',
+          projectId,
+        })
+      )
+      .catch(() => {/* silent — never block exit */})
+      .finally(() => {
+        printer.blank();
+        printer.dim('Session ended. Goodbye.');
+        printer.blank();
+        process.exit(0);
+      });
   });
 
   rl.on('SIGINT', () => {

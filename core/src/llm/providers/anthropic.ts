@@ -199,6 +199,102 @@ export class AnthropicProvider implements LLMProvider {
     };
   }
 
+  async streamChat(messages: LLMMessage[], options: ChatOptions = {}, onToken: (token: string) => void): Promise<ChatResponse> {
+    const systemMessages = messages.filter(m => m.role === 'system');
+    const chatMessages   = messages.filter(m => m.role !== 'system');
+    const system = systemMessages.map(m => m.content).join('\n\n') || undefined;
+
+    const merged: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+    for (const msg of chatMessages) {
+      const role = msg.role as 'user' | 'assistant';
+      const last = merged[merged.length - 1];
+      if (last && last.role === role) {
+        last.content += '\n' + msg.content;
+      } else {
+        merged.push({ role, content: msg.content });
+      }
+    }
+    if (merged.length === 0 || merged[0]?.role !== 'user') {
+      merged.unshift({ role: 'user', content: 'Continue.' });
+    }
+
+    const body: Record<string, any> = {
+      model:       this.model,
+      max_tokens:  options.maxTokens ?? 8192,
+      messages:    merged,
+      temperature: options.temperature ?? 0.2,
+      top_p:       options.top_p       ?? 0.9,
+      stream:      true,
+    };
+    if (system) body.system = system;
+
+    let res: Response;
+    try {
+      res = await fetch(`${this.baseUrl}/messages`, {
+        method:  'POST',
+        headers: this._headers(),
+        body:    JSON.stringify(body),
+        signal:  AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'TimeoutError') {
+        throw new LLMError(`Anthropic stream timed out after ${this.timeoutMs / 1000}s`, this.id);
+      }
+      throw new LLMError(`Cannot reach Anthropic API: ${String(err)}`, this.id);
+    }
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new LLMError(`Anthropic HTTP ${res.status}: ${text}`, this.id, res.status);
+    }
+
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = '';
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let modelName = this.model;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data: ')) continue;
+        const data = trimmed.slice(6);
+
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
+            const text = parsed.delta.text ?? '';
+            if (text) {
+              accumulated += text;
+              onToken(text);
+            }
+          }
+          if (parsed.type === 'message_start' && parsed.message) {
+            if (parsed.message.model) modelName = parsed.message.model;
+            if (parsed.message.usage?.input_tokens) inputTokens = parsed.message.usage.input_tokens;
+          }
+          if (parsed.type === 'message_delta' && parsed.usage?.output_tokens) {
+            outputTokens = parsed.usage.output_tokens;
+          }
+        } catch { /* skip malformed SSE lines */ }
+      }
+    }
+
+    return {
+      content:   accumulated,
+      tokensUsed: inputTokens + outputTokens,
+      model:     modelName,
+      provider:  this.id,
+    };
+  }
+
   private _headers(): Record<string, string> {
     return {
       'Content-Type':      'application/json',

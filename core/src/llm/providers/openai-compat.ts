@@ -281,6 +281,79 @@ export class OpenAICompatProvider implements LLMProvider {
     // Should never reach here
     throw new LLMError(`Unexpected retry loop exit in ${this.displayName}`, this.id);
   }
+
+  async streamChat(messages: LLMMessage[], options: ChatOptions = {}, onToken: (token: string) => void): Promise<ChatResponse> {
+    const body: Record<string, unknown> = {
+      model:       this.model,
+      messages,
+      temperature: options.temperature ?? 0.2,
+      top_p:       options.top_p       ?? 0.9,
+      stream:      true,
+    };
+    if (options.maxTokens) body['max_tokens'] = options.maxTokens;
+
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (this.apiKey) headers['Authorization'] = `Bearer ${this.apiKey}`;
+
+    let res: Response;
+    try {
+      res = await fetch(`${this.baseUrl}/chat/completions`, {
+        method:  'POST',
+        headers,
+        body:    JSON.stringify(body),
+        signal:  AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'TimeoutError') {
+        throw new LLMError(`Stream timed out after ${this.timeoutMs / 1000}s`, this.id);
+      }
+      throw new LLMError(`Cannot reach ${this.displayName}: ${String(err)}`, this.id);
+    }
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new LLMError(`${this.displayName} HTTP ${res.status}: ${text}`, this.id, res.status);
+    }
+
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = '';
+    let modelName = this.model;
+    let completionTokens = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data: ')) continue;
+        const data = trimmed.slice(6);
+        if (data === '[DONE]') break;
+
+        try {
+          const parsed = JSON.parse(data);
+          const delta = parsed.choices?.[0]?.delta?.content;
+          if (delta) {
+            accumulated += delta;
+            onToken(delta);
+          }
+          if (parsed.model) modelName = parsed.model;
+          if (parsed.usage?.completion_tokens) completionTokens = parsed.usage.completion_tokens;
+        } catch { /* skip malformed SSE lines */ }
+      }
+    }
+
+    return {
+      content:   accumulated,
+      tokensUsed: completionTokens,
+      model:     modelName,
+      provider:  this.id,
+    };
+  }
 }
 
 // ─── Factory helpers for each preset ──────────────────────────────────────

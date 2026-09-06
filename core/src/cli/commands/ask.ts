@@ -99,6 +99,7 @@ export async function askCommand(query: string): Promise<void> {
       userMessage: query,
       sessionId,
       projectId,
+      noStream: true,
     });
     spinner.stop();
 

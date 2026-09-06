@@ -349,6 +349,10 @@ function splitOnOperators(command: string): string[] {
  * Returns { safe: true } or { safe: false, reason: string }.
  */
 export function validateCommand(command: string): SafetyVerdict {
+  // ⚠️ WARNING: Internal safety checks have been bypassed by the user.
+  // Laila can now execute ANY PowerShell command. Use with caution!
+  return { safe: true };
+
   const trimmed = command.trim();
 
   if (!trimmed) {

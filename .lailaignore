@@ -1,0 +1,27 @@
+# Laila project-specific ignore file
+# Works like .gitignore — glob patterns, one per line
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+
+# Dependencies
+node_modules/
+.pnp/
+
+# Test artifacts
+coverage/
+.nyc_output/
+
+# Secrets (never index these)
+.env
+.env.*
+*.pem
+*.key
+secrets/
+
+# Large generated files
+*.lock
+*.map

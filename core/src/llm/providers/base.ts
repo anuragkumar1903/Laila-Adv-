@@ -63,6 +63,16 @@ export interface LLMProvider {
   listModels(): Promise<ModelInfo[]>;
   modelExists(model: string): Promise<boolean>;
   chat(messages: LLMMessage[], options?: ChatOptions): Promise<ChatResponse>;
+  /**
+   * Stream the final assistant response token by token.
+   * Calls `onToken` for each text chunk. Returns the full ChatResponse
+   * (with accumulated content and token counts) when the stream ends.
+   *
+   * Tool calls are NOT streamed — they are buffered and returned in the
+   * ChatResponse once complete. Streaming is only used for the final
+   * human-readable response turn (no active tool calls expected).
+   */
+  streamChat(messages: LLMMessage[], options: ChatOptions, onToken: (token: string) => void): Promise<ChatResponse>;
 }
 
 export type ProviderName =

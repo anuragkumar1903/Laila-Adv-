@@ -160,6 +160,81 @@ export class OllamaProvider implements LLMProvider {
     };
   }
 
+  async streamChat(messages: LLMMessage[], options: ChatOptions = {}, onToken: (token: string) => void): Promise<ChatResponse> {
+    const modelToUse = this.model || await this.getDefaultModel();
+    if (!modelToUse) {
+      throw new LLMError('No models available in Ollama. Pull a model first: ollama pull <model>', this.id);
+    }
+
+    const body: Record<string, unknown> = {
+      model:   modelToUse,
+      messages,
+      stream:  true,
+      options: {
+        temperature: options.temperature ?? 0.2,
+        top_p:       options.top_p       ?? 0.9,
+        num_ctx:     8192,
+      },
+    };
+
+    let res: Response;
+    try {
+      res = await fetch(`${this.host}/api/chat`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(body),
+        signal:  AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'TimeoutError') {
+        throw new LLMError(`Ollama stream timed out after ${this.timeoutMs / 1000}s`, this.id);
+      }
+      throw new LLMError(`Cannot reach Ollama at ${this.host}: ${String(err)}`, this.id);
+    }
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new LLMError(`Ollama HTTP ${res.status}: ${text}`, this.id, res.status);
+    }
+
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = '';
+    let evalCount = 0;
+    let promptEvalCount = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      // Ollama streams newline-delimited JSON objects (not SSE)
+      const lines = chunk.split('\n').filter(l => l.trim());
+
+      for (const line of lines) {
+        try {
+          const parsed = JSON.parse(line) as OllamaChatResponse;
+          const token = parsed.message?.content;
+          if (token) {
+            accumulated += token;
+            onToken(token);
+          }
+          if (parsed.done) {
+            evalCount       = parsed.eval_count       ?? evalCount;
+            promptEvalCount = parsed.prompt_eval_count ?? promptEvalCount;
+          }
+        } catch { /* skip malformed lines */ }
+      }
+    }
+
+    return {
+      content:   accumulated,
+      tokensUsed: evalCount + promptEvalCount,
+      model:     modelToUse,
+      provider:  this.id,
+    };
+  }
+
   async embed(text: string, embedModel = 'nomic-embed-text'): Promise<number[]> {
     const res = await fetch(`${this.host}/api/embeddings`, {
       method: 'POST',

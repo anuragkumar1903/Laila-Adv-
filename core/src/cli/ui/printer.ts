@@ -65,6 +65,65 @@ export const printer = {
     });
   },
 
+  /**
+   * Start a streaming response — prints the left border and moves to the
+   * correct column. Call streamToken() for each arriving chunk.
+   */
+  streamStart(): void {
+    clearCurrentInput();
+    process.stdout.write('\n' + chalk.hex('#7C3AED')('│ '));
+  },
+
+  /**
+   * Emit a single streaming token to stdout in-place.
+   * Handles newlines by reprinting the border on each new line.
+   */
+  streamToken(token: string): void {
+    // Split on newlines so we can re-print the border gutter on each line
+    const parts = token.split('\n');
+    for (let i = 0; i < parts.length; i++) {
+      if (i > 0) {
+        process.stdout.write('\n' + chalk.hex('#7C3AED')('│ '));
+      }
+      if (parts[i]) process.stdout.write(parts[i]!);
+    }
+  },
+
+  /**
+   * End a streaming response — adds trailing newline and redraws the prompt.
+   */
+  streamEnd(): void {
+    process.stdout.write('\n\n');
+    redrawPrompt();
+  },
+
+  /**
+   * Abort an in-progress stream (e.g. model returned tool calls after partial text).
+   * Clears the current line so tool indicators print cleanly.
+   */
+  streamAbort(): void {
+    process.stdout.write('\n');
+    redrawPrompt();
+  },
+
+  /**
+   * Print a tool call result inline when verbose mode is on.
+   * Truncated to 800 chars to keep the terminal readable.
+   */
+  verboseToolResult(toolName: string, result: string): void {
+    print(() => {
+      const preview = result.length > 800
+        ? result.slice(0, 800) + '\n  [... truncated]'
+        : result;
+      const lines = preview.split('\n');
+      console.log(chalk.dim(`  ┌─ ${toolName} result`));
+      for (const line of lines) {
+        console.log(chalk.dim('  │ ') + chalk.dim(line));
+      }
+      console.log(chalk.dim('  └─────────────────────'));
+    });
+  },
+
   /** Validation report summary */
   validationReport(results: Array<{ step: string; success: boolean; durationMs: number }>): void {
     print(() => {
@@ -146,6 +205,7 @@ export const printer = {
       ['Session', [
         ['/status',    'Show session, project, and provider info'],
         ['/history',   'Show recent tasks in this session'],
+        ['/cost',      'Show token usage and estimated cost for this session'],
         ['/clear',     'Clear the screen'],
         ['/exit',      'End the session'],
       ]],
@@ -155,6 +215,11 @@ export const printer = {
         ['/queue',     'List all pending queued prompts'],
         ['/skip [n]',  'Remove prompt #n from the queue (default: next)'],
         ['/interrupt <text>', 'Push a prompt to the front — runs before anything else'],
+      ]],
+      ['Output & Control', [
+        ['/auto',      'Toggle auto-approve (skip Y/n confirmations)'],
+        ['/verbose',   'Toggle verbose mode — show tool call results inline'],
+        ['/undo',      'Restore a file to its state before the last write/patch'],
       ]],
       ['Provider & Model', [
         ['/provider', 'Switch LLM provider mid-session (Ollama → OpenAI etc.)'],

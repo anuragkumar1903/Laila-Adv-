@@ -225,13 +225,112 @@ export class GeminiProvider implements LLMProvider {
     return {
       content:    textParts.map((p: any) => p.text).join(''),
       toolCalls:  functionCalls.map((fc: any) => ({
-        id: fc.name, // Gemini doesn't provide tool call IDs, use name
+        id: fc.name,
         name: fc.name,
         arguments: (typeof fc.args === 'string' && fc.args) ? JSON.parse(fc.args) : (fc.args || {})
       })),
       tokensUsed: data.usageMetadata?.totalTokenCount ?? 0,
       model:      data.modelVersion ?? this.model,
       provider:   this.id,
+    };
+  }
+
+  async streamChat(messages: LLMMessage[], options: ChatOptions = {}, onToken: (token: string) => void): Promise<ChatResponse> {
+    const systemMsgs = messages.filter(m => m.role === 'system');
+    const chatMsgs   = messages.filter(m => m.role !== 'system');
+
+    const contents: GeminiContent[] = [];
+    for (const msg of chatMsgs) {
+      const role: 'user' | 'model' = msg.role === 'assistant' ? 'model' : 'user';
+      const last = contents[contents.length - 1];
+      if (last && last.role === role) {
+        last.parts.push({ text: msg.content });
+      } else {
+        contents.push({ role, parts: [{ text: msg.content }] });
+      }
+    }
+    if (contents.length === 0 || contents[0]?.role !== 'user') {
+      contents.unshift({ role: 'user', parts: [{ text: 'Continue.' }] });
+    }
+
+    const systemInstruction = systemMsgs.length > 0
+      ? { parts: [{ text: systemMsgs.map(m => m.content).join('\n\n') }] }
+      : undefined;
+
+    const body: Record<string, any> = {
+      contents,
+      generationConfig: {
+        temperature:     options.temperature ?? 0.2,
+        topP:            options.top_p       ?? 0.9,
+        maxOutputTokens: options.maxTokens   ?? 4096,
+      },
+    };
+    if (systemInstruction) body.systemInstruction = systemInstruction;
+
+    const url = `${this.baseUrl}/${this.model}:streamGenerateContent?alt=sse`;
+
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method:  'POST',
+        headers: {
+          'Content-Type':   'application/json',
+          'x-goog-api-key': this.apiKey,
+        },
+        body:   JSON.stringify(body),
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'TimeoutError') {
+        throw new LLMError(`Gemini stream timed out after ${this.timeoutMs / 1000}s`, this.id);
+      }
+      throw new LLMError(`Cannot reach Gemini API: ${String(err)}`, this.id);
+    }
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new LLMError(`Gemini HTTP ${res.status}: ${text}`, this.id, res.status);
+    }
+
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let accumulated = '';
+    let totalTokens = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data: ')) continue;
+        const data = trimmed.slice(6);
+
+        try {
+          const parsed = JSON.parse(data) as GeminiResponse;
+          const candidate = parsed.candidates?.[0];
+          if (candidate) {
+            const text = candidate.content?.parts?.filter((p: any) => p.text).map((p: any) => p.text).join('') ?? '';
+            if (text) {
+              accumulated += text;
+              onToken(text);
+            }
+          }
+          if (parsed.usageMetadata?.totalTokenCount) {
+            totalTokens = parsed.usageMetadata.totalTokenCount;
+          }
+        } catch { /* skip malformed SSE lines */ }
+      }
+    }
+
+    return {
+      content:   accumulated,
+      tokensUsed: totalTokens,
+      model:     this.model,
+      provider:  this.id,
     };
   }
 }

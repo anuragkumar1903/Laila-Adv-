@@ -193,3 +193,24 @@ export async function chat(
   const response = await provider.chat(messages, options);
   return { content: response.content, toolCalls: response.toolCalls, tokensUsed: response.tokensUsed };
 }
+
+/**
+ * Streaming chat wrapper — streams tokens to `onToken`, returns full response.
+ * Falls back to non-streaming if the provider errors.
+ */
+export async function streamChat(
+  messages: import('./providers/base.js').LLMMessage[],
+  options: import('./providers/base.js').ChatOptions,
+  onToken: (token: string) => void,
+): Promise<{ content: string; toolCalls?: import('./providers/base.js').ToolCall[]; tokensUsed: number }> {
+  const provider = await getProvider();
+  try {
+    const response = await provider.streamChat(messages, options, onToken);
+    return { content: response.content, toolCalls: response.toolCalls, tokensUsed: response.tokensUsed };
+  } catch {
+    // Fallback to non-streaming (e.g. provider doesn't support it)
+    const response = await provider.chat(messages, options);
+    onToken(response.content);
+    return { content: response.content, toolCalls: response.toolCalls, tokensUsed: response.tokensUsed };
+  }
+}
